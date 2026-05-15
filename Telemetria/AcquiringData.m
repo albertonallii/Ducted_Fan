@@ -3,9 +3,7 @@ clearvars;
 clear global STOP_FLAG STOP_REASON serialObj_global EMERGENCY_KILL_SENT SHUTDOWN_DONE STOP_IS_KILL
 clc;
 
-%% =========================
-% PARAMETRI PROGRAMMA
-%% =========================
+%% PARAMETRI PROGRAMMA
 
 HOVER        = 1050;
 MOTOR_MIN    = 700;

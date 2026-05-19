@@ -49,7 +49,7 @@ stats.badLines = 0;
 
 delete(serialportfind);
 
-port = "/dev/cu.usbmodem11103";
+port = "/dev/cu.usbmodem111303";
 baudrate = 230400;
 
 serialObj = serialport(port, baudrate);

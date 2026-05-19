@@ -1,0 +1,1 @@
+time_ms,roll_cdeg,pitch_cdeg,yaw_cdeg,alt_mm,top_pwm,bottom_pwm,roll_pwm,pitch_pwm,motors_enabled,uart_rx_errors,uart_rx_overflows,uart_bad_lines,telemetry_overrun,stop_reason

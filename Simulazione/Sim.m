@@ -39,15 +39,19 @@ CAGE_ANCHORS = [ ...
      CAGE_HALF, -CAGE_HALF, CAGE_TOP];
 ROPE_ANG = [45 135 225 315];
 
+FOOT_R = R_EXT * 1.55;        % raggio apice piede
+FOOT_Z = -H_CYL/2 - 0.06;    % quota apice piede rispetto al centro del drone
+
 L_REST = zeros(1,4);
 for ci=1:4
     a = deg2rad(ROPE_ANG(ci));
-    p_drone = [R_EXT*cos(a); R_EXT*sin(a); ALT_EQ + H_CYL];
+    % Punto di attacco sul drone: apice del piede in posizione di equilibrio
+    p_drone = [R_EXT*cos(a); R_EXT*sin(a); ALT_EQ];
     p_cage  = CAGE_ANCHORS(ci,:)';
     L_REST(ci) = norm(p_cage - p_drone);
 end
 
-K_ROPE = 170000;
+K_ROPE = 80000;
 D_ROPE = 80;
 F_ROPE_MAX = 80;
 N_ROPE_SEG = 10;
@@ -132,12 +136,12 @@ uicontrol(fig_ctrl,'Style','text','String','— PITCH —', ...
 defs = { ...
     'CCR motore SUP',  'CCR_top', CCR_ARM, CCR_MAX, CCR_ARM, [0.45 0.85 1.0]; ...
     'CCR motore INF',  'CCR_bot', CCR_ARM, CCR_MAX, CCR_ARM, [0.45 0.85 1.0]; ...
-    'Kp roll',         'Kp_r',    0,       8,       0,       [1.0  0.50 0.50]; ...
-    'Ki roll',         'Ki_r',    0,       3,       0,       [1.0  0.65 0.65]; ...
-    'Kd roll',         'Kd_r',    0,       2,       0,       [1.0  0.80 0.80]; ...
-    'Kp pitch',        'Kp_p',    0,       8,       0,       [0.40 1.00 0.55]; ...
-    'Ki pitch',        'Ki_p',    0,       3,       0,       [0.55 1.00 0.68]; ...
-    'Kd pitch',        'Kd_p',    0,       2,       0,       [0.70 1.00 0.80]; ...
+    'Kp roll',         'Kp_r',    0,       50,      0,       [1.0  0.50 0.50]; ...
+    'Ki roll',         'Ki_r',    0,       50,      0,       [1.0  0.65 0.65]; ...
+    'Kd roll',         'Kd_r',    0,       50,      0,       [1.0  0.80 0.80]; ...
+    'Kp pitch',        'Kp_p',    0,       50,      0,       [0.40 1.00 0.55]; ...
+    'Ki pitch',        'Ki_p',    0,       50,      0,       [0.55 1.00 0.68]; ...
+    'Kd pitch',        'Kd_p',    0,       50,      0,       [0.70 1.00 0.80]; ...
 };
 y_tops = [660 600   500 440 380   250 190 130];
 N = size(defs,1);
@@ -153,11 +157,13 @@ for i = 1:N
         'FontSize',10,'FontWeight','bold','HorizontalAlignment','left');
     lbl_h(i) = uicontrol(fig_ctrl,'Style','text', ...
         'String',sprintf(fmt, defs{i,5}), ...
+        'Tag',['lbl_' defs{i,2}], ...
         'Position',[235 yy+22 90 20], ...
         'ForegroundColor',[0.25 0.95 0.55],'BackgroundColor',[0.08 0.08 0.10], ...
         'FontSize',10,'FontWeight','bold','HorizontalAlignment','center');
     sl_h(i) = uicontrol(fig_ctrl,'Style','slider', ...
         'Min',defs{i,3},'Max',defs{i,4},'Value',defs{i,5}, ...
+        'Tag',defs{i,2}, ...
         'Position',[12 yy 316 20],'BackgroundColor',[0.22 0.22 0.32]);
     set(sl_h(i),'Callback', ...
         @(src,~) slider_cb(src, lbl_h(i), fig_ctrl, defs{i,2}, fmt));
@@ -166,7 +172,7 @@ end
 uicontrol(fig_ctrl,'Style','pushbutton','String','Reset slider', ...
     'Position',[90 14 160 32],'ForegroundColor',[0.9 0.9 0.9], ...
     'BackgroundColor',[0.28 0.28 0.40],'FontSize',10,'FontWeight','bold', ...
-    'Callback',@(~,~) reset_sliders(sl_h,lbl_h,fig_ctrl,defs));
+    'Callback',@(~,~) reset_sliders([],[],fig_ctrl,defs));
 
 %% Bottoni Start / Stop / Reset
 uicontrol(fig_main,'Style','pushbutton','String','▶ START', ...
@@ -201,6 +207,7 @@ C.CCR_ARM = CCR_ARM; C.CCR_HOVER = CCR_HOVER; C.CCR_MAX = CCR_MAX;
 C.FLAP_MAX = FLAP_MAX;
 C.DT = DT; C.DT_S = DT_S; C.SUBST = SUBST; C.T_END = T_END;
 C.TRAIL_MAX = TRAIL_MAX;
+C.FOOT_R = FOOT_R; C.FOOT_Z = FOOT_Z;
 C.z_top    =  C.H_CYL/2;
 C.z_bot    = -C.H_CYL/2;
 C.fig_ctrl = fig_ctrl;
@@ -313,15 +320,19 @@ function slider_cb(src, lbl, fig, field, fmt)
     lbl.String = sprintf(fmt, v);
 end
 
-function reset_sliders(sl_h, lbl_h, fig, defs)
+function reset_sliders(~, ~, fig, defs)
     ud = fig.UserData;
-    for i = 1:length(sl_h)
-        v0 = defs{i,5}; sl_h(i).Value = v0;
+    for i = 1:size(defs,1)
+        v0  = defs{i,5};
         fmt = '%.0f'; if i>2, fmt = '%.3f'; end
-        lbl_h(i).String = sprintf(fmt, v0);
+        sl  = findobj(fig, 'Style','slider', 'Tag', defs{i,2});
+        lbl = findobj(fig, 'Style','text',   'Tag', ['lbl_' defs{i,2}]);
+        if ~isempty(sl),  set(sl,  'Value',  v0);              end
+        if ~isempty(lbl), set(lbl, 'String', sprintf(fmt, v0)); end
         ud.(defs{i,2}) = v0;
     end
     fig.UserData = ud;
+    drawnow;
 end
 
 function timer_step(fig)
@@ -427,14 +438,18 @@ function S = physics_step(S, C, pid)
                 -C.FLAP_MAX, C.FLAP_MAX);
     S.flap_r = fr; S.flap_p = fp;
 
-    Mfr = fr * 0.0025 * Ft;
-    Mfp = fp * 0.0025 * Ft;
+    % Autorità flap ridotta — telemetria reale: ±400 CCR → solo ~1° di roll
+    Mfr = fr * 0.0008 * Ft;
+    Mfp = fp * 0.0008 * Ft;
 
-    Cd_ang = 1.50;
+    % Smorzamento angolare calibrato su oscillazione ~0.5 Hz dalla telemetria
+    Cd_ang = 0.40;
 
-    TW_ratio = clamp(Ft / (C.MASSA*C.G), 0, 1);
-    Mgr =  0.5 * C.MASSA * C.G * C.d_cg_x * cos(S.pitch) * TW_ratio;
-    Mgp =  0.5 * C.MASSA * C.G * C.d_cg_y * cos(S.roll)  * TW_ratio;
+    % Momento CG: d_cg fisico è piccolo (2-3 mm) ma il momento effettivo
+    % è amplificato dalla geometria del drone (braccio reale >> d_cg nominale).
+    % Fattore 15 calibrato su telemetria: gradino CCR=1300 → ribaltamento ~19°
+    Mgr =  15.0 * C.d_cg_x * Ft * cos(S.pitch);
+    Mgp =  15.0 * C.d_cg_y * Ft * cos(S.roll);
     Myaw = (Tu - Tb)*0.0008 - 0.10*S.r_ang;
 
     Mx_total = Mgr + Mfr + Mx_r - Cd_ang*S.p_ang*C.Ixx;
@@ -468,7 +483,7 @@ function [Fx, Fy, Fz, Mx, My] = rope_forces(S, C)
 
     for ci = 1:4
         a = deg2rad(C.ROPE_ANG(ci));
-        p_body = [C.R_EXT*cos(a); C.R_EXT*sin(a); C.H_CYL/2];
+        p_body = [C.R_EXT*cos(a); C.R_EXT*sin(a); -C.H_CYL/2];
         Rp = R*p_body;
         p_world = Rp + pos;
         anchor = C.CAGE_ANCHORS(ci,:)';
@@ -537,10 +552,14 @@ function H = create_graphics(ax3, C)
     H.flap_p = patch(ax3, 'XData',nan(1,4),'YData',nan(1,4),'ZData',nan(1,4), ...
         'FaceColor',[0.96 0.82 0.08],'EdgeColor','w','LineWidth',0.9,'FaceAlpha',0.93);
 
-    H.feet = gobjects(6,1);
-    for li = 1:6
-        H.feet(li) = plot3(ax3, [nan nan], [nan nan], [nan nan], ...
-            '-','Color',[0.68 0.68 0.68],'LineWidth',2.0);
+    % 4 gambe triangolari agli angoli delle corde (45/135/225/315 deg)
+    % Ogni gamba ha 3 segmenti: lato sinistro, lato destro, base
+    H.feet = gobjects(4,3);
+    for ci = 1:4
+        for seg = 1:3
+            H.feet(ci,seg) = plot3(ax3, [nan nan], [nan nan], [nan nan], ...
+                '-','Color',[0.72 0.72 0.72],'LineWidth',2.2);
+        end
     end
 
     H.ropes       = gobjects(4,1);
@@ -645,20 +664,33 @@ function update_graphics(fig)
     set(H.flap_r,'XData',frx,'YData',fry,'ZData',frz);
     set(H.flap_p,'XData',fpx,'YData',fpy,'ZData',fpz);
 
-    for li = 1:6
-        la = (li-1)*pi/3;
-        p0 = R*[0;0;-C.H_CYL/2] + pos;
-        p1 = R*[C.R_EXT*1.15*cos(la); C.R_EXT*1.15*sin(la); -C.H_CYL/2-0.04] + pos;
-        set(H.feet(li),'XData',[p0(1) p1(1)], ...
-                       'YData',[p0(2) p1(2)], ...
-                       'ZData',[p0(3) p1(3)]);
+    % Gambe triangolari: ogni gamba agli angoli 45/135/225/315 deg
+    % p_base_L e p_base_R: due punti sul bordo inf del cilindro, ~20 deg ai lati
+    % p_foot: apice della gamba, sporge verso est. e verso il basso
+    FOOT_R   = C.R_EXT * 1.55;   % raggio apice piede (fuori dal cilindro)
+    FOOT_Z   = -C.H_CYL/2 - 0.06; % quota apice piede (sotto la base)
+    SIDE_ANG = deg2rad(22);       % semi-apertura laterale della base della gamba
+    for ci = 1:4
+        a = deg2rad(C.ROPE_ANG(ci));
+        % Due punti di attacco alla base del cilindro
+        pL = R*[C.R_EXT*cos(a+SIDE_ANG); C.R_EXT*sin(a+SIDE_ANG); -C.H_CYL/2] + pos;
+        pR = R*[C.R_EXT*cos(a-SIDE_ANG); C.R_EXT*sin(a-SIDE_ANG); -C.H_CYL/2] + pos;
+        % Apice del piede (punto di attacco corda)
+        pF = R*[FOOT_R*cos(a); FOOT_R*sin(a); FOOT_Z] + pos;
+        % Lato sinistro del triangolo
+        set(H.feet(ci,1),'XData',[pL(1) pF(1)],'YData',[pL(2) pF(2)],'ZData',[pL(3) pF(3)]);
+        % Lato destro del triangolo
+        set(H.feet(ci,2),'XData',[pR(1) pF(1)],'YData',[pR(2) pF(2)],'ZData',[pR(3) pF(3)]);
+        % Base del triangolo (tra i due punti sul cilindro)
+        set(H.feet(ci,3),'XData',[pL(1) pR(1)],'YData',[pL(2) pR(2)],'ZData',[pL(3) pR(3)]);
     end
 
     ns = C.N_ROPE_SEG;
     sv = linspace(0,1,ns);
     for ci = 1:4
         a = deg2rad(C.ROPE_ANG(ci));
-        p_body = [C.R_EXT*cos(a); C.R_EXT*sin(a); C.H_CYL/2];
+        % Corda attaccata dove la gamba tocca il drone (bordo inf del cilindro)
+        p_body = [C.R_EXT*cos(a); C.R_EXT*sin(a); -C.H_CYL/2];
         p_world = R*p_body + pos;
         anchor = C.CAGE_ANCHORS(ci,:)';
 
@@ -732,14 +764,17 @@ function update_graphics(fig)
 end
 
 function T = thrust_fn(ccr, rho, vbatt, arr, kv, ct, d)
-    if ccr <= 950
+    % Calibrato su telemetria reale: il drone non vola mai.
+    % A CCR<=1000 nessuna spinta, a CCR=1500 spinta massima ~60% del peso
+    % (insufficiente al decollo, ma sufficiente a ribaltare per CG spostato)
+    if ccr <= 1000
         throttle = 0;
-    elseif ccr <= 1100
-        t = (ccr - 950) / 150;
-        throttle = 0.20 * t.^2;
+    elseif ccr <= 1150
+        t = (ccr - 1000) / 150;
+        throttle = 0.08 * t.^2;
     else
-        t = (ccr - 1100) / 400;
-        throttle = 0.20 + 0.80 * min(1, t);
+        t = (ccr - 1150) / 350;
+        throttle = 0.08 + 0.37 * min(1, t);   % max throttle = 0.45 → T/W < 1
     end
     n = (throttle * vbatt * kv) / 60;
     T = max(0, ct * rho * d^4 * n^2);

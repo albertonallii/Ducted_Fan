@@ -1,0 +1,26 @@
+\begin{thebibliography}{1}
+
+\bibitem{stm32_nucleo_um}
+{STMicroelectronics}, {\em {STM32H7 Nucleo-144 boards (MB1363) -- User Manual}}, 2025.
+\newblock UM2408.
+
+\bibitem{dfrobot_pm}
+{DFRobot}, {\em {Power Module (SKU: DFR0205) -- Datasheet}}, 2017.
+
+\bibitem{turnigy_plush}
+{Turnigy}, {\em {Turnigy Manual for Brushless Motor Speed Controller}}, n.d.
+
+\bibitem{hitec_hs82mg}
+{Hitec Multiplex Japan, Inc.}, {\em {HS-82MG Spec Sheet}}, 2012.
+
+\bibitem{bno055_ds}
+{Bosch Sensortec}, {\em {BNO055 Data Sheet: Intelligent 9-axis Absolute Orientation Sensor}}, 2021.
+
+\bibitem{vl53l1x_ds}
+{STMicroelectronics}, {\em {VL53L1X Time-of-Flight Ranging Sensor -- Datasheet}}, 2018.
+
+\bibitem{uiuc_propeller_db}
+J.~B. Brandt and M.~S. Selig, ``{UIUC Propeller Data Site}.'' Online, 2014.
+\newblock Department of Aerospace Engineering.
+
+\end{thebibliography}

@@ -1,19 +1,5 @@
 %% IDENTIFY_AND_TUNE_V2.M
 %  Identificazione Black-Box e Tuning automatico PID per Roll o Pitch
-%
-%  CORREZIONI rispetto alla versione precedente:
-%   1. Rimossa la doppia sottrazione dell'offset (non si sottrae più
-%      PWM_servo_neutro prima e poi la media: si fa UNA sola centratura)
-%   2. Usato tfest ordine 2 con 1 zero invece di ssest ordine 4 fisso
-%      (più aderente alla fisica: il sistema flap->angolo è II ordine)
-%   3. Convertito l'ingresso in GRADI prima di identificare, così il
-%      modello ha unità fisiche coerenti (deg/deg) e pidtune lavora
-%      su guadagni in gradi, non in CCR raw
-%   4. DesignFocus cambiato da 'disturbance-rejection' a
-%      'reference-tracking' per guadagni conservativi adatti al primo test
-%   5. Aggiunto report del fit % e avviso se il modello è inaffidabile
-%   6. Aggiunta stima del guadagno statico per sanity check fisico
-
 close all; clearvars; clc;
 
 %% =========================================================
@@ -187,13 +173,6 @@ title(['Confronto dati reali vs modello - ', titolo, ...
 
 %% =========================================================
 %  9) TUNING PID
-%     DesignFocus 'reference-tracking': guadagni conservativi,
-%     adatti al primo test fisico. Meno aggressivo di
-%     'disturbance-rejection' che produceva guadagni enormi.
-%
-%     Nota: i guadagni Kp/Ki/Kd sono in GRADI (come il firmware).
-%     Il firmware riceve gradi dall'IMU, calcola il PID in gradi,
-%     poi converte in CCR tramite angle_to_pwm() con CCR_PER_DEGREE=10.
 %% =========================================================
 fprintf('\n=== Calcolo guadagni PIDF ===\n');
 
@@ -282,7 +261,7 @@ end
 %     i guadagni partendo dal modello identificato.
 %
 %     ISTRUZIONI:
-%       1. Si apre la finestra pidTuner con il tuo modello
+%       1. Si apre la finestra pidTuner con il modello
 %       2. Clicca "Add Plot" -> "Step" -> "Closed-Loop"
 %          per vedere la risposta a gradino in anello chiuso
 %       3. Clicca "Add Plot" -> "Step" -> "Open-Loop"

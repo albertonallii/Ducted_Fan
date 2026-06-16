@@ -466,59 +466,6 @@
 		\label{fig:turnigy_plush}
 	\end{figure}
 	
-	\subsection{Turnigy Plush 40A. Programmazione}
-	L'ESC \textit{Turnigy Plush 40A} offre la possibilità di configurare molteplici parametri operativi per l'ottimizzazione del controllo motore. Nell'ambito del presente progetto, la programmazione di entrambi gli ESC è stata eseguita avvalendosi della \textit{Turnigy Programming Card}, al fine di tararne il comportamento in funzione delle specifiche esigenze aerodinamiche e meccaniche del \textit{DPDF}.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.7\textwidth]{figures/02_hardware/esc_programming_setup.jpg}
-		\caption{Schema dei collegamenti per la programmazione dell'ESC}
-		\label{fig:esc_programming_setup}
-	\end{figure}
-	
-	Per procedere alla configurazione, è necessario predisporre i collegamenti elettrici illustrati in Figura~\ref{fig:esc_programming_setup}. La \textit{Programming Card} (visibile in Figura~\ref{fig:programming_card}) richiede una tensione di alimentazione compresa nell'intervallo $4.8 \div 6.0$ [V]. La navigazione all'interno del menù dei parametri si effettua mediante i pulsanti direzionali (\textit{up/down} e \textit{left/right}), mentre l'avvenuta memorizzazione del valore selezionato viene confermata dall'accensione del LED \textit{connecting}.\\
-	Di seguito vengono analizzati i principali parametri di configurazione e le relative impostazioni adottate per i test:
-	
-	\paragraph{Brake (Freno motore)}\mbox{}\\
-	Questo parametro definisce il comportamento del rotore in assenza di segnale PWM di trazione. Poiché le sessioni di collaudo sono state condotte all'interno di una gabbia di sicurezza, tale funzione non ha assunto una rilevanza critica per la dinamica del sistema; è stata pertanto disabilitata impostandola su \textbf{OFF}.
-	
-	\paragraph{Battery Type}\mbox{}\\
-	Tale voce istruisce l'ESC riguardo alla chimica dell'accumulatore impiegato (\textit{LiPo} o \textit{NiMH}), requisito fondamentale per una corretta gestione delle soglie di protezione. Impiegando il sistema pacchi batteria \textit{Tattu LiPo}, è stata logicamente selezionata l'opzione \textbf{Li-xx}.
-	
-	\paragraph{Low Voltage Protection Mode (Tipologia di Cut-off)}\mbox{}\\
-	Il parametro stabilisce la reazione dell'ESC qualora la tensione di alimentazione scenda al di sotto del valore limite prefissato. Al fine di scongiurare arresti improvvisi dei motori durante le fasi di test, con conseguente perdita repentina di portanza, si è optato per la modalità \textbf{Soft Cut-Off}, la quale garantisce una riduzione progressiva e controllata della potenza erogata.
-	
-	\paragraph{Cut Off Voltage (Tensione di Cut-off)}\mbox{}\\
-	Il parametro definisce la soglia di attivazione della protezione di bassa tensione:
-	\begin{itemize}
-		\item Low: 2.85 [V];
-		\item Medium: 3.15 [V];
-		\item High: 3.3 [V].
-	\end{itemize}
-	È stata scelta l'impostazione \textbf{Medium}, che nel caso di una batteria LiPo a 4 celle corrisponde a una soglia complessiva di \textbf{12.6 [V]}.
-	
-	\paragraph{Start Mode}\mbox{}\\
-	Regola la rampa di accelerazione iniziale del motore nel transitorio da fermo a regime. Durante le prove preliminari, è stata impiegata la configurazione \textbf{Very Soft Start} per minimizzare le sollecitazioni meccaniche sulla struttura, evitare reazioni brusche e ridurre i disturbi di misura durante i test in gabbia. Nelle fasi successive, specificatamente dedicate alla taratura dell'algoritmo PID per il controllo dell'imbardata (\textit{yaw}), è stata invece ripristinata la modalità \textbf{Normal} per garantire una risposta dinamica più reattiva.
-	
-	\paragraph{Timing Mode}\mbox{}\\
-	Rappresenta l'anticipo temporale con cui l'ESC commuta le fasi statoriche rispetto alla posizione angolare del rotore. Un anticipo ridotto privilegia l'efficienza energetica e la regolarità di rotazione, mentre un anticipo elevato massimizza la potenza meccanica erogata e i regimi di rotazione. Per il \textit{DPDF} è stata preferita l'impostazione \textbf{Medium Timing}, in quanto ritenuta il miglior compromesso tecnico tra prestazioni dinamiche ed efficienza complessiva.
-	
-	\paragraph{Music / Li-Po Cells}\mbox{}\\
-	Questa funzione riveste una valenza puramente estetica (notifiche acustiche all'accensione) e non incide sulle prestazioni cinematiche o elettriche del sistema; pertanto, non è stata abilitata.
-	
-	\paragraph{Governor Mode}\mbox{}\\
-	Questa logica di controllo è preposta al mantenimento di un regime di rotazione costante al variare del carico meccanico applicato. Non risultando necessaria per le logiche di controllo implementate nel presente lavoro, l'opzione è stata mantenuta su \textbf{OFF}.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.45\textwidth]{figures/02_hardware/turnigy_programming_card.jpg}
-		\caption{Turnigy Programming Card}
-		\label{fig:programming_card}
-	\end{figure}
-	\begin{center}
-		\footnotesize\textit{L'immagine riportata sopra non è riferita alla configurazione attuale degli ESC, ma ha esclusivamente scopo illustrativo.}
-	\end{center}
-	
 	\subsection{Turnigy Plush 40A. Risoluzione e controllo dei motori}
 	L'ESC \textit{Turnigy Plush 40A} gestisce la potenza erogata ai motori mediante un segnale di controllo PWM (\textit{Pulse-Width Modulation}) operante a una frequenza di \textbf{50 [Hz]}. Prima di consentire l'azionamento dei rotori, il dispositivo impone l'esecuzione di una rigorosa procedura di sicurezza definita \textbf{armamento} (\textit{arming}), la quale viene innescata fornendo in ingresso un segnale PWM con un \textit{duty cycle} costantemente mantenuto al \textbf{5\%}.\\
 	Lo stato operativo e l'esito della procedura di inizializzazione vengono comunicati all'operatore attraverso una diagnostica basata su specifici \textit{feedback} acustici emessi dall'ESC stesso:
@@ -1033,35 +980,40 @@
 	\end{enumerate}
 	%--------------------------------------------------------------
 	
+
+
 	\section{Architettura di controllo a quattro PID}
 	\label{sec:architettura_controllo}
-	
+
+	L'architettura di controllo del \textit{DPDF} è organizzata in \textbf{tre catene logiche distinte}, ciascuna dedicata a una specifica dinamica del velivolo. A livello implementativo, queste tre catene istanziano complessivamente \textbf{quattro regolatori PID} indipendenti, perché il ramo di assetto richiede due regolatori separati per \textit{roll} e \textit{pitch}. La presente sezione descrive esclusivamente gli aspetti implementativi dei regolatori all'interno del firmware; la forma matematica del controllore PIDF, la procedura di sintesi dei guadagni a partire dai modelli identificati e la loro discretizzazione sono trattate nel Capitolo~5.
+
 	\subsection{Decomposizione funzionale}
-	L'architettura di controllo del \textit{DPDF} è organizzata in \textbf{tre catene logiche distinte}, ciascuna dedicata a una specifica dinamica del velivolo. A livello implementativo, queste tre catene istanziano complessivamente \textbf{quattro regolatori PID} indipendenti, perché il ramo di assetto richiede due regolatori separati per \textit{roll} e \textit{pitch}. La scomposizione adottata è la seguente:
+	La scomposizione adottata è la seguente:
 	\begin{itemize}
-		\item \textbf{Quota}: il regolatore confronta il riferimento verticale $z_{ref}$ con la misura del \textit{VL53L1X} compensata rispetto al \textit{tilt}, e produce un comando PWM medio comune ai due motori. La dinamica di quota dipende infatti dalla spinta totale, che è governata dalla media dei due PWM motore.
-		\item \textbf{Assetto \textit{roll}/\textit{pitch}}: due regolatori distinti, alimentati dalle componenti corrispondenti dell'angolo letto dal BNO-055, producono comandi angolari per i due \textit{flap}. Questi comandi vengono successivamente convertiti in PWM per i servomotori \textit{HS-82MG} tramite il fattore \texttt{CCR\_PER\_DEGREE} definito in \texttt{config.h}.
-		\item \textbf{Yaw}: il regolatore confronta l'imbardata letta dal BNO-055 (sempre relativa alla posa iniziale) con un riferimento nullo, e produce un comando \textbf{differenziale} sui due motori. Il \textit{mixer} sottrae questo comando dal PWM del motore inferiore e lo somma a quello del motore superiore (o viceversa, in base al verso di rotazione delle eliche), così che la spinta totale resti invariata mentre cambia il bilanciamento di coppia tra i due gruppi propulsivi.
+	\item \textbf{Quota}: il regolatore confronta il riferimento verticale $z_{ref}$ con la misura del \textit{VL53L1X} compensata rispetto al \textit{tilt}, e produce un comando PWM medio comune ai due motori. La dinamica di quota dipende infatti dalla spinta totale, che è governata dalla media dei due PWM motore.
+	\item \textbf{Assetto \textit{roll}/\textit{pitch}}: due regolatori distinti, alimentati dalle componenti corrispondenti dell'angolo letto dal BNO-055, producono comandi angolari per i due \textit{flap}. Questi comandi vengono successivamente convertiti in PWM per i servomotori \textit{HS-82MG} tramite il fattore \texttt{CCR\_PER\_DEGREE} definito in \texttt{config.h}.
+	\item \textbf{Yaw}: il regolatore confronta l'imbardata letta dal BNO-055 (sempre relativa alla posa iniziale) con un riferimento nullo, e produce un comando \textbf{differenziale} sui due motori. Il \textit{mixer} sottrae questo comando dal PWM del motore inferiore e lo somma a quello del motore superiore (o viceversa, in base al verso di rotazione delle eliche), così che la spinta totale resti invariata mentre cambia il bilanciamento di coppia tra i due gruppi propulsivi.
 	\end{itemize}
-	Questa decomposizione rende esplicito il significato fisico di ciascun comando: la spinta media governa la quota, i flap governano l'assetto, e il differenziale di coppia governa l'imbardata. I tre rami operano su variabili fisicamente disaccoppiate, condizione necessaria per poterli identificare e tarare separatamente come SISO --- procedura descritta nel Capitolo 5.
-	
-	\subsection{PID discreto adottato}
-	Il regolatore PID implementato in \texttt{pid.c} adotta la forma incrementale a tempo discreto in cui i tre contributi sono calcolati separatamente e poi sommati. Dato un errore $e[k] = r[k] - y[k]$ tra riferimento $r$ e misura $y$ al passo $k$-esimo, il comando viene calcolato come:
-	\begin{align}
-		P[k] &= K_p \cdot e[k] \\
-		I[k] &= I[k-1] + K_i \cdot T_s \cdot e[k] \\
-		D[k] &= \frac{K_d}{T_s}\bigl(e[k] - e[k-1]\bigr) \\
-		u_{raw}[k] &= u_0 + P[k] + I[k] + D[k]
-	\end{align}
-	dove $T_s$ è il periodo di campionamento del ramo, $u_0$ è un eventuale \textit{offset} di funzionamento (utile per il ramo quota, in cui un PWM diverso da zero è necessario anche a errore nullo per sostenere il peso) e $u_{raw}[k]$ è il comando grezzo prima delle saturazioni.\\
-	Il periodo di campionamento $T_s$ è coerente con la frequenza di aggiornamento del ramo a cui il PID appartiene: \textbf{10 [ms]} per i regolatori di \textit{roll}, \textit{pitch} e \textit{yaw}, allineati al ramo IMU/servo; \textbf{coerente con la disponibilità di una nuova misura del ToF} per il PID di quota.
-	
+	Questa decomposizione rende esplicito il significato fisico di ciascun comando: la spinta media governa la quota, i flap governano l'assetto, e il differenziale di coppia governa l'imbardata. I tre rami operano su variabili fisicamente disaccoppiate, condizione necessaria per poterli identificare e tarare separatamente come SISO --- procedura descritta nel Capitolo~5.
+
+	\subsection{Implementazione nel firmware}
+	Il modulo \texttt{pid.c} espone un'unica struttura dati che rappresenta un regolatore PIDF generico, di cui sono istanziate quattro copie indipendenti all'interno del firmware --- una per ciascuna delle catene di controllo descritte sopra. Ogni istanza mantiene il proprio stato interno (termine integrale accumulato, errore al passo precedente, derivata filtrata) e riceve dall'esterno i propri guadagni $K_p$, $K_i$, $K_d$ e il coefficiente del filtro derivativo, letti dalla struttura \texttt{FLIGHT\_CFG} definita in \texttt{config.c}. Tale organizzazione consente di modificare i parametri di un singolo regolatore senza ricompilare il modulo \texttt{pid.c} e mantiene separato il \emph{contenuto} della legge di controllo dalla sua \emph{esecuzione}.
+
+	I quattro regolatori sono eseguiti in due rami temporali distinti del \textit{main loop}:
+	\begin{itemize}
+	\item I PID di \textit{roll}, \textit{pitch} e \textit{yaw} sono aggiornati nel ramo IMU/servo, attivato dalla scadenza periodica di TIM7 alla frequenza nominale di \textbf{50 [Hz]} ($T_s = 20$ [ms]), coerente con la cadenza di trasmissione della telemetria descritta nel Capitolo~4 e con la frequenza alla quale è stata effettuata l'identificazione del modello nel Capitolo~5.
+	\item Il PID di quota è aggiornato nel ramo ToF, attivato dalla disponibilità di una nuova misura dal \textit{VL53L1X}, con cadenza coerente con il \textit{Timing Budget} di 33 [ms] del sensore.
+	\end{itemize}
+	La separazione tra i due rami garantisce che un eventuale ritardo nella lettura del ToF non comprometta la reattività del controllo d'assetto, e viceversa.
+
 	\subsection{Saturazioni hardware e \textit{anti-windup}}
-	Il comando grezzo $u_{raw}[k]$ generato dal PID non può essere applicato direttamente all'attuatore: motori e servomotori operano entro intervalli finiti e fissi, definiti come costanti in \texttt{config.h} (\texttt{UPPER\_LIMIT\_MOTOR}, \texttt{LOWER\_LIMIT\_MOTOR}, \texttt{UPPER\_LIMIT\_SERVO}, \texttt{LOWER\_LIMIT\_SERVO}). Il firmware effettua dunque una saturazione esplicita prima di scrivere il valore nel \textit{Capture-Compare Register} del relativo \textit{timer}:
+	Il comando grezzo $u_{raw}[k]$ generato da ciascun regolatore non può essere applicato direttamente all'attuatore: motori e servomotori operano entro intervalli finiti e fissi, definiti come costanti in \texttt{config.h} (\texttt{UPPER\_LIMIT\_MOTOR}, \texttt{LOWER\_LIMIT\_MOTOR}, \texttt{UPPER\_LIMIT\_SERVO}, \texttt{LOWER\_LIMIT\_SERVO}). Il firmware effettua dunque una saturazione esplicita prima di scrivere il valore nel \textit{Capture-Compare Register} del relativo \textit{timer}:
 	\begin{equation}
-		u[k] = \mathrm{clamp}\bigl(u_{raw}[k], u_{min}, u_{max}\bigr).
+	u[k] = \mathrm{clamp}\bigl(u_{raw}[k], u_{min}, u_{max}\bigr).
 	\end{equation}
-	Per evitare il fenomeno dell'\textit{integral windup} --- ovvero l'accumulo indefinito del termine integrale quando l'attuatore è saturato e non riesce a ridurre l'errore --- è stata implementata la tecnica del \textit{clamping}: quando il comando grezzo eccede i limiti e l'errore tende a far crescere ulteriormente il termine integrale, l'aggiornamento dell'integrale viene sospeso fino a quando l'attuatore non rientra nella zona lineare. Questa scelta, semplice ma efficace, evita le sovraelongazioni che si verificherebbero al rientro dalla saturazione, fenomeno particolarmente indesiderabile in un sistema in cui la dinamica meccanica è già intrinsecamente lenta.
+	Per evitare il fenomeno dell'\textit{integral windup} --- ovvero l'accumulo indefinito del termine integrale quando l'attuatore è saturato e non riesce a ridurre l'errore --- è stata implementata la tecnica del \textit{conditional integration} (o \textit{integrator clamping}): l'aggiornamento del termine integrale viene sospeso quando si verificano contemporaneamente due condizioni, ovvero che l'uscita grezza superi i limiti di saturazione e che il segno dell'errore sia tale da spingere ulteriormente l'integrale nella stessa direzione della saturazione. In questo modo l'integrale può ancora decrescere (o crescere) quando l'errore cambia segno, ma non può accumularsi inutilmente durante una saturazione prolungata. Questa scelta, semplice ma efficace, evita le sovraelongazioni che si verificherebbero al rientro dalla saturazione, fenomeno particolarmente indesiderabile in un sistema in cui la dinamica meccanica è già intrinsecamente lenta.
+
+
 	
 	%--------------------------------------------------------------
 	\section{Protocollo di comunicazione seriale con MATLAB}
@@ -1094,7 +1046,7 @@
 	Una volta in funzione, il firmware mantiene una serie di contatori diagnostici che vengono trasmessi in ogni pacchetto di telemetria: il numero di errori UART in ricezione (\texttt{uart\_rx\_errors}), il numero di \textit{overflow} del \textit{buffer} seriale (\texttt{uart\_rx\_overflows}), il numero di linee malformate scartate (\texttt{uart\_bad\_lines}), e un \textit{flag} che segnala eventuali ritardi nella trasmissione della telemetria stessa (\texttt{telemetry\_overrun}). Questi contatori non hanno effetto sul comportamento del sistema, ma forniscono lato PC un'indicazione immediata della qualità del canale di comunicazione, particolarmente utile durante le campagne di acquisizione in cui la perdita di campioni comprometterebbe la successiva identificazione del modello.\\
 	Al verificarsi di una condizione anomala --- ad esempio un \textit{timeout} del \textit{watchdog}, una mancata risposta del BNO-055 dopo più tentativi, o un \textit{reset} forzato del VL53L1X --- il firmware riporta autonomamente i motori al PWM minimo e segnala l'anomalia attraverso il campo \texttt{stop\_reason} della telemetria, che codifica la causa del passaggio allo stato di sicurezza. Questo approccio rende il sistema osservabile dall'esterno anche in condizioni degradate, consentendo all'operatore di diagnosticare il problema senza dover ricorrere a strumenti di \textit{debug} \textit{on-chip}.
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%                         CAPITOLO 4 - TELEMETRIA
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\chapter{Telemetria}
@@ -1108,7 +1060,7 @@
 	
 	Nel contesto dello sviluppo di un velivolo intrinsecamente instabile come il \textit{DPDF}, la telemetria non costituisce un semplice strumento di monitoraggio passivo, ma rappresenta uno degli elementi centrali dell'intera pipeline di sviluppo. La necessità di un flusso di dati bidirezionale e ad alta frequenza nasce da tre obiettivi distinti, tutti perseguiti in parallelo durante le campagne sperimentali in laboratorio:
 	\begin{enumerate}
-		\item \textbf{Identificazione del modello matematico (anello aperto)}: il calcolo delle funzioni di trasferimento tramite \textit{System Identification} richiede di registrare con precisione il legame temporale tra gli ingressi forzati (ad esempio le sequenze PRBS imposte ai \textit{flap}) e le risposte cinematiche del drone (angoli di \textit{roll}, \textit{pitch} e \textit{yaw}). Tale procedura, descritta nel Capitolo~\ref{ch:modello}, ha senso solo se i campioni di ingresso e uscita sono allineati nel tempo entro pochi millisecondi.
+		\item \textbf{Identificazione del modello matematico (anello aperto)}: il calcolo delle funzioni di trasferimento tramite \textit{System Identification} richiede di registrare con precisione il legame temporale tra gli ingressi forzati (ad esempio le sequenze pseudo-casuali multilivello imposte ai \textit{flap}) e le risposte cinematiche del drone (angoli di \textit{roll}, \textit{pitch} e \textit{yaw}). Tale procedura, descritta nel Capitolo~\ref{ch:modello}, ha senso solo se i campioni di ingresso e uscita sono allineati nel tempo entro pochi millisecondi.
 		\item \textbf{Validazione dei controllori (anello chiuso)}: una volta sintetizzati i regolatori PID tramite \texttt{pidtune}, il loro comportamento sul prototipo fisico deve essere verificato osservando tempi di assestamento, sovraelongazioni e fenomeni di saturazione dei \textit{flap} a $\pm 30\degree$. Senza una telemetria affidabile, qualsiasi affermazione sulla qualità dei guadagni resterebbe puramente qualitativa.
 		\item \textbf{Sicurezza in laboratorio}: il prototipo, con una massa assemblata di $m \approx 2.2$ [kg] e due eliche \textit{APC 9$\times$4.5} che ruotano a regimi elevati, presenta rischi meccanici non trascurabili. Il fatto di operarlo all'interno di una gabbia vincolata da quattro funi non elimina questi rischi, ma li circoscrive. La telemetria, in questo contesto, fornisce all'operatore una via di terminazione d'emergenza software (\textit{Kill Switch}) che integra le protezioni hardware degli ESC.
 	\end{enumerate}
@@ -1121,7 +1073,7 @@
 	Il flusso telematico si appoggia su un'architettura di tipo \textit{master--slave} cooperativa tra l'unità di calcolo a bordo del drone e la \textit{Ground Station} di laboratorio.
 	\begin{itemize}
 		\item \textbf{Segmento di bordo}: la scheda \textit{STM32 NUCLEO-H745ZI-Q} interroga il sensore IMU \textit{BNO-055} per campionare l'orientamento in centesimi di grado, riceve dal sensore ToF \textit{VL53L1X} la misura di quota in millimetri, e impacchetta queste informazioni assieme allo stato dei motori e dei servomotori in una stringa CSV. La logica di confezionamento dei pacchetti è descritta nel dettaglio nel Capitolo~\ref{ch:firmware}.
-		\item \textbf{Canale di comunicazione}: la trasmissione avviene su periferica \textit{USART3}, esposta all'esterno attraverso il \textit{Virtual COM Port (VCP)} dell'\textit{ST-LINK/V3E} integrato sulla scheda. Per garantire che le stringhe di telemetria (denso \textit{payload} di 15 campi) vengano trasmesse interamente entro il periodo di campionamento, il \textit{baudrate} è stato impostato a \textbf{230\,400 [bps]}. Questo valore è significativamente più elevato dei 115\,200 \textit{baud} comunemente adottati per il \textit{debug} testuale, e si è dimostrato necessario per sostenere il traffico a 50 [Hz] senza saturare il canale.
+		\item \textbf{Canale di comunicazione}: la trasmissione avviene su periferica \textit{USART3}, esposta all'esterno attraverso il \textit{Virtual COM Port (VCP)} dell'\textit{ST-LINK/V3E} integrato sulla scheda. Il \textit{baudrate} è stato impostato a \textbf{230\,400 [bps]}, valore scelto come compromesso tra occupazione del canale e margine operativo. Con un \textit{payload} medio di circa 60 caratteri per pacchetto (15 campi separati da virgole) trasmesso a 50 [Hz], il \textit{bitrate} richiesto in regime UART 8N1 è di circa 30\,000 [bps]: il \textit{baudrate} adottato lascia dunque un'occupazione effettiva del canale attorno al 13\%, sufficiente ad assorbire i picchi dovuti ai messaggi di stato (\texttt{ACK\_ON}, \texttt{ACK\_OFF}, \texttt{ACK\_KILL}) e a garantire un margine contro il \textit{jitter} del sistema operativo \textit{host}.
 		\item \textbf{Segmento di terra (\textit{Ground Station})}: un \textit{personal computer} esegue uno \textit{script} MATLAB dedicato (\texttt{AcquiringData.m}), che opera a una frequenza nominale di 50 [Hz], ossia con un passo di campionamento $\Delta t = 20$ [ms]. Lo \textit{script} svolge un duplice compito: in trasmissione genera e invia i comandi di eccitazione sintetizzati dalla funzione \texttt{generateSignal}; in ricezione drena continuamente il \textit{buffer} seriale, filtra i pacchetti validi e li scrive su un file di testo strutturato in formato \texttt{.csv}.
 	\end{itemize}
 	La scelta di mantenere il segmento di terra su MATLAB, anziché spostare l'intera logica di controllo a bordo, è coerente con l'obiettivo del progetto. Il drone è in questa fase una \textit{piattaforma di acquisizione}, e MATLAB rappresenta l'ambiente naturale in cui i dati saranno successivamente analizzati nel Capitolo~\ref{ch:modello}.
@@ -1151,7 +1103,7 @@ duration     = 30;
 		\item \texttt{HOVER = 1050} rappresenta il valore CCR corrispondente alla spinta nominale di equilibrio statico nella configurazione vincolata. Tutti i segnali di eccitazione che agiscono sui motori sono espressi come variazioni rispetto a questo valore.
 		\item \texttt{STEP\_SMALL = 50}, \texttt{STEP\_MEDIUM = 100} e \texttt{SIN\_AMP = 100} sono le ampiezze nominali dei segnali di eccitazione (gradini e sinusoidi) generati dalla funzione \texttt{generateSignal}. Questi parametri determinano il rapporto segnale--rumore dell'identificazione: ampiezze troppo piccole non producono uno spostamento angolare distinguibile dal rumore del BNO-055, mentre ampiezze eccessive potrebbero forzare le funi di vincolo oltre il loro regime elastico o portare i servomotori in saturazione meccanica.
 		\item \texttt{CENTER\_SERVO = 1125} è il valore CCR corrispondente alla posizione neutra dei servomotori \textit{Hitec HS-82MG}, ovvero all'inclinazione nulla dei \textit{flap}.
-		\item \texttt{DT\_TARGET = 0.02} sancisce il passo di campionamento temporale dell'intero sistema. Coordinare la telemetria alla stessa frequenza a cui opera il PID nel firmware (50 [Hz]) è una scelta metodologica essenziale per evitare effetti di \textit{aliasing} e sfasamenti nei modelli identificati.
+		\item \texttt{DT\_TARGET = 0.02} sancisce il passo di campionamento temporale dell'intero sistema. Coordinare la telemetria alla stessa frequenza a cui opera il ramo IMU/servo del firmware (50 [Hz], come descritto nella Sezione~\ref{sec:architettura_controllo} del Capitolo~\ref{ch:firmware}) è una scelta metodologica essenziale per evitare effetti di \textit{aliasing} e sfasamenti nei modelli identificati.
 	\end{itemize}
 	
 	%--------------------------------------------------------------
@@ -1188,7 +1140,7 @@ duration     = 30;
 	\section{Watchdog firmware e keep-alive lato MATLAB}
 	\label{sec:watchdog_keepalive}
 	
-	Operare un velivolo instabile tramite computer richiede un meccanismo che prevenga il \textit{flyaway} o l'impatto distruttivo in caso di \textit{crash} del PC o di disconnessione del cavo USB. Per questo motivo il firmware è equipaggiato con un \textit{watchdog} di comunicazione, descritto nel Capitolo~\ref{ch:firmware}: se la scheda non riceve un nuovo comando \texttt{CMD} entro \textbf{200 [ms]}, forza autonomamente i motori al PWM minimo e torna allo stato \textit{disarmato}.
+	Operare un velivolo instabile tramite computer richiede un meccanismo che prevenga il \textit{flyaway} o l'impatto distruttivo in caso di \textit{crash} del PC o di disconnessione del cavo USB. Per questo motivo il firmware è equipaggiato con un \textit{watchdog} di comunicazione, descritto nel Capitolo~\ref{ch:firmware}: se la scheda non riceve un nuovo comando \texttt{CMD} entro \textbf{200 [ms]}, forza autonomamente i motori al PWM minimo e torna allo stato \textit{disarmato}. La scelta di 200 [ms] come finestra di \textit{timeout} costituisce un compromesso tra reattività in caso di guasto della linea di comunicazione (un valore troppo grande lascerebbe il drone in funzione per un tempo eccessivo dopo la perdita del collegamento) e robustezza rispetto al \textit{jitter} accumulato lato MATLAB (un valore troppo piccolo provocherebbe \textit{trigger} spuri durante normali rallentamenti del sistema operativo).
 	
 	Esiste tuttavia una fase critica in cui questo meccanismo, pensato per la sicurezza, rischia di intervenire in modo non desiderato: la \textit{start sequence}. Durante l'attesa di un \textit{acknowledgement} (in particolare l'\texttt{ACK\_ON} dopo l'invio di \texttt{MOTOR\_ON}), MATLAB non sta ancora inviando comandi \texttt{CMD}, e il \textit{watchdog} potrebbe scattare prima che l'operatore abbia il controllo effettivo del sistema.
 	
@@ -1225,7 +1177,7 @@ if (t - nextCmdTime) > DT_TARGET
 end
 	\end{lstlisting}
 	
-	Se il tempo corrente $t$ supera abbondantemente \texttt{nextCmdTime}, segno di un blocco temporaneo del sistema operativo, lo \textit{script} non cerca di compensare il ritardo accumulando comandi arretrati. Riallinea invece la variabile \texttt{nextCmdTime} sul tempo corrente, garantendo che i comandi successivi mantengano lo spaziamento nominale $\Delta t = 20$ [ms]. La conseguenza è la perdita di qualche campione in corrispondenza del \textit{glitch}, ma la coerenza temporale del resto della prova viene preservata.
+	Se il tempo corrente $t$ supera di oltre un periodo \texttt{nextCmdTime}, segno di un blocco temporaneo del sistema operativo, lo \textit{script} non cerca di compensare il ritardo accumulando comandi arretrati. Riallinea invece la variabile \texttt{nextCmdTime} sul tempo corrente, abbandonando deliberatamente la cadenza nominale precedente in favore di un nuovo riferimento locale. La conseguenza pratica è la perdita di qualche campione in corrispondenza del \textit{glitch} e una piccola discontinuità di fase nei comandi successivi, ma la cadenza media di 50 [Hz] e la coerenza temporale del resto della prova vengono preservate, condizione necessaria per la successiva identificazione.
 	
 	\subsection{Parsing CSV e validazione delle righe}
 	La seriale non trasmette esclusivamente i pacchetti di telemetria: veicola anche messaggi di stato, risposte ACK e occasionali messaggi di \textit{debug}. Lo \textit{script} deve dunque classificare ogni riga ricevuta prima di salvarla. La scrematura avviene all'interno della funzione \texttt{readSerialAvailable}.
@@ -1245,7 +1197,7 @@ if count(line, ",") == 14
 end
 	\end{lstlisting}
 	
-	Questo approccio garantisce l'integrità dei dati salvati. Se un disturbo elettromagnetico sui cavi del laboratorio corrompe un pacchetto UART troncandolo a metà, il conteggio delle virgole fallisce: lo \textit{script} scarta la riga, classificandola come \texttt{badLines}, e mantiene il file \texttt{.csv} libero da valori anomali (\texttt{NaN}) che farebbero fallire le successive procedure di identificazione in \texttt{tfest}.
+	Questo controllo è un filtro di primo livello, di natura puramente strutturale: garantisce che la riga abbia il numero corretto di campi, ma non verifica che ciascun campo contenga un valore numerico nel range atteso. Una corruzione che lasciasse intatto il numero di virgole ma alterasse il contenuto di un singolo campo (ad esempio un valore di angolo di Eulero fuori dall'intervallo $[-180, +180]\degree$) non verrebbe intercettata in questa fase. Un controllo più robusto richiederebbe l'inserimento di un \textit{checksum} (ad esempio CRC-8) come ultimo campo del pacchetto, soluzione comune nei protocolli telemetrici embedded ma non implementata in questa iterazione del progetto per non appesantire eccessivamente il \textit{payload} a livello applicativo. Nella pratica, il controllo geometrico si è dimostrato sufficiente per le campagne sperimentali svolte: se un disturbo elettromagnetico sui cavi del laboratorio corrompe un pacchetto UART troncandolo a metà, il conteggio delle virgole fallisce, la riga viene classificata come \texttt{badLines} e il file \texttt{.csv} resta libero da valori anomali (\texttt{NaN}) che farebbero fallire le successive procedure di identificazione in \texttt{tfest}. Eventuali corruzioni più sottili emergerebbero comunque in fase di analisi attraverso il controllo dei limiti fisici dei segnali.
 	
 	\subsection{Terminazione asincrona di emergenza}
 	Data la massa del prototipo ($\approx 2.2$ [kg]), l'energia cinetica delle eliche e il vincolo elastico delle funi, esiste la possibilità che oscillazioni divergenti si sviluppino più velocemente di quanto un operatore possa reagire premendo un pulsante tradizionale. Per questo motivo la telemetria include una gestione prioritaria degli arresti di emergenza, distinta a due livelli:
@@ -1292,7 +1244,7 @@ end
 		\item \textbf{prove 2.x} --- eccitazione differenziale dei motori, per stimolare la dinamica di \textit{yaw};
 		\item \textbf{prove 3.x} --- gradini, sinusoidi e \textit{chirp} sul \textit{flap} di \textit{roll};
 		\item \textbf{prove 4.x} --- gradini, sinusoidi e \textit{chirp} sul \textit{flap} di \textit{pitch};
-		\item \textbf{prove 5.x} --- eccitazioni combinate e sequenze pseudo-casuali (PRBS) su uno o entrambi gli assi.
+		\item \textbf{prove 5.x} --- eccitazioni combinate e sequenze pseudo-casuali multilivello su uno o entrambi gli assi.
 	\end{itemize}
 	La selezione della prova imposta lo stato della funzione \texttt{generateSignal}, che a ogni iterazione del \textit{loop} principale produce la quadrupla \texttt{(top, bottom, roll, pitch)} da inviare al firmware. Nelle sottosezioni seguenti vengono descritte le caratteristiche principali di ciascuna famiglia di segnali.
 	
@@ -1313,10 +1265,13 @@ end
 	
 	Questi segnali permettono di tracciare empiricamente il diagramma di Bode del sistema: all'aumentare della frequenza di oscillazione del comando, l'inerzia del velivolo ne attenua progressivamente l'ampiezza di risposta e ne introduce uno sfasamento. Il \textit{chirp} è particolarmente prezioso perché, in un'unica prova, copre un'intera decade di frequenze e consente di individuare eventuali frequenze di risonanza del telaio in PLA o del sistema elastico delle funi, informazione utile in fase successiva qualora si rendesse necessario inserire filtri \textit{notch} o passa-basso nei rami di retroazione.
 	
-	\subsection{Sequenze PRBS}
-	Le prove contrassegnate dai codici 5.2, 5.3 e 5.4 implementano sequenze binarie pseudo-casuali (PRBS, \textit{Pseudo-Random Binary Sequence}). In queste modalità il comando inviato ai \textit{flap} non segue una legge matematica continua, ma salta in modo istantaneo tra livelli discreti definiti a partire dalle costanti \texttt{STEP\_SMALL} e \texttt{STEP\_MEDIUM}, a intervalli temporali regolari (ogni 0.5 [s]).
+	\subsection{Sequenze pseudo-casuali multilivello}
+	\label{subsec:aprbs}
+	Le prove contrassegnate dai codici 5.2, 5.3 e 5.4 implementano sequenze pseudo-casuali multilivello, riconducibili alla famiglia delle \textit{Amplitude-modulated Pseudo-Random Binary Sequences} (APRBS). A differenza della PRBS classica --- generata da un \textit{Linear Feedback Shift Register} e limitata a due livelli di ampiezza --- l'APRBS impiegata in questo lavoro adotta cinque livelli discreti di ampiezza, mantenendo invariata la natura pseudo-casuale dei salti. Per coerenza con la nomenclatura adottata nello \textit{script} di acquisizione e nei nomi dei \textit{dataset} prodotti, nel seguito si continuerà a indicare queste sequenze con la sigla \textit{PRBS}, fermo restando che la definizione tecnicamente più corretta è quella di sequenza multilivello.
 	
-	Il PRBS è lo standard nell'identificazione \textit{black-box} dei sistemi dinamici. Da un punto di vista spettrale, un salto pseudo-casuale tra livelli discreti approssima il comportamento di un rumore bianco entro la banda di interesse: il segnale contiene energia su un'ampia gamma di frequenze, permettendo di stimolare contemporaneamente tutti i modi della dinamica e di alimentare in modo efficiente gli algoritmi di identificazione parametrica come \texttt{tfest} (descritto nel Capitolo 5).
+	In queste modalità il comando inviato ai \textit{flap} non segue una legge matematica continua, ma salta in modo istantaneo tra livelli discreti definiti a partire dalle costanti \texttt{STEP\_SMALL} e \texttt{STEP\_MEDIUM}, a intervalli temporali regolari (ogni 0.5 [s]).
+	
+	Le sequenze pseudo-casuali rappresentano uno standard nell'identificazione \textit{black-box} dei sistemi dinamici. Da un punto di vista spettrale, un salto pseudo-casuale tra livelli discreti approssima il comportamento di un rumore bianco entro la banda di interesse: il segnale contiene energia su un'ampia gamma di frequenze, permettendo di stimolare contemporaneamente tutti i modi della dinamica e di alimentare in modo efficiente gli algoritmi di identificazione parametrica come \texttt{tfest} (descritto nel Capitolo~\ref{ch:modello}). Va tuttavia osservato che la scelta di cinque livelli (incluso lo zero) anziché due livelli puri --- come prescriverebbe la PRBS classica --- comporta una lieve riduzione dell'energia spettrale totale a parità di ampiezza massima, in quanto durante i blocchi in cui il livello selezionato è zero il sistema non viene effettivamente eccitato. Questa scelta è stata ritenuta accettabile in quanto rende il segnale meccanicamente meno aggressivo sui servomotori e sulle funi, prolungandone la vita utile durante le ripetute campagne di acquisizione.
 	
 	Le prove 5.2 (PRBS \textit{roll}) e 5.3 (PRBS \textit{pitch}) hanno svolto il ruolo principale nella stima delle funzioni di trasferimento $G_\text{roll}(z)$ e $G_\text{pitch}(z)$ presentate nel prossimo capitolo. La scelta è motivata da due proprietà del segnale.
 	\begin{itemize}
@@ -1325,7 +1280,7 @@ end
 	\end{itemize}
 	L'implementazione della modalità 5.2 (PRBS \textit{roll}) è riportata di seguito:
 	
-	\begin{lstlisting}[language=Matlab, caption={Generazione della sequenza PRBS roll (case 21)}]
+	\begin{lstlisting}[language=Matlab, caption={Generazione della sequenza pseudo-casuale multilivello sul flap di roll (case 21)}]
 case 21
     % 5.2 PRBS roll ogni 0.5 s
     block = floor(time / 0.5);
@@ -1401,11 +1356,15 @@ fprintf("===================================\n");
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/dataset_prbs.png}
+		\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs1.png}
+	\end{figure}
+	
+		\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs2.png}
 		\caption{\textit{Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit{flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sinistra l'asse di \textit{roll}, a destra l'asse di \textit{pitch}}
 		\label{fig:dataset_prbs}
 	\end{figure}
-	
 	La centratura del segnale d'ingresso rispetto alla posizione neutra del \textit{flap} ($CCR_\text{neutro} = 1125$) è governata dalla relazione:
 	\begin{equation}
 		\Delta u(t) = \frac{CCR_\text{flap}(t) - CCR_\text{neutro}}{K_\text{CCR}}
@@ -1529,7 +1488,12 @@ fitC = goodnessOfFit(sim(sysC, data_ident).y, y_centered, 'NRMSE') * 100;
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation.png}
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation1.png}
+	\end{figure}
+	
+		\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation2.png}
 		\caption{Analisi di \textit{cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata). A sinistra l'asse di \textit{roll} (Fit $77.85\%$), a destra l'asse di \textit{pitch} (Fit $77.67\%$)}
 		\label{fig:cross_validation}
 	\end{figure}
@@ -1575,9 +1539,14 @@ sys_cl   = feedback(C_pid * sys_asse, 1);    % risposta a gradino
 sys_ctrl = feedback(C_pid, sys_asse);        % sforzo di controllo
 	\end{lstlisting}
 	
+		\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response1.png}
+	\end{figure}
+	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response.png}
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response2.png}
 		\caption{Analisi della risposta al gradino ad anello chiuso (sinistra) e del corrispondente sforzo di controllo dei servomotori (destra). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree$}
 		\label{fig:step_response}
 	\end{figure}
@@ -1831,21 +1800,32 @@ end
 	
 	Il simulatore fornisce dunque due indicazioni complementari, entrambe di valore. Da un lato \textbf{conferma la validità della legge di controllo PID} sintetizzata nel Capitolo~\ref{ch:modello}, mostrando che i regolatori sono in grado di stabilizzare l'assetto del velivolo in presenza dei principali disturbi non lineari (eccentricità del baricentro, accoppiamento con il vincolo elastico). Dall'altro \textbf{conferma il deficit di spinta} che impedisce il volo libero: nessuna combinazione dei guadagni testati produce il decollo, e questo non è un limite dei regolatori ma una caratteristica intrinseca della catena propulsiva nella configurazione attuale. Le cause di tale deficit e le possibili strade per superarlo sono analizzate in dettaglio nel Capitolo~\ref{ch:conclusioni}.
 	
-	%--------------------------------------------------------------
+%--------------------------------------------------------------
 	\section{De-rating dei guadagni per il transfer al prototipo fisico}
 	\label{sec:derating}
 	
 	I guadagni sintetizzati da \texttt{pidtune} sul modello LTI identificato (Tabella~\ref{tab:guadagni_pid}) costituiscono il punto di partenza teorico ottimale. Tuttavia, nel passaggio dal modello al sistema fisico intervengono fattori non modellati che possono favorire l'insorgenza di oscillazioni ad alta frequenza (\textit{chattering}) sugli attuatori: i giochi meccanici dei servomotori \textit{Hitec HS-82MG}, l'attrito statico dei perni dei \textit{flap}, le piccole non-linearità della catena ESC--motore, e il rumore residuo dell'IMU.
 	
-	Per il primo collaudo sul prototipo fisico si è scelto di adottare una configurazione di sicurezza, ottenuta riducendo i guadagni del modello LTI di un fattore approssimativamente pari a due:
-	\begin{equation}
-		K_{p,\text{safe}} = 10.0, \quad
-		K_{i,\text{safe}} = 15.0, \quad
-		K_{d,\text{safe}} = 1.0.
-		\label{eq:derating}
-	\end{equation}
-	Questi valori sono stati prima validati nel simulatore (producendo la risposta mostrata in Figura~\ref{fig:simulazione_hover}) e successivamente impiegati come punto di partenza nel firmware. La pratica del \textit{de-rating} è una scelta metodologica conservativa coerente con la prudenza richiesta nella validazione di sistemi non lineari: i guadagni più aggressivi suggeriti da \texttt{pidtune} possono essere reintrodotti incrementalmente in fase di taratura fine sul prototipo, una volta acquisita confidenza con il comportamento reale del sistema.
+	Per il primo collaudo sul prototipo fisico si è scelto di adottare una configurazione di sicurezza, ottenuta arrotondando in modo conservativo i guadagni del modello LTI rispetto ai valori sintetizzati nel Capitolo~\ref{ch:modello}. I valori adottati, distinti per i due assi di assetto, sono riportati in Tabella~\ref{tab:guadagni_derated}.
 	
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{lcc}
+			\toprule
+			\textbf{Parametro} & \textbf{Asse di Roll} & \textbf{Asse di Pitch} \\
+			\midrule
+			$K_{p,\text{safe}}$ & 15.0 & 10.0 \\
+			$K_{i,\text{safe}}$ & 40.0 & 11.0 \\
+			$K_{d,\text{safe}}$ & 1.0  & 2.0  \\
+			\bottomrule
+		\end{tabular}
+		\caption{Guadagni PIDF adottati per il primo collaudo sul prototipo fisico, distinti per i due assi di controllo}
+		\label{tab:guadagni_derated}
+	\end{table}
+	
+	L'asimmetria tra i due assi --- $K_p$ più elevato e $K_i$ significativamente più aggressivo sul \textit{roll} rispetto al \textit{pitch} --- riflette quella già emersa nella sintesi automatica di \texttt{pidtune} (Tabella~\ref{tab:guadagni_pid}), ed è imputabile alla differente struttura dei modelli identificati sui due assi: un secondo ordine con uno zero per il \textit{roll} e un terzo ordine con uno zero per il \textit{pitch}, con guadagni statici di modulo differente. L'azione integrale più forte sul \textit{roll} è dunque necessaria per compensare un guadagno statico più piccolo, mentre il valore più elevato di $K_d$ sul \textit{pitch} contribuisce a smorzare la dinamica leggermente più oscillante predetta dal modello del terzo ordine.
+	
+	Questi valori sono stati prima validati nel simulatore (producendo la risposta mostrata in Figura~\ref{fig:simulazione_hover}) e successivamente impiegati come punto di partenza nel firmware. La pratica dell'arrotondamento conservativo è una scelta metodologica coerente con la prudenza richiesta nella validazione di sistemi non lineari: i guadagni più aggressivi suggeriti da \texttt{pidtune} possono essere reintrodotti incrementalmente in fase di taratura fine sul prototipo, una volta acquisita confidenza con il comportamento reale del sistema.
 	%--------------------------------------------------------------
 	\section{Limiti del simulatore e relazione con i capitoli successivi}
 	\label{sec:limiti_sim}

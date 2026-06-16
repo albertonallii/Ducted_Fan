@@ -31,137 +31,128 @@
 \contentsline {subsection}{\numberline {2.6.1}Turnigy AereoDrive SK3-3536 1400 KV. Caratteristiche fisiche e tecniche}{18}{subsection.2.6.1}%
 \contentsline {section}{\numberline {2.7}Turnigy Plush 40A. Electronic Speed Controller}{19}{section.2.7}%
 \contentsline {subsection}{\numberline {2.7.1}Turnigy Plush 40A. Caratteristiche fisiche}{19}{subsection.2.7.1}%
-\contentsline {subsection}{\numberline {2.7.2}Turnigy Plush 40A. Programmazione}{19}{subsection.2.7.2}%
-\contentsline {paragraph}{Brake (Freno motore)}{20}{paragraph*.24}%
-\contentsline {paragraph}{Battery Type}{20}{paragraph*.25}%
-\contentsline {paragraph}{Low Voltage Protection Mode (Tipologia di Cut-off)}{20}{paragraph*.26}%
-\contentsline {paragraph}{Cut Off Voltage (Tensione di Cut-off)}{20}{paragraph*.27}%
-\contentsline {paragraph}{Start Mode}{21}{paragraph*.28}%
-\contentsline {paragraph}{Timing Mode}{21}{paragraph*.29}%
-\contentsline {paragraph}{Music / Li-Po Cells}{21}{paragraph*.30}%
-\contentsline {paragraph}{Governor Mode}{21}{paragraph*.31}%
-\contentsline {subsection}{\numberline {2.7.3}Turnigy Plush 40A. Risoluzione e controllo dei motori}{22}{subsection.2.7.3}%
-\contentsline {paragraph}{Attesa di un segnale di armamento valido}{22}{paragraph*.33}%
-\contentsline {paragraph}{Esito positivo dell'operazione di armamento}{23}{paragraph*.34}%
-\contentsline {paragraph}{Esito negativo dell'operazione di armamento}{23}{paragraph*.35}%
-\contentsline {section}{\numberline {2.8}APC 9x4.5. Eliche}{23}{section.2.8}%
-\contentsline {subsection}{\numberline {2.8.1}Caratteristiche fisiche}{23}{subsection.2.8.1}%
-\contentsline {section}{\numberline {2.9}Hitec HS-82MG Gear micro servo}{23}{section.2.9}%
-\contentsline {subsection}{\numberline {2.9.1}HS-82MG Hitec. Caratteristiche fisiche}{24}{subsection.2.9.1}%
-\contentsline {paragraph}{Coppia di stasi (\textit {Holding torque})}{24}{paragraph*.38}%
-\contentsline {paragraph}{Coppia di stallo (\textit {Stall torque})}{24}{paragraph*.39}%
-\contentsline {paragraph}{Velocità angolare}{24}{paragraph*.40}%
-\contentsline {paragraph}{Corrente operativa}{25}{paragraph*.41}%
-\contentsline {paragraph}{Corrente di stallo}{25}{paragraph*.42}%
-\contentsline {paragraph}{Corsa operativa}{25}{paragraph*.43}%
-\contentsline {subsection}{\numberline {2.9.2}HS-82MG Hitec. Caratteristiche tecniche e controllo}{25}{subsection.2.9.2}%
-\contentsline {paragraph}{Alimentazione}{25}{paragraph*.45}%
-\contentsline {paragraph}{Controllo}{26}{paragraph*.46}%
-\contentsline {section}{\numberline {2.10}BNO055 Bosch Sensortec. Unità di misura inerziale e magnetometro}{26}{section.2.10}%
-\contentsline {subsection}{\numberline {2.10.1}BNO055 Bosch Sensortec. Caratteristiche fisiche}{27}{subsection.2.10.1}%
-\contentsline {subsection}{\numberline {2.10.2}BNO055 Bosch Sensortec. Infrastruttura di alimentazione, comunicazione ed integrazione del sensore}{27}{subsection.2.10.2}%
-\contentsline {paragraph}{Alimentazione}{27}{paragraph*.48}%
-\contentsline {paragraph}{Protocollo di comunicazione}{27}{paragraph*.49}%
-\contentsline {subsection}{\numberline {2.10.3}BNO055 Bosch Sensortec. Sensori inerziali e sensor fusion}{28}{subsection.2.10.3}%
-\contentsline {paragraph}{Accelerometro}{28}{paragraph*.51}%
-\contentsline {paragraph}{Giroscopio}{28}{paragraph*.52}%
-\contentsline {paragraph}{Magnetometro}{28}{paragraph*.53}%
-\contentsline {paragraph}{Sensor fusion}{28}{paragraph*.54}%
-\contentsline {subsection}{\numberline {2.10.4}BNO055 Bosch Sensortec. Modalità operative}{29}{subsection.2.10.4}%
-\contentsline {paragraph}{Modalità operative con Sensor Fusion (\textit {Fusion Modes})}{29}{paragraph*.56}%
-\contentsline {paragraph}{Modalità operative senza Sensor Fusion (\textit {Non-Fusion Modes})}{30}{paragraph*.57}%
-\contentsline {section}{\numberline {2.11}VL53L1X ST. Sensore Time-of-Flight per la misurazione a lunga distanza}{30}{section.2.11}%
-\contentsline {subsection}{\numberline {2.11.1}Il principio di misura di un sensore Time-of-Flight (ToF)}{30}{subsection.2.11.1}%
-\contentsline {subsection}{\numberline {2.11.2}VL53L1X STMicroelectronics. Caratteristiche fisiche}{31}{subsection.2.11.2}%
-\contentsline {subsection}{\numberline {2.11.3}VL53L1X STMicroelectronics. Caratteristiche tecniche}{31}{subsection.2.11.3}%
-\contentsline {paragraph}{Alimentazione}{31}{paragraph*.58}%
-\contentsline {paragraph}{Protocollo di comunicazione}{31}{paragraph*.59}%
-\contentsline {paragraph}{XSHUT e GPIO 1 (Interrupt)}{31}{paragraph*.60}%
-\contentsline {paragraph}{Field of View e Region of Interest}{32}{paragraph*.63}%
-\contentsline {paragraph}{Prestazioni di misura, Timing Budget e modalità operative di misura}{32}{paragraph*.65}%
-\contentsline {section}{\numberline {2.12}Schema dei collegamenti}{34}{section.2.12}%
-\contentsline {subsection}{\numberline {2.12.1}Tabelle dei collegamenti}{35}{subsection.2.12.1}%
-\contentsline {paragraph}{Collegamenti tra NUCLEO-H745ZI-Q e sensore VL53L1X}{35}{paragraph*.69}%
-\contentsline {paragraph}{Collegamenti tra NUCLEO-H745ZI-Q e sensore BNO055}{36}{paragraph*.71}%
-\contentsline {paragraph}{Collegamenti tra convertitori (DFRobot), servomotori e NUCLEO-H745ZI-Q}{36}{paragraph*.73}%
-\contentsline {paragraph}{Collegamenti tra Power Distribution Module, ESC e NUCLEO-H745ZI-Q}{37}{paragraph*.76}%
-\contentsline {chapter}{\numberline {3}Firmware}{38}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Architettura software \textit {event-driven}}{38}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Gestione del microcontrollore \textit {dual-core}}{39}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Organizzazione modulare del codice}{39}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Configurazione delle periferiche}{40}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Timer}{40}{subsection.3.4.1}%
-\contentsline {subsection}{\numberline {3.4.2}Periferiche di comunicazione}{41}{subsection.3.4.2}%
-\contentsline {section}{\numberline {3.5}Gestione dei sensori}{41}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}VL53L1X --- Acquisizione di quota}{41}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}BNO-055 --- Acquisizione dell'assetto}{42}{subsection.3.5.2}%
-\contentsline {section}{\numberline {3.6}Diagrammi di flusso}{42}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Diagramma di flusso del VL53L1X}{43}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Diagramma di flusso del BNO-055}{44}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}Diagramma di flusso del firmware complessivo}{45}{subsection.3.6.3}%
-\contentsline {section}{\numberline {3.7}Architettura di controllo a quattro PID}{46}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Decomposizione funzionale}{46}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}PID discreto adottato}{47}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {3.7.3}Saturazioni hardware e \textit {anti-windup}}{47}{subsection.3.7.3}%
-\contentsline {section}{\numberline {3.8}Protocollo di comunicazione seriale con MATLAB}{47}{section.3.8}%
-\contentsline {subsection}{\numberline {3.8.1}Comandi ricevuti dal firmware}{48}{subsection.3.8.1}%
-\contentsline {subsection}{\numberline {3.8.2}ACK e \textit {watchdog} di sicurezza}{48}{subsection.3.8.2}%
-\contentsline {section}{\numberline {3.9}\textit {Safe startup} e gestione delle anomalie}{48}{section.3.9}%
-\contentsline {chapter}{\numberline {4}Telemetria}{50}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{50}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{50}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{51}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{52}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit {uplink}: comandi}{52}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit {downlink}: telemetria}{53}{subsection.4.4.2}%
-\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{53}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{54}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{54}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{55}{subsection.4.6.2}%
-\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{55}{subsection.4.6.3}%
-\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{56}{subsection.4.6.4}%
-\contentsline {section}{\numberline {4.7}Profili di eccitazione}{57}{section.4.7}%
-\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{57}{subsection.4.7.1}%
-\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{58}{subsection.4.7.2}%
-\contentsline {subsection}{\numberline {4.7.3}Sequenze PRBS}{58}{subsection.4.7.3}%
-\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{60}{subsection.4.7.4}%
-\contentsline {section}{\numberline {4.8}Validazione del link telematico}{60}{section.4.8}%
-\contentsline {chapter}{\numberline {5}Identificazione del modello}{61}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Approccio data-driven}{61}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{61}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{63}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{64}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{66}{subsection.5.4.1}%
-\contentsline {section}{\numberline {5.5}Sintesi del controllore PIDF}{67}{section.5.5}%
-\contentsline {subsection}{\numberline {5.5.1}Architettura del controllore}{67}{subsection.5.5.1}%
-\contentsline {subsection}{\numberline {5.5.2}Sintesi tramite pidtune}{67}{subsection.5.5.2}%
-\contentsline {subsection}{\numberline {5.5.3}Discretizzazione per il firmware}{69}{subsection.5.5.3}%
-\contentsline {section}{\numberline {5.6}Guadagni finali e parametri PID}{69}{section.5.6}%
-\contentsline {section}{\numberline {5.7}Considerazioni sull'approccio black-box}{69}{section.5.7}%
-\contentsline {chapter}{\numberline {6}Simulazione 3D}{71}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{71}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{71}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{72}{subsection.6.1.2}%
-\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{72}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{73}{section.6.3}%
-\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{73}{subsection.6.3.1}%
-\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{73}{subsection.6.3.2}%
-\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{74}{subsection.6.3.3}%
-\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{74}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{76}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Risultati della simulazione}{76}{section.6.6}%
-\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{78}{section.6.7}%
-\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{78}{section.6.8}%
-\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{80}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{80}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{80}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{83}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{83}{subsection.7.1.3}%
-\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{83}{subsection.7.1.4}%
-\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{84}{subsection.7.1.5}%
-\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{84}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{84}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{85}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{85}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{86}{subsection.7.2.4}%
-\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{86}{section.7.3}%
+\contentsline {subsection}{\numberline {2.7.2}Turnigy Plush 40A. Risoluzione e controllo dei motori}{19}{subsection.2.7.2}%
+\contentsline {paragraph}{Attesa di un segnale di armamento valido}{20}{paragraph*.23}%
+\contentsline {paragraph}{Esito positivo dell'operazione di armamento}{20}{paragraph*.24}%
+\contentsline {paragraph}{Esito negativo dell'operazione di armamento}{20}{paragraph*.25}%
+\contentsline {section}{\numberline {2.8}APC 9x4.5. Eliche}{20}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}Caratteristiche fisiche}{20}{subsection.2.8.1}%
+\contentsline {section}{\numberline {2.9}Hitec HS-82MG Gear micro servo}{21}{section.2.9}%
+\contentsline {subsection}{\numberline {2.9.1}HS-82MG Hitec. Caratteristiche fisiche}{21}{subsection.2.9.1}%
+\contentsline {paragraph}{Coppia di stasi (\textit {Holding torque})}{22}{paragraph*.28}%
+\contentsline {paragraph}{Coppia di stallo (\textit {Stall torque})}{22}{paragraph*.29}%
+\contentsline {paragraph}{Velocità angolare}{22}{paragraph*.30}%
+\contentsline {paragraph}{Corrente operativa}{22}{paragraph*.31}%
+\contentsline {paragraph}{Corrente di stallo}{22}{paragraph*.32}%
+\contentsline {paragraph}{Corsa operativa}{22}{paragraph*.33}%
+\contentsline {subsection}{\numberline {2.9.2}HS-82MG Hitec. Caratteristiche tecniche e controllo}{23}{subsection.2.9.2}%
+\contentsline {paragraph}{Alimentazione}{23}{paragraph*.35}%
+\contentsline {paragraph}{Controllo}{23}{paragraph*.36}%
+\contentsline {section}{\numberline {2.10}BNO055 Bosch Sensortec. Unità di misura inerziale e magnetometro}{24}{section.2.10}%
+\contentsline {subsection}{\numberline {2.10.1}BNO055 Bosch Sensortec. Caratteristiche fisiche}{24}{subsection.2.10.1}%
+\contentsline {subsection}{\numberline {2.10.2}BNO055 Bosch Sensortec. Infrastruttura di alimentazione, comunicazione ed integrazione del sensore}{24}{subsection.2.10.2}%
+\contentsline {paragraph}{Alimentazione}{24}{paragraph*.38}%
+\contentsline {paragraph}{Protocollo di comunicazione}{25}{paragraph*.39}%
+\contentsline {subsection}{\numberline {2.10.3}BNO055 Bosch Sensortec. Sensori inerziali e sensor fusion}{25}{subsection.2.10.3}%
+\contentsline {paragraph}{Accelerometro}{26}{paragraph*.41}%
+\contentsline {paragraph}{Giroscopio}{26}{paragraph*.42}%
+\contentsline {paragraph}{Magnetometro}{26}{paragraph*.43}%
+\contentsline {paragraph}{Sensor fusion}{26}{paragraph*.44}%
+\contentsline {subsection}{\numberline {2.10.4}BNO055 Bosch Sensortec. Modalità operative}{27}{subsection.2.10.4}%
+\contentsline {paragraph}{Modalità operative con Sensor Fusion (\textit {Fusion Modes})}{27}{paragraph*.46}%
+\contentsline {paragraph}{Modalità operative senza Sensor Fusion (\textit {Non-Fusion Modes})}{27}{paragraph*.47}%
+\contentsline {section}{\numberline {2.11}VL53L1X ST. Sensore Time-of-Flight per la misurazione a lunga distanza}{28}{section.2.11}%
+\contentsline {subsection}{\numberline {2.11.1}Il principio di misura di un sensore Time-of-Flight (ToF)}{28}{subsection.2.11.1}%
+\contentsline {subsection}{\numberline {2.11.2}VL53L1X STMicroelectronics. Caratteristiche fisiche}{28}{subsection.2.11.2}%
+\contentsline {subsection}{\numberline {2.11.3}VL53L1X STMicroelectronics. Caratteristiche tecniche}{29}{subsection.2.11.3}%
+\contentsline {paragraph}{Alimentazione}{29}{paragraph*.48}%
+\contentsline {paragraph}{Protocollo di comunicazione}{29}{paragraph*.49}%
+\contentsline {paragraph}{XSHUT e GPIO 1 (Interrupt)}{29}{paragraph*.50}%
+\contentsline {paragraph}{Field of View e Region of Interest}{30}{paragraph*.53}%
+\contentsline {paragraph}{Prestazioni di misura, Timing Budget e modalità operative di misura}{30}{paragraph*.55}%
+\contentsline {section}{\numberline {2.12}Schema dei collegamenti}{31}{section.2.12}%
+\contentsline {subsection}{\numberline {2.12.1}Tabelle dei collegamenti}{32}{subsection.2.12.1}%
+\contentsline {paragraph}{Collegamenti tra NUCLEO-H745ZI-Q e sensore VL53L1X}{32}{paragraph*.59}%
+\contentsline {paragraph}{Collegamenti tra NUCLEO-H745ZI-Q e sensore BNO055}{33}{paragraph*.61}%
+\contentsline {paragraph}{Collegamenti tra convertitori (DFRobot), servomotori e NUCLEO-H745ZI-Q}{33}{paragraph*.63}%
+\contentsline {paragraph}{Collegamenti tra Power Distribution Module, ESC e NUCLEO-H745ZI-Q}{34}{paragraph*.66}%
+\contentsline {chapter}{\numberline {3}Firmware}{35}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Architettura software \textit {event-driven}}{35}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Gestione del microcontrollore \textit {dual-core}}{36}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Organizzazione modulare del codice}{36}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Configurazione delle periferiche}{37}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Timer}{37}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Periferiche di comunicazione}{38}{subsection.3.4.2}%
+\contentsline {section}{\numberline {3.5}Gestione dei sensori}{38}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}VL53L1X --- Acquisizione di quota}{38}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}BNO-055 --- Acquisizione dell'assetto}{39}{subsection.3.5.2}%
+\contentsline {section}{\numberline {3.6}Diagrammi di flusso}{39}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Diagramma di flusso del VL53L1X}{40}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Diagramma di flusso del BNO-055}{41}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Diagramma di flusso del firmware complessivo}{42}{subsection.3.6.3}%
+\contentsline {section}{\numberline {3.7}Architettura di controllo a quattro PID}{43}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Decomposizione funzionale}{43}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Implementazione nel firmware}{44}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Saturazioni hardware e \textit {anti-windup}}{44}{subsection.3.7.3}%
+\contentsline {section}{\numberline {3.8}Protocollo di comunicazione seriale con MATLAB}{44}{section.3.8}%
+\contentsline {subsection}{\numberline {3.8.1}Comandi ricevuti dal firmware}{45}{subsection.3.8.1}%
+\contentsline {subsection}{\numberline {3.8.2}ACK e \textit {watchdog} di sicurezza}{45}{subsection.3.8.2}%
+\contentsline {section}{\numberline {3.9}\textit {Safe startup} e gestione delle anomalie}{46}{section.3.9}%
+\contentsline {chapter}{\numberline {4}Telemetria}{47}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{47}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{47}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{48}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{49}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit {uplink}: comandi}{49}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit {downlink}: telemetria}{50}{subsection.4.4.2}%
+\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{51}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{51}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{52}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{52}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{53}{subsection.4.6.3}%
+\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{54}{subsection.4.6.4}%
+\contentsline {section}{\numberline {4.7}Profili di eccitazione}{54}{section.4.7}%
+\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{55}{subsection.4.7.1}%
+\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{55}{subsection.4.7.2}%
+\contentsline {subsection}{\numberline {4.7.3}Sequenze pseudo-casuali multilivello}{56}{subsection.4.7.3}%
+\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{57}{subsection.4.7.4}%
+\contentsline {section}{\numberline {4.8}Validazione del link telematico}{57}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Identificazione del modello}{59}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Approccio data-driven}{59}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{59}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{61}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{62}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{64}{subsection.5.4.1}%
+\contentsline {section}{\numberline {5.5}Sintesi del controllore PIDF}{64}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Architettura del controllore}{64}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Sintesi tramite pidtune}{65}{subsection.5.5.2}%
+\contentsline {subsection}{\numberline {5.5.3}Discretizzazione per il firmware}{66}{subsection.5.5.3}%
+\contentsline {section}{\numberline {5.6}Guadagni finali e parametri PID}{67}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Considerazioni sull'approccio black-box}{67}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Simulazione 3D}{69}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{69}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{69}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{70}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{70}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{71}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{71}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{71}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{72}{subsection.6.3.3}%
+\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{72}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{74}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Risultati della simulazione}{74}{section.6.6}%
+\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{76}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{77}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{78}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{78}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{78}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{81}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{81}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{81}{subsection.7.1.4}%
+\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{82}{subsection.7.1.5}%
+\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{82}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{82}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{83}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{83}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{84}{subsection.7.2.4}%
+\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{84}{section.7.3}%

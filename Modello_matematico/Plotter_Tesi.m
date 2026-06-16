@@ -15,11 +15,9 @@ if ischar(files)
     files = {files}; 
 end
 
-% --- MODIFICA CHIAVE: CREAZIONE DI UN'UNICA FINESTRA PRINCIPALE ---
-% Creiamo la finestra principale una sola volta, fuori dal ciclo
+
 fig_principale = figure('Name', 'Analisi Log Telemetria', 'Position', [100, 100, 1200, 800]);
 
-% Creiamo il gruppo di schede (Tab Group) che conterrà tutti i test
 gruppo_schede = uitabgroup(fig_principale); 
 
 % 2. CICLO SU TUTTI I FILE SELEZIONATI
@@ -54,10 +52,6 @@ for i = 1:length(files)
     % Rimuovi l'estensione .csv per i titoli
     titolo_pulito = strrep(files{i}, '.csv', '');
     titolo_pulito = strrep(titolo_pulito, '_', ' '); % Rimuove gli underscore
-    
-    % --- MODIFICA CHIAVE: CREAZIONE DELLA SCHEDA ---
-    % Invece di creare una nuova "figure", creiamo una nuova scheda (uitab) 
-    % e usiamo un nome abbreviato per l'etichetta (utile se hai 20 test)
     scheda_corrente = uitab(gruppo_schede, 'Title', sprintf('Test %d', i));
     
     % --- SUBPLOT 1: MOTORI (THROTTLE) ---

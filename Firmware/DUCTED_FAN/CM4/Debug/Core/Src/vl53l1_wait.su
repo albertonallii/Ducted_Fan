@@ -1,0 +1,9 @@
+../Core/Src/vl53l1_wait.c:88:14:VL53L1_wait_for_boot_completion	32	static
+../Core/Src/vl53l1_wait.c:136:14:VL53L1_wait_for_firmware_ready	32	static
+../Core/Src/vl53l1_wait.c:201:14:VL53L1_wait_for_range_completion	32	static
+../Core/Src/vl53l1_wait.c:248:14:VL53L1_wait_for_test_completion	32	static
+../Core/Src/vl53l1_wait.c:297:14:VL53L1_is_boot_complete	24	static
+../Core/Src/vl53l1_wait.c:341:14:VL53L1_is_firmware_ready	24	static
+../Core/Src/vl53l1_wait.c:366:14:VL53L1_is_new_data_ready	32	static
+../Core/Src/vl53l1_wait.c:418:14:VL53L1_poll_for_firmware_ready	40	static
+../Core/Src/vl53l1_wait.c:476:14:VL53L1_poll_for_range_completion	40	static

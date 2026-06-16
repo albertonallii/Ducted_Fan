@@ -845,208 +845,245 @@
 	
 	\textit{Nota}: il dispositivo che riceve il segnale PWM deve condividere lo stesso riferimento di massa del dispositivo che genera tale segnale.
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	%                         CAPITOLO 3 - FIRMWARE
-	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\chapter{Firmware}
-	\label{ch:firmware}
-	
-	Il presente capitolo illustra l'architettura software sviluppata per la gestione e il controllo del \textit{Double Propeller Ducted-Fan (DPDF)}. Il firmware è stato concepito non come un sistema di controllo a sé stante, ma come componente di una pipeline più ampia che comprende l'acquisizione strutturata dei dati, l'identificazione del modello dinamico in ambiente MATLAB e la successiva validazione dei regolatori sul prototipo fisico. Per questa ragione, il microcontrollore non si limita a calcolare l'azione di controllo: deve allo stesso tempo trasmettere al PC ospite un flusso di telemetria stabile, ricevere comandi in tempo reale e garantire la sicurezza del sistema in ogni fase operativa.\\
-	Per soddisfare questi requisiti, il firmware è stato strutturato secondo un'architettura modulare ed \textit{event-driven} che garantisce tre proprietà fondamentali:
-	\begin{enumerate}
-		\item un \textbf{campionamento deterministico} delle grandezze di stato (angoli di Eulero forniti dalla IMU \textit{BNO-055} e quota fornita dal ToF \textit{VL53L1X}), con jitter di fase contenuto;
-		\item un \textbf{sistema di telemetria ad alta frequenza}, capace di trasmettere a 50 [Hz] su porta seriale a 230\,400 [baud] lo stato completo del sistema --- inclusi angoli, quota, comandi PWM applicati agli attuatori, contatori di errore UART e \textit{flag} di stato;
-		\item un'\textbf{infrastruttura di controllo flessibile}, predisposta per ricevere dall'esterno sia i comandi di prova durante la fase di identificazione, sia i guadagni dei PID derivati dalla simulazione per la successiva validazione sperimentale.
-	\end{enumerate}
-	Nelle sezioni che seguono vengono descritte, in ordine, l'architettura software complessiva, la gestione del microcontrollore \textit{dual-core}, l'organizzazione modulare del codice, la configurazione delle periferiche, la gestione dei sensori, i diagrammi di flusso del sistema, l'architettura di controllo a quattro PID e il protocollo di comunicazione seriale con MATLAB.
-	
-	%--------------------------------------------------------------
-	\section{Architettura software \textit{event-driven}}
-	\label{sec:architettura_software}
-	
-	L'infrastruttura firmware sviluppata per il \textit{DPDF} si fonda su un'architettura \textit{event-driven}, ovvero guidata dagli eventi temporali e hardware. A differenza dei paradigmi puramente sequenziali, basati sul \textit{polling} continuo dei sensori, l'architettura adottata fa sì che l'unità di calcolo intervenga esclusivamente quando si verifica un evento rilevante: la disponibilità di una nuova misura dal sensore di quota, la scadenza del timer che governa il ciclo di assetto, oppure l'arrivo di un comando dalla porta seriale.\\
-	Per garantire questa reattività, le \textit{Interrupt Service Routine (ISR)} associate a \textit{timer} e periferiche sono state mantenute estremamente leggere. Il loro unico compito è quello di alzare una \textit{flag} logica di attivazione (ad esempio \texttt{flag\_int\_servo\_control = true}), senza eseguire calcoli o accessi a periferiche che potrebbero protrarne la durata. L'elaborazione vera e propria --- acquisizione dati via $I^{2}C$, filtraggio, calcolo dei PID e aggiornamento dei registri PWM --- viene invece eseguita nel ciclo principale \texttt{while(1)}, che monitora costantemente lo stato delle \textit{flag} ed esegue i blocchi computazionali pesanti solo quando il rispettivo sottosistema lo richiede.\\
-	Questa separazione tra \textit{eventi} (gestiti in ISR) ed \textit{elaborazione} (gestita nel \textit{main loop}) presenta tre vantaggi concreti per il presente progetto. In primo luogo, riduce la latenza di risposta agli eventi più critici, perché le ISR completano in pochi microsecondi e lasciano il core libero. In secondo luogo, evita situazioni di \textit{race condition} sui dati condivisi, perché l'elaborazione avviene sempre nel contesto sequenziale del \textit{main loop}. Infine, rende il sistema più facilmente verificabile: ogni evento corrisponde a una \textit{flag}, ogni \textit{flag} a un blocco di codice ben identificabile, e l'ordine di esecuzione è esplicito.
-	
-	%--------------------------------------------------------------
-	\section{Gestione del microcontrollore \textit{dual-core}}
-	\label{sec:dual_core}
-	
-	Il microcontrollore \textit{STM32H745ZI-TQ6}, descritto nel Capitolo~\ref{ch:hardware}, è caratterizzato da un'architettura \textit{dual-core} che integra un processore \textit{Arm Cortex-M7} e un coprocessore \textit{Arm Cortex-M4}. Sebbene l'intera logica di controllo sia eseguita dal \textit{Cortex-M4}, anche il \textit{Cortex-M7} riveste un ruolo essenziale nella fase di avvio del sistema.\\
-	Per ragioni architetturali interne al microcontrollore, la configurazione del clock e l'inizializzazione della \textit{Power Domain} principale sono di esclusiva competenza del \textit{Cortex-M7}, in quanto core primario. Il \textit{Cortex-M4} resta dunque in attesa, in modalità a basso consumo (\textit{Wait For Event, WFE}), fino a quando il \textit{Cortex-M7} non gli segnala il completamento di tale configurazione tramite un \textit{Hardware Semaphore (HSEM)}. Solo dopo aver ricevuto questo segnale, il \textit{Cortex-M4} esce dallo stato di attesa e procede con l'inizializzazione delle proprie periferiche e con l'avvio del \textit{main loop} di controllo.\\
-	Una conseguenza pratica di questa architettura, di particolare rilevanza in fase di sviluppo, riguarda la procedura di \textit{flashing} del firmware. Il binario destinato al \textit{Cortex-M7} deve essere caricato \textit{prima} di quello destinato al \textit{Cortex-M4}: in caso contrario, il \textit{Cortex-M4} rimane indefinitamente bloccato in attesa del segnale \textit{HSEM} che non verrà mai generato, e il sistema risulta apparentemente non operativo. L'ambiente di sviluppo \textit{STM32CubeIDE} consente di gestire entrambi i target all'interno dello stesso progetto, garantendo la corretta sequenza di programmazione.
-	
-	%--------------------------------------------------------------
-	\section{Organizzazione modulare del codice}
-	\label{sec:organizzazione_codice}
-	
-	Per favorire la leggibilità, la manutenibilità e la verificabilità del firmware, il codice sorgente è stato organizzato in moduli funzionalmente coesi. Ogni modulo è composto da un \textit{header file} (\texttt{.h}), che dichiara l'interfaccia pubblica del modulo, e da un \textit{source file} (\texttt{.c}), che ne contiene l'implementazione. Le configurazioni di basso livello generate da \textit{STM32CubeMX} sono state mantenute separate dai moduli applicativi, in modo da non appesantire il file \texttt{main.c} con dettagli implementativi delle periferiche.\\
-	I principali moduli applicativi sviluppati sono i seguenti:
-	\begin{itemize}
-		\item \textbf{\texttt{main.c}} --- contiene la sequenza di inizializzazione del sistema, il \textit{safe startup}, il \textit{main loop} basato sulle \textit{flag} di evento e la chiamata coordinata agli altri moduli.
-		\item \textbf{\texttt{config.h} e \texttt{config.c}} --- raccolgono in un unico punto i parametri numerici che descrivono il comportamento ammissibile del sistema: limiti PWM per motori e servomotori, posizione neutra dei servo, fattori di conversione angolo--PWM, parametri di sicurezza, riferimenti e guadagni dei quattro PID. Centralizzare queste costanti rende esplicito il confine tra legge di controllo e limiti imposti dall'hardware reale, ed evita la dispersione di valori magici nel codice.
-		\item \textbf{\texttt{pwm.c}} --- incapsula la gestione dei segnali PWM destinati a motori (\texttt{TIM4-CH2}, \texttt{TIM4-CH3}) e servomotori (\texttt{TIM2-CH1}, \texttt{TIM2-CH2}). Espone funzioni di alto livello per impostare un comando in unità fisiche (angolo flap, valore CCR motore), che internamente effettuano la saturazione hardware e l'aggiornamento dei \textit{Capture-Compare Register} del rispettivo \textit{timer}.
-		\item \textbf{\texttt{pid.c}} --- implementa un'unica classe di regolatore PID a tempo discreto, di cui sono istanziate quattro versioni indipendenti --- per quota, \textit{roll}, \textit{pitch} e \textit{yaw} --- ciascuna con i propri guadagni e il proprio stato interno (termine integrale accumulato, errore precedente, derivata filtrata).
-		\item \textbf{\texttt{imu.c}} --- costituisce un livello di astrazione sopra il \textit{driver} ufficiale Bosch del sensore \textit{BNO-055}. Si occupa dell'inizializzazione, dell'impostazione della modalità operativa, della lettura periodica degli angoli di Eulero e della loro conversione in centesimi di grado per la trasmissione via UART.
-		\item \textbf{\texttt{altimetro.h}} --- definisce le costanti fisiche e i parametri di filtraggio impiegati nell'elaborazione della misura di quota fornita dal \textit{VL53L1X}, inclusi i parametri della compensazione geometrica rispetto all'inclinazione del velivolo.
-		\item \textbf{\texttt{cmd\_parser.c} e \texttt{cmd\_parser.h}} --- implementano la macchina a stati che riceve, valida ed esegue i comandi inviati dal PC sulla porta seriale, gestendo sia i comandi periodici di attuazione (\texttt{CMD,top,bottom,roll,pitch}) sia i comandi di stato (\texttt{MOTOR\_ON}, \texttt{MOTOR\_OFF}, \texttt{KILL}).
-	\end{itemize}
-	
-	Questa suddivisione consente, in fase di sviluppo, di intervenire su un modulo alla volta riducendo il rischio di introdurre regressioni in funzionalità già validate. Le modifiche al firmware sono state pertanto effettuate come modifiche puntuali e mirate, conservando per quanto possibile la struttura e le interfacce esistenti.
-	
-	%--------------------------------------------------------------
-	\section{Configurazione delle periferiche}
-	\label{sec:periferiche}
-	
-	La configurazione hardware del \textit{Cortex-M4} è stata generata tramite \textit{STM32CubeMX} a partire dal file di progetto \texttt{.ioc}, ed è stata mantenuta coerente con i collegamenti pin-to-pin descritti nel Capitolo~\ref{ch:hardware}. Si descrivono di seguito le periferiche principali impiegate dal firmware.
-	
-	\subsection{Timer}
-	I quattro \textit{timer} impiegati svolgono ruoli funzionalmente distinti:
-	\begin{itemize}
-		\item \textbf{TIM2}: configurato in modalità \textit{PWM Generation}, genera sui canali CH1 e CH2 i segnali di controllo dei servomotori di \textit{roll} e \textit{pitch}. Frequenza di funzionamento pari a \textbf{50 [Hz]}, coerente con le specifiche dei servo \textit{HS-82MG}.
-		\item \textbf{TIM4}: anch'esso in modalità \textit{PWM Generation}, genera sui canali CH2 e CH3 i segnali destinati agli ESC \textit{Turnigy Plush 40A} che pilotano i due motori \textit{brushless}. Frequenza di 50 [Hz] richiesta dagli ESC stessi.
-		\item \textbf{TIM6}: impiegato per la sequenza temporizzata di \textit{safe startup} (descritta nella Sezione~\ref{sec:safe_startup}) e per il pilotaggio diagnostico dei LED integrati sulla scheda.
-		\item \textbf{TIM7}: utilizzato come \textit{timebase} per la generazione periodica dell'\textit{interrupt} che innesca l'aggiornamento del ramo di controllo IMU--servomotori. La sua scadenza alza la \textit{flag} \texttt{flag\_int\_servo\_control}, che il \textit{main loop} intercetta per eseguire la lettura del BNO-055, il calcolo dei PID di assetto e l'aggiornamento del PWM dei servo.
-	\end{itemize}
-	I valori di \textit{Prescaler} e \textit{Auto-Reload Register (ARR)} di ciascun \textit{timer} sono stati calcolati a partire dalla frequenza di clock del bus APB1 (configurata a 75 [MHz]) secondo la relazione standard:
-	\begin{equation}
-		f_{PWM} = \frac{f_{clk}}{(\textit{Prescaler}+1) \cdot (\textit{ARR}+1)}
-		\label{eq:freq_pwm}
-	\end{equation}
-	
-	\subsection{Periferiche di comunicazione}
-	Il firmware utilizza due canali distinti per la comunicazione:
-	\begin{itemize}
-		\item \textbf{USART3}: configurata in modalità \textit{full-duplex} asincrona a \textbf{230\,400 [baud]} con \textbf{8 bit di dato, 1 bit di stop, nessuna parità}. Questo canale costituisce il collegamento bidirezionale con il PC ospite: in trasmissione veicola la telemetria a 50 [Hz], in ricezione raccoglie i comandi inviati da MATLAB. La scelta di un \textit{baud rate} elevato è motivata dalla necessità di non saturare il canale alla frequenza di telemetria adottata, considerando che ogni pacchetto è composto da una stringa CSV di lunghezza variabile.
-		\item \textbf{$I^{2}C1$ e $I^{2}C2$}: configurati in \textit{Fast Mode} a \textbf{400 [kHz]}, dedicati rispettivamente alla comunicazione con il sensore \textit{BNO-055} e con il sensore \textit{VL53L1X}. L'impiego di due bus distinti, anziché di un unico bus condiviso, evita conflitti di indirizzo e permette di gestire i due sensori in modo completamente indipendente.
-	\end{itemize}
-	La gestione degli \textit{interrupt} associati a queste periferiche è affidata al \textit{Nested Vectored Interrupt Controller (NVIC)}, configurato con livelli di priorità coerenti con la criticità temporale di ciascuna sorgente di evento.
-	
-	%--------------------------------------------------------------
-	\section{Gestione dei sensori}
-	\label{sec:gestione_sensori}
-	
-	\subsection{VL53L1X --- Acquisizione di quota}
-	L'acquisizione della quota avviene tramite il sensore \textit{Time-of-Flight VL53L1X}, descritto nel Capitolo~\ref{ch:hardware}. Il firmware utilizza il \textit{driver} ufficiale fornito da \textit{STMicroelectronics}, integrato attraverso un sottile livello di adattamento alle funzioni HAL.\\
-	La sequenza di inizializzazione del sensore prevede: il rilascio del segnale \texttt{XSHUT}, il caricamento del firmware interno tramite \texttt{VL53L1\_WaitDeviceBooted()}, l'inizializzazione tramite \texttt{VL53L1\_DataInit()}, l'impostazione della modalità \textit{Short ranging} e del \textit{Timing Budget} a \textbf{33 [ms]}, e infine l'avvio della misura continua tramite \texttt{VL53L1\_StartMeasurement()}.\\
-	Per non bloccare il microcontrollore durante il tempo di integrazione ottica, l'acquisizione segue un approccio basato sulla disponibilità del dato. Ad ogni iterazione del ramo motori, il firmware interroga il sensore tramite \texttt{VL53L1\_GetMeasurementDataReady()}: se un nuovo dato è disponibile, la misura viene letta con \texttt{VL53L1\_GetRangingMeasurementData()} e l'\textit{interrupt} interno del sensore viene azzerato con \texttt{VL53L1\_ClearInterruptAndStartMeasurement()}, predisponendo il sensore per la lettura successiva. Se invece il dato non è ancora disponibile, il firmware prosegue senza bloccarsi, lasciando al sensore il tempo di completare l'integrazione.\\
-	La misura grezza così ottenuta viene successivamente compensata rispetto all'inclinazione istantanea del velivolo, in modo da fornire al regolatore di quota una stima coerente con la variabile fisica realmente controllata --- la coordinata verticale --- piuttosto che con la distanza grezza misurata dal sensore lungo il proprio asse.
-	
-	\subsection{BNO-055 --- Acquisizione dell'assetto}
-	Il \textit{BNO-055} è responsabile del monitoraggio dell'assetto tridimensionale del velivolo. Il firmware utilizza il \textit{driver} platform-agnostic fornito da \textit{Bosch Sensortec}, adattato al contesto HAL per le funzioni di comunicazione $I^{2}C$, di temporizzazione e di gestione del \textit{reset}.\\
-	La sequenza di inizializzazione del sensore comprende: la verifica dell'identità del dispositivo tramite la lettura del registro \texttt{CHIP\_ID}, l'impostazione delle unità di misura (gradi per gli angoli, $m/s^{2}$ per le accelerazioni), e l'impostazione della modalità operativa. Come anticipato nel Capitolo~\ref{ch:hardware}, è stata scelta la modalità di \textit{fusion} \textbf{NDOF}, in cui l'algoritmo proprietario del sensore combina i dati provenienti da accelerometro, giroscopio e magnetometro per restituire una stima stabile e robusta dell'orientamento assoluto.\\
-	Subito dopo l'inizializzazione, e prima dell'avvio del ciclo di controllo, il firmware acquisisce un campione di \textit{posa iniziale} tramite la funzione \texttt{DPDF\_BNO055\_firmware\_read\_init()}, che memorizza gli angoli di Eulero correnti come riferimento. Tutte le letture successive vengono espresse come scostamento rispetto a questa posa iniziale: in questo modo i PID di assetto lavorano su angoli \textit{relativi} alla configurazione di equilibrio meccanico in cui il drone si trova all'accensione, evitando la dipendenza dall'orientamento magnetico assoluto e semplificando il confronto con la simulazione.\\
-	Le letture periodiche degli angoli avvengono nel ramo IMU--servo a 100 [Hz], frequenza coerente con la massima banda passante del \textit{sensor fusion} interno al BNO-055 in modalità NDOF. I valori vengono mantenuti internamente in centesimi di grado, formato che consente di trasmettere informazione angolare con precisione di $0.01\degree$ utilizzando soli interi a 16 bit nella stringa di telemetria.
-	
-	%--------------------------------------------------------------
-	\section{Diagrammi di flusso}
-	\label{sec:diagrammi_flusso}
-	
-	Per illustrare in modo sintetico la logica decisionale e le dipendenze temporali dei diversi \textit{task} del firmware, vengono di seguito presentati tre diagrammi di flusso: due dedicati alla gestione dei singoli sensori, e uno che sintetizza l'esecuzione complessiva del firmware.
-	
-	\subsection{Diagramma di flusso del VL53L1X}
-	Il diagramma di Figura~\ref{fig:flow_vl53l1x} riassume la sequenza di inizializzazione e di acquisizione del sensore di quota. Il flusso si conclude con l'attivazione della modalità di misura continua, dopodiché il \textit{main loop} interroga periodicamente la disponibilità del dato senza bloccarsi.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.4\textwidth]{figures/03_firmware/flow_vl53l1x.png}
-		\caption{Diagramma di flusso del sensore VL53L1X}
-		\label{fig:flow_vl53l1x}
-	\end{figure}
-	
-	\subsection{Diagramma di flusso del BNO-055}
-	Il diagramma di Figura~\ref{fig:flow_bno055} illustra la sequenza di astrazione dell'API Bosch. Particolarmente rilevante è il blocco dedicato all'acquisizione della posa iniziale (\texttt{DPDF\_BNO055\_firmware\_read\_init}), che fissa il sistema di riferimento angolare rispetto al quale tutte le misure successive saranno espresse.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.35\textwidth]{figures/03_firmware/flow_bno055.png}
-		\caption{Diagramma di flusso del sensore BNO-055}
-		\label{fig:flow_bno055}
-	\end{figure}
-	
-	\subsection{Diagramma di flusso del firmware complessivo}
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.75\textwidth] {figures/03_firmware/flow_complessivo.png}
-		\caption{Diagramma di flusso complessivo del firmware}
-		\label{fig:flow_complessivo}
-	\end{figure}
-	
-		Il diagramma di Figura~\ref{fig:flow_complessivo} sintetizza la cooperazione tra i moduli software. Il flusso si articola in due macro-fasi:
-	\begin{enumerate}
-		\item \textbf{Inizializzazione e \textit{safe startup}}: il sistema attende un \textit{trigger} esterno di sicurezza (\textit{User button}) prima di avviare l'alimentazione ai sensori e di generare i segnali di armamento per gli ESC dei motori.
-		\item \textbf{\textit{Main loop} di controllo}: il ciclo infinito gestisce due percorsi asincroni e indipendenti. Il primo, attivato dalla scadenza di \texttt{TIM7}, gestisce la correzione di assetto tramite i servomotori (\textit{roll} e \textit{pitch}) e la correzione differenziale di \textit{yaw} sui motori. Il secondo, attivato dalla disponibilità di un nuovo dato dal ToF, gestisce la portanza verticale dei motori principali. La separazione di questi due percorsi assicura che un eventuale ritardo di un sensore non comprometta la reattività dell'intero sistema.
-	\end{enumerate}
-	%--------------------------------------------------------------
-	
-
-
-	\section{Architettura di controllo a quattro PID}
-	\label{sec:architettura_controllo}
-
-	L'architettura di controllo del \textit{DPDF} è organizzata in \textbf{tre catene logiche distinte}, ciascuna dedicata a una specifica dinamica del velivolo. A livello implementativo, queste tre catene istanziano complessivamente \textbf{quattro regolatori PID} indipendenti, perché il ramo di assetto richiede due regolatori separati per \textit{roll} e \textit{pitch}. La presente sezione descrive esclusivamente gli aspetti implementativi dei regolatori all'interno del firmware; la forma matematica del controllore PIDF, la procedura di sintesi dei guadagni a partire dai modelli identificati e la loro discretizzazione sono trattate nel Capitolo~5.
-
-	\subsection{Decomposizione funzionale}
-	La scomposizione adottata è la seguente:
-	\begin{itemize}
-	\item \textbf{Quota}: il regolatore confronta il riferimento verticale $z_{ref}$ con la misura del \textit{VL53L1X} compensata rispetto al \textit{tilt}, e produce un comando PWM medio comune ai due motori. La dinamica di quota dipende infatti dalla spinta totale, che è governata dalla media dei due PWM motore.
-	\item \textbf{Assetto \textit{roll}/\textit{pitch}}: due regolatori distinti, alimentati dalle componenti corrispondenti dell'angolo letto dal BNO-055, producono comandi angolari per i due \textit{flap}. Questi comandi vengono successivamente convertiti in PWM per i servomotori \textit{HS-82MG} tramite il fattore \texttt{CCR\_PER\_DEGREE} definito in \texttt{config.h}.
-	\item \textbf{Yaw}: il regolatore confronta l'imbardata letta dal BNO-055 (sempre relativa alla posa iniziale) con un riferimento nullo, e produce un comando \textbf{differenziale} sui due motori. Il \textit{mixer} sottrae questo comando dal PWM del motore inferiore e lo somma a quello del motore superiore (o viceversa, in base al verso di rotazione delle eliche), così che la spinta totale resti invariata mentre cambia il bilanciamento di coppia tra i due gruppi propulsivi.
-	\end{itemize}
-	Questa decomposizione rende esplicito il significato fisico di ciascun comando: la spinta media governa la quota, i flap governano l'assetto, e il differenziale di coppia governa l'imbardata. I tre rami operano su variabili fisicamente disaccoppiate, condizione necessaria per poterli identificare e tarare separatamente come SISO --- procedura descritta nel Capitolo~5.
-
-	\subsection{Implementazione nel firmware}
-	Il modulo \texttt{pid.c} espone un'unica struttura dati che rappresenta un regolatore PIDF generico, di cui sono istanziate quattro copie indipendenti all'interno del firmware --- una per ciascuna delle catene di controllo descritte sopra. Ogni istanza mantiene il proprio stato interno (termine integrale accumulato, errore al passo precedente, derivata filtrata) e riceve dall'esterno i propri guadagni $K_p$, $K_i$, $K_d$ e il coefficiente del filtro derivativo, letti dalla struttura \texttt{FLIGHT\_CFG} definita in \texttt{config.c}. Tale organizzazione consente di modificare i parametri di un singolo regolatore senza ricompilare il modulo \texttt{pid.c} e mantiene separato il \emph{contenuto} della legge di controllo dalla sua \emph{esecuzione}.
-
-	I quattro regolatori sono eseguiti in due rami temporali distinti del \textit{main loop}:
-	\begin{itemize}
-	\item I PID di \textit{roll}, \textit{pitch} e \textit{yaw} sono aggiornati nel ramo IMU/servo, attivato dalla scadenza periodica di TIM7 alla frequenza nominale di \textbf{50 [Hz]} ($T_s = 20$ [ms]), coerente con la cadenza di trasmissione della telemetria descritta nel Capitolo~4 e con la frequenza alla quale è stata effettuata l'identificazione del modello nel Capitolo~5.
-	\item Il PID di quota è aggiornato nel ramo ToF, attivato dalla disponibilità di una nuova misura dal \textit{VL53L1X}, con cadenza coerente con il \textit{Timing Budget} di 33 [ms] del sensore.
-	\end{itemize}
-	La separazione tra i due rami garantisce che un eventuale ritardo nella lettura del ToF non comprometta la reattività del controllo d'assetto, e viceversa.
-
-	\subsection{Saturazioni hardware e \textit{anti-windup}}
-	Il comando grezzo $u_{raw}[k]$ generato da ciascun regolatore non può essere applicato direttamente all'attuatore: motori e servomotori operano entro intervalli finiti e fissi, definiti come costanti in \texttt{config.h} (\texttt{UPPER\_LIMIT\_MOTOR}, \texttt{LOWER\_LIMIT\_MOTOR}, \texttt{UPPER\_LIMIT\_SERVO}, \texttt{LOWER\_LIMIT\_SERVO}). Il firmware effettua dunque una saturazione esplicita prima di scrivere il valore nel \textit{Capture-Compare Register} del relativo \textit{timer}:
-	\begin{equation}
-	u[k] = \mathrm{clamp}\bigl(u_{raw}[k], u_{min}, u_{max}\bigr).
-	\end{equation}
-	Per evitare il fenomeno dell'\textit{integral windup} --- ovvero l'accumulo indefinito del termine integrale quando l'attuatore è saturato e non riesce a ridurre l'errore --- è stata implementata la tecnica del \textit{conditional integration} (o \textit{integrator clamping}): l'aggiornamento del termine integrale viene sospeso quando si verificano contemporaneamente due condizioni, ovvero che l'uscita grezza superi i limiti di saturazione e che il segno dell'errore sia tale da spingere ulteriormente l'integrale nella stessa direzione della saturazione. In questo modo l'integrale può ancora decrescere (o crescere) quando l'errore cambia segno, ma non può accumularsi inutilmente durante una saturazione prolungata. Questa scelta, semplice ma efficace, evita le sovraelongazioni che si verificherebbero al rientro dalla saturazione, fenomeno particolarmente indesiderabile in un sistema in cui la dinamica meccanica è già intrinsecamente lenta.
-
-
-	
-	%--------------------------------------------------------------
-	\section{Protocollo di comunicazione seriale con MATLAB}
-	\label{sec:protocollo_seriale}
-	
-	Il firmware espone verso il PC ospite un protocollo testuale bidirezionale sulla porta seriale USART3 a 230\,400 [baud]. Il protocollo è stato progettato per essere semplice da analizzare lato MATLAB, robusto rispetto a perdite occasionali di byte, e tracciabile in fase di \textit{debug} --- requisiti tipici di una piattaforma di acquisizione dati sperimentale.\\
-	Il modulo \texttt{cmd\_parser.c} implementa la macchina a stati che gestisce la ricezione dei comandi, mentre la trasmissione della telemetria è gestita direttamente nel \textit{main loop} dopo ogni aggiornamento del ramo IMU/servo. La descrizione dettagliata del formato di telemetria e delle modalità di acquisizione lato PC è rimandata al Capitolo~\ref{ch:telemetria}; in questa sezione vengono illustrati i comandi che il firmware accetta in ricezione e le relative risposte di conferma.
-	
-	\subsection{Comandi ricevuti dal firmware}
-	Il firmware riconosce quattro comandi distinti, terminati dal carattere di nuova riga (\texttt{LF}):
-	\begin{itemize}
-		\item \texttt{CMD,top,bottom,roll,pitch} --- comando di attuazione, accettato esclusivamente quando i motori sono nello stato \textit{armato}. I quattro campi numerici rappresentano, nell'ordine: PWM del motore superiore, PWM del motore inferiore, PWM del servo di \textit{roll}, PWM del servo di \textit{pitch}. Tutti i valori sono espressi in unità CCR (\textit{Capture-Compare Register}) e vengono saturati in lettura entro i limiti hardware definiti in \texttt{config.h}.
-		\item \texttt{MOTOR\_ON} --- richiede al firmware di passare dallo stato \textit{disarmato} allo stato \textit{armato}. In risposta, il firmware abilita la generazione dei segnali PWM per i motori, avvia il \textit{watchdog} di sicurezza e risponde con \texttt{ACK\_ON}.
-		\item \texttt{MOTOR\_OFF} --- richiede il ritorno allo stato \textit{disarmato}. Il firmware forza i motori al PWM minimo, risponde con \texttt{ACK\_OFF} e disabilita l'esecuzione dei comandi \texttt{CMD} successivi fino al prossimo \texttt{MOTOR\_ON}.
-		\item \texttt{KILL} --- comando di emergenza che ferma immediatamente i motori, indipendentemente dallo stato corrente, e attiva un \textit{latch} di sicurezza che può essere resettato solo da un successivo \texttt{MOTOR\_OFF}. Il firmware risponde con \texttt{ACK\_KILL}.
-	\end{itemize}
-	Qualsiasi linea ricevuta che non corrisponda a uno di questi quattro formati genera una risposta \texttt{ACK\_ERR}, utile lato PC per individuare rapidamente errori di sintassi nel canale.
-	
-	\subsection{ACK e \textit{watchdog} di sicurezza}
-	Il sistema di \textit{Acknowledgement} svolge due funzioni complementari. La prima è confermare al PC che il firmware ha effettivamente ricevuto ed eseguito il comando, evitando le ambiguità tipiche dei protocolli \textit{fire-and-forget}. La seconda è permettere al PC di sincronizzarsi con lo stato interno del firmware: ad esempio, prima di iniziare una sequenza di eccitazione, lo \textit{script} MATLAB attende esplicitamente \texttt{ACK\_ON} prima di inviare il primo \texttt{CMD}.\\
-	A protezione del sistema è inoltre implementato un \textit{watchdog} di comunicazione: una volta entrato nello stato \textit{armato}, il firmware si aspetta di ricevere un nuovo \texttt{CMD} entro \textbf{200 [ms]}. Qualora questo intervallo venga superato senza ricevere comandi --- ad esempio per la caduta del collegamento USB o per un \textit{freeze} dello \textit{script} MATLAB --- il firmware forza autonomamente i motori al PWM minimo e ritorna allo stato \textit{disarmato}, garantendo che il drone non resti accidentalmente in funzione senza supervisione. Questa scelta progettuale rende il sistema intrinsecamente sicuro: lo stato attivo richiede una conferma continua dal PC, mentre lo stato di riposo è quello di \textit{default} verso cui il sistema converge in assenza di comunicazione.
-	
-	%--------------------------------------------------------------
-	\section{\textit{Safe startup} e gestione delle anomalie}
-	\label{sec:safe_startup}
-	
-	L'avvio del firmware è gestito da una sequenza temporizzata di sicurezza, chiamata \textit{safe startup}, che precede qualsiasi attivazione effettiva degli attuatori. La sequenza, gestita tramite \texttt{TIM6}, persegue due obiettivi fondamentali: armare gli ESC dei motori secondo la procedura richiesta dal \textit{Turnigy Plush 40A} (descritta nel Capitolo~\ref{ch:hardware}) e dare all'operatore un \textit{feedback} visivo non ambiguo dello stato di avanzamento.\\
-	Concretamente, dopo l'inizializzazione delle periferiche e dei sensori, il firmware genera per circa \textbf{4 [s]} un segnale PWM costante al valore di \textit{minimo armamento} (\textit{duty cycle} di circa il 5\%) sui canali dei due ESC. Durante questa fase, il LED diagnostico LD2 della NUCLEO viene fatto lampeggiare a frequenza fissa per segnalare che l'armamento è in corso; al termine della procedura, il LED viene mantenuto acceso fisso per indicare che il sistema è pronto a ricevere comandi.\\
-	Solo dopo questa fase, e solo a fronte della pressione dello \textit{User Button} (USER B1) della scheda, il firmware abilita la ricezione effettiva del comando \texttt{MOTOR\_ON}. Questa doppia condizione --- attesa della sequenza di armamento \textit{e} conferma fisica dell'operatore --- riduce significativamente il rischio di azionamenti accidentali durante le operazioni di collegamento e di setup in laboratorio.\\
-	Una volta in funzione, il firmware mantiene una serie di contatori diagnostici che vengono trasmessi in ogni pacchetto di telemetria: il numero di errori UART in ricezione (\texttt{uart\_rx\_errors}), il numero di \textit{overflow} del \textit{buffer} seriale (\texttt{uart\_rx\_overflows}), il numero di linee malformate scartate (\texttt{uart\_bad\_lines}), e un \textit{flag} che segnala eventuali ritardi nella trasmissione della telemetria stessa (\texttt{telemetry\_overrun}). Questi contatori non hanno effetto sul comportamento del sistema, ma forniscono lato PC un'indicazione immediata della qualità del canale di comunicazione, particolarmente utile durante le campagne di acquisizione in cui la perdita di campioni comprometterebbe la successiva identificazione del modello.\\
-	Al verificarsi di una condizione anomala --- ad esempio un \textit{timeout} del \textit{watchdog}, una mancata risposta del BNO-055 dopo più tentativi, o un \textit{reset} forzato del VL53L1X --- il firmware riporta autonomamente i motori al PWM minimo e segnala l'anomalia attraverso il campo \texttt{stop\_reason} della telemetria, che codifica la causa del passaggio allo stato di sicurezza. Questo approccio rende il sistema osservabile dall'esterno anche in condizioni degradate, consentendo all'operatore di diagnosticare il problema senza dover ricorrere a strumenti di \textit{debug} \textit{on-chip}.
-
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                         CAPITOLO 3 - FIRMWARE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Firmware}
+\label{ch:firmware}
+Il presente capitolo illustra l'architettura software sviluppata per la gestione e il controllo del \textit{Double Propeller Ducted-Fan (DPDF)}. Il firmware è stato concepito non come un sistema di controllo a sé stante, ma come componente di una pipeline più ampia che comprende l'acquisizione strutturata dei dati, l'identificazione del modello dinamico in ambiente MATLAB e la successiva validazione dei regolatori sul prototipo fisico. Per questa ragione, il microcontrollore non si limita a calcolare l'azione di controllo: deve allo stesso tempo trasmettere al PC ospite un flusso di telemetria stabile, ricevere comandi in tempo reale e garantire la sicurezza del sistema in ogni fase operativa.
+
+Per soddisfare questi rigorosi requisiti, il firmware è stato strutturato secondo un'architettura modulare ed \textit{event-driven}. È infatti imprescindibile che il microcontrollore garantisca:
+\begin{enumerate}
+    \item Un campionamento deterministico delle grandezze di stato (angoli di Eulero forniti dalla IMU BNO-055 e quota fornita dal ToF VL53L1X), con \textit{jitter} di fase contenuto;
+    \item Un sistema di telemetria ad alta frequenza, capace di trasmettere a 50 [Hz] su porta seriale a 230\,400 [baud] lo stato completo del sistema, inclusi angoli, quota, comandi PWM applicati agli attuatori, contatori di errore UART e flag di stato;
+    \item Un protocollo di comando sicuro, affinché si possa testare il drone fisico in sicurezza, per evitare possibili malfunzionamenti e comportamenti anomali;
+    \item Una gestione robusta della comunicazione UART, con meccanismi di ricezione, parsing, diagnostica degli errori e ripristino della comunicazione;
+    \item Un'infrastruttura di controllo flessibile, pronta a recepire i guadagni ottimali del PID calcolati in simulazione, per procedere alla validazione sul prototipo fisico in condizioni di massima sicurezza.
+\end{enumerate}
+
+Nelle sezioni successive verranno analizzati nel dettaglio l'architettura del software complessiva, la gestione del microcontrollore dual-core, l'organizzazione modulare del codice, la configurazione delle periferiche, la gestione dei sensori, i diagrammi di flusso del sistema, l'architettura di controllo a quattro PID, il protocollo di comunicazione seriale con MATLAB e le principali logiche di sicurezza implementate durante i test sul DPDF reale.
+
+%--------------------------------------------------------------
+\section{Architettura software event-driven}
+L'infrastruttura firmware sviluppata per il DPDF si fonda su un'architettura \textit{event-driven}, ovvero guidata dagli eventi temporali e hardware. A differenza dei paradigmi puramente sequenziali, basati sul \textit{polling} continuo delle periferiche, l'architettura adottata fa sì che l'unità di calcolo intervenga quando si verifica un evento rilevante: la disponibilità di una nuova misura dal sensore di quota, la scadenza di un timer periodico, l'arrivo di un comando dalla porta seriale oppure la pressione di un pulsante fisico di emergenza.
+
+Per garantire questa reattività, le \textit{Interrupt Service Routine} (ISR) e le callback HAL associate a timer e periferiche sono state mantenute estremamente leggere. Il loro compito principale è aggiornare flag logiche, contatori o variabili di stato, senza eseguire calcoli onerosi o accessi prolungati alle periferiche. L'elaborazione vera e propria — acquisizione dati via $I^{2}C$, compensazione e filtraggio della quota, aggiornamento dei segnali PWM, gestione dei comandi e composizione della telemetria — viene invece eseguita nel ciclo principale \texttt{while(1)}, che monitora lo stato delle flag ed esegue i blocchi computazionali solo quando il rispettivo sottosistema lo richiede.
+
+Questa separazione tra eventi, gestiti in ISR, ed elaborazione, gestita nel main loop, presenta tre vantaggi concreti per il presente progetto. In primo luogo, riduce il tempo di permanenza all'interno delle ISR, lasciando il core libero di gestire gli altri task del firmware. In secondo luogo, limita il rischio di inconsistenze sui dati condivisi, poiché le elaborazioni principali vengono eseguite nel contesto sequenziale del main loop. Infine, rende il sistema più facilmente verificabile: ogni evento aggiorna una flag o una variabile di stato, ogni flag abilita un blocco di codice ben identificabile e l'ordine di esecuzione risulta più semplice da analizzare durante le prove sperimentali.
+
+%--------------------------------------------------------------
+\section{Gestione del microcontrollore dual-core}
+Il microcontrollore \textit{STM32H745ZI-TQ6}, descritto nel Capitolo~\ref{ch:hardware}, è caratterizzato da un'architettura \textit{dual-core} che integra un processore \textit{Arm Cortex-M7} e un coprocessore \textit{Arm Cortex-M4}. Sebbene l'intera logica di controllo sia eseguita dal Cortex-M4, anche il Cortex-M7 riveste un ruolo essenziale nella fase di avvio del sistema.
+
+Per ragioni architetturali interne al microcontrollore, la configurazione del clock e l'inizializzazione della \textit{Power Domain} principale sono di esclusiva competenza del Cortex-M7, in quanto core primario. Il Cortex-M4 resta dunque in attesa, in modalità a basso consumo (\textit{Wait For Event}, WFE), fino a quando il Cortex-M7 non gli segnala il completamento di tale configurazione tramite un \textit{Hardware Semaphore} (HSEM). Solo dopo aver ricevuto questo segnale, il Cortex-M4 esce dallo stato di attesa e procede con l'inizializzazione delle proprie periferiche e con l'avvio del main loop di controllo.
+
+Una conseguenza pratica di questa architettura, di particolare rilevanza in fase di sviluppo, riguarda la procedura di \textit{flashing} del firmware. Il binario destinato al Cortex-M7 deve essere caricato prima di quello destinato al Cortex-M4: in caso contrario, il Cortex-M4 rimane indefinitamente bloccato in attesa del segnale HSEM che non verrà mai generato, e il sistema risulta apparentemente non operativo. L'ambiente di sviluppo STM32CubeIDE consente di gestire entrambi i target all'interno dello stesso progetto, garantendo la corretta sequenza di programmazione.
+
+%--------------------------------------------------------------
+\section{Organizzazione modulare del codice}
+Per favorire la leggibilità, la manutenibilità e la verificabilità del firmware, il codice sorgente è stato organizzato in moduli funzionalmente coesi. Ogni modulo è composto, dove previsto, da un \textit{header file} \texttt{.h}, che dichiara l'interfaccia pubblica del modulo, e da un \textit{source file} \texttt{.c}, che ne contiene l'implementazione. Le configurazioni di basso livello generate da STM32CubeMX sono state mantenute separate dai moduli applicativi, in modo da non appesantire il file \texttt{main.c} con dettagli implementativi non direttamente legati alla logica del sistema.
+
+I principali moduli applicativi sviluppati sono i seguenti:
+\begin{itemize}
+    \item \textbf{main.c} — contiene la sequenza di inizializzazione del sistema, la procedura di \textit{safe startup}, il ciclo operativo principale basato sulle flag di evento e la chiamata coordinata agli altri moduli. Al suo interno sono inoltre gestite le callback principali associate a timer, GPIO e UART. In particolare, il file \texttt{main.c} coordina la ricezione e il parsing dei comandi provenienti da MATLAB, l'aggiornamento dei PWM, la composizione della telemetria e la gestione delle principali condizioni di sicurezza.
+
+    \item \textbf{config.h e config.c} — raccolgono in un unico punto i principali parametri numerici del firmware, tra cui i limiti PWM per motori e servomotori, la posizione neutra dei servo, i fattori di conversione angolo–PWM e la struttura di configurazione dei regolatori. Centralizzare questi valori rende esplicito il confine tra comando richiesto, comando ammissibile e limite imposto dall'hardware reale, evitando la dispersione di valori numerici direttamente all'interno del codice.
+
+    \item \textbf{pwm.h e pwm.c} — incapsulano la gestione dei segnali PWM destinati ai motori e ai servomotori. Il modulo espone funzioni di alto livello per l'avvio dei canali PWM, l'aggiornamento dei comandi e lo spegnimento degli attuatori. In questo modo la logica applicativa può richiamare funzioni come \texttt{set\_pwm\_motors()} e \texttt{set\_pwm\_servos()} senza intervenire direttamente sui registri dei timer.
+
+    \item \textbf{pid.h e pid.c} — implementano la struttura del regolatore PID discreto e alcune funzioni di supporto, tra cui il filtro mediano utilizzato nella catena di acquisizione della quota. Nel firmware attuale le strutture PID vengono inizializzate e mantenute nel codice come predisposizione per successive integrazioni, ma non vengono utilizzate per generare i PWM durante le prove open-loop comandate da MATLAB.
+
+    \item \textbf{imu.h e imu.c} — costituiscono un livello di astrazione sopra il driver del sensore BNO055. Il modulo si occupa dell'inizializzazione dell'IMU, della lettura degli angoli di Eulero e della gestione del riferimento iniziale, così da ottenere valori relativi di roll, pitch e yaw rispetto alla posa iniziale del DPDF.
+
+    \item \textbf{tof.h e tof.c} — contengono le funzioni di supporto associate alla misura di quota fornita dal VL53L1X. In particolare, il modulo implementa la compensazione geometrica della distanza misurata dal sensore rispetto all'inclinazione del velivolo, utilizzando gli angoli di roll e pitch forniti dall'IMU.
+
+    \item \textbf{Driver BNO055 e VL53L1X} — oltre ai moduli applicativi, il progetto include i driver necessari all'interfacciamento con i sensori. I file relativi al BNO055 e alla libreria VL53L1X forniscono le funzioni di basso livello per la comunicazione con i dispositivi, mentre i moduli \texttt{imu.c} e \texttt{tof.c} ne semplificano l'utilizzo all'interno della logica del firmware.
+\end{itemize}
+
+Questa suddivisione consente, in fase di sviluppo, di intervenire su un modulo alla volta riducendo il rischio di introdurre regressioni in funzionalità già validate. Le modifiche al firmware sono state pertanto effettuate come modifiche puntuali e mirate, conservando per quanto possibile la struttura e le interfacce esistenti.
+
+%--------------------------------------------------------------
+\section{Configurazione delle periferiche}
+La configurazione hardware del Cortex-M4 è stata generata tramite STM32CubeMX a partire dal file di progetto \texttt{.ioc}, ed è stata mantenuta coerente con i collegamenti pin-to-pin descritti nel Capitolo~\ref{ch:hardware}. Si descrivono di seguito le periferiche principali impiegate dal firmware.
+
+\subsection{Timer}
+I timer impiegati svolgono ruoli funzionalmente distinti:
+\begin{itemize}
+    \item \textbf{TIM2}: configurato in modalità \textit{PWM Generation}, genera sui canali CH1 e CH2 i segnali di controllo dei servomotori di roll e pitch. La frequenza di funzionamento è pari a 50 [Hz], coerentemente con le specifiche dei servomotori HS-82MG.
+
+    \item \textbf{TIM4}: anch'esso configurato in modalità \textit{PWM Generation}, genera sui canali CH2 e CH3 i segnali destinati agli ESC Turnigy Plush 40A che pilotano i due motori brushless. Anche in questo caso la frequenza è pari a 50 [Hz], come richiesto dagli ESC stessi.
+
+    \item \textbf{TIM3}: utilizzato come base temporale per la generazione periodica dei campioni di telemetria. A ogni interrupt viene aggiornato il tempo telemetrico e viene incrementato il numero di campioni pendenti da trasmettere. Questa scelta permette di separare la temporizzazione della telemetria dalla trasmissione effettiva via UART, che viene invece gestita nel ciclo principale.
+
+    \item \textbf{TIM6}: impiegato per la sequenza temporizzata di \textit{safe startup} e per il pilotaggio diagnostico dei LED integrati sulla scheda.
+
+    \item \textbf{TIM7}: utilizzato come \textit{timebase} per la generazione periodica dell'interrupt che abilita l'aggiornamento del ramo IMU–attuatori. La sua scadenza imposta la flag \texttt{actuate\_servo\_control}, che il main loop intercetta per eseguire la lettura del BNO055, aggiornare i valori operativi dei servomotori e applicare i PWM agli attuatori. Nella configurazione di test open-loop i PWM sono ricevuti da MATLAB; la stessa struttura temporale rimane tuttavia compatibile con la successiva integrazione dei PID di assetto, tarati a partire dal modello identificato.
+\end{itemize}
+
+I valori di Prescaler e Auto-Reload Register (ARR) di ciascun timer sono stati calcolati a partire dalla frequenza di clock del bus APB1, configurata a 75 [MHz], secondo la relazione standard:
+\begin{equation}
+    f_{PWM} = \frac{f_{clk}}{(Prescaler + 1) \cdot (ARR + 1)}
+    \label{eq:timer_freq}
+\end{equation}
+Nel caso dei timer PWM, tale relazione determina la frequenza del segnale generato; nel caso dei timer usati come \textit{timebase}, determina invece la frequenza con cui vengono generati gli interrupt periodici.
+
+\subsection{Periferiche di comunicazione}
+Il firmware utilizza due tipologie principali di periferiche di comunicazione:
+\begin{itemize}
+    \item \textbf{USART3}: configurata in modalità \textit{full-duplex} asincrona a 230\,400 [baud], con 8 bit di dato, 1 bit di stop e nessuna parità. Questo canale costituisce il collegamento bidirezionale con il PC ospite: in trasmissione veicola la telemetria seriale, mentre in ricezione raccoglie i comandi inviati da MATLAB. La scelta di un baud rate elevato è motivata dalla necessità di sostenere sia il flusso telemetrico sia l'invio asincrono dei comandi, considerando che ogni pacchetto trasmesso è costituito da una stringa CSV di lunghezza variabile.
+
+    \item \textbf{$I^{2}$C1 e $I^{2}$C2}: configurati in \textit{Fast Mode} a 400 [kHz], sono dedicati rispettivamente alla comunicazione con il sensore BNO055 e con il sensore VL53L1X. L'impiego di due bus distinti, anziché di un unico bus condiviso, evita possibili conflitti e permette di gestire i due sensori in modo indipendente.
+\end{itemize}
+
+La gestione degli interrupt associati a queste periferiche è affidata al \textit{Nested Vectored Interrupt Controller} (NVIC), configurato con livelli di priorità coerenti con la criticità temporale di ciascuna sorgente di evento.
+
+%--------------------------------------------------------------
+\section{Gestione dei sensori}
+
+\subsection{VL53L1X — Acquisizione di quota}
+L'acquisizione della quota avviene tramite il sensore Time-of-Flight VL53L1X, descritto nel Capitolo~\ref{ch:hardware}. Il firmware utilizza il driver ufficiale fornito da STMicroelectronics, integrato attraverso un sottile livello di adattamento alle funzioni HAL.
+
+La sequenza di inizializzazione del sensore prevede: il rilascio del segnale XSHUT, il caricamento del firmware interno tramite \texttt{VL53L1\_WaitDeviceBooted()}, l'inizializzazione tramite \texttt{VL53L1\_DataInit()}, l'impostazione della modalità \textit{Short ranging} e del \textit{Timing Budget} a 33 [ms], e infine l'avvio della misura continua tramite \texttt{VL53L1\_StartMeasurement()}.
+
+Per non bloccare il microcontrollore durante il tempo di integrazione ottica, l'acquisizione segue un approccio basato sulla disponibilità del dato. Quando il sensore segnala la presenza di una nuova misura, il firmware imposta la relativa flag di acquisizione; la lettura effettiva viene poi eseguita nel ciclo principale. In questo modo la callback rimane leggera e il main loop può procedere con la lettura della misura tramite \texttt{VL53L1\_GetRangingMeasurementData()} e con il successivo riavvio dell'acquisizione tramite \texttt{VL53L1\_ClearInterruptAndStartMeasurement()}.
+
+La misura grezza così ottenuta viene successivamente compensata rispetto all'inclinazione istantanea del velivolo, in modo da fornire al regolatore di quota una stima coerente con la variabile fisica realmente controllata — la coordinata verticale — piuttosto che con la distanza grezza misurata dal sensore lungo il proprio asse.
+
+\subsection{BNO055 — Acquisizione dell'assetto}
+Il BNO055 è responsabile del monitoraggio dell'assetto tridimensionale del velivolo. Il firmware utilizza il driver \textit{platform-agnostic} fornito da Bosch Sensortec, adattato al contesto HAL per le funzioni di comunicazione $I^{2}C$, di temporizzazione e di gestione del reset.
+
+La sequenza di inizializzazione del sensore comprende: la verifica del corretto collegamento del dispositivo, la configurazione dei parametri interni, l'impostazione del remap degli assi e dei relativi segni, e l'impostazione della modalità operativa. Come anticipato nel Capitolo~\ref{ch:hardware}, è stata scelta la modalità di fusion NDOF, in cui l'algoritmo proprietario del sensore combina i dati provenienti da accelerometro, giroscopio e magnetometro per restituire una stima stabile e robusta dell'orientamento assoluto.
+
+Subito dopo l'inizializzazione, e prima dell'avvio del ciclo di controllo, il firmware acquisisce un campione di posa iniziale tramite le funzioni del modulo IMU, che memorizzano gli angoli di Eulero correnti come riferimento. Tutte le letture successive vengono espresse come scostamento rispetto a questa posa iniziale: in questo modo i PID di assetto lavorano su angoli relativi alla configurazione di equilibrio meccanico in cui il drone si trova all'accensione, evitando la dipendenza dall'orientamento magnetico assoluto e semplificando il confronto con la simulazione.
+
+Le letture periodiche degli angoli avvengono nel ramo IMU–servo a 100 [Hz], frequenza coerente con la massima banda passante della \textit{sensor fusion} interna al BNO055 in modalità NDOF. I valori di roll, pitch e yaw vengono mantenuti internamente come grandezze angolari e, al momento della composizione della telemetria, vengono convertiti in centesimi di grado. Questa rappresentazione consente di trasmettere informazione angolare con precisione di 0.01° utilizzando soli interi nella stringa di telemetria.
+
+%--------------------------------------------------------------
+\section{Diagrammi di flusso}
+Per illustrare in modo sintetico la logica decisionale e le dipendenze temporali dei diversi task del firmware, vengono di seguito presentati tre diagrammi di flusso: due dedicati alla gestione dei singoli sensori, e uno che sintetizza l'esecuzione complessiva del firmware.
+
+\subsection{Diagramma di flusso del VL53L1X}
+Il diagramma di Figura~\ref{fig:flow_vl53l1x} riassume la sequenza di inizializzazione e di acquisizione del sensore di quota. Il flusso si conclude con l'attivazione della modalità di misura continua, dopodiché il main loop interroga periodicamente la disponibilità del dato senza bloccarsi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/03_firmware/flow_vl53l1x.png}
+    \caption{Diagramma di flusso del sensore VL53L1X}
+    \label{fig:flow_vl53l1x}
+\end{figure}
+
+\subsection{Diagramma di flusso del BNO055}
+Il diagramma di Figura~\ref{fig:flow_bno055} illustra la sequenza di astrazione dell'API Bosch. Particolarmente rilevante è il blocco dedicato all'acquisizione della posa iniziale (\texttt{DPDF\_BNO055\_firmware\_read\_init}), che fissa il sistema di riferimento angolare rispetto al quale tutte le misure successive saranno espresse.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{figures/03_firmware/flow_bno055.png}
+    \caption{Diagramma di flusso del sensore BNO055}
+    \label{fig:flow_bno055}
+\end{figure}
+
+\subsection{Diagramma di flusso del firmware complessivo}
+Il diagramma di Figura~\ref{fig:flow_firmware} sintetizza la cooperazione tra i moduli software. Il flusso si articola in due macro-fasi:
+\begin{enumerate}
+    \item \textbf{Inizializzazione e safe startup}: il sistema attende un trigger esterno di sicurezza (User button) prima di avviare l'alimentazione ai sensori e di generare i segnali di armamento per gli ESC dei motori.
+    \item \textbf{Main loop di controllo}: il ciclo infinito gestisce due percorsi asincroni e indipendenti. Il primo, attivato dalla scadenza di TIM7, gestisce la correzione di assetto tramite i servomotori (roll e pitch) e la correzione differenziale di yaw sui motori. Il secondo, attivato dalla disponibilità di un nuovo dato dal ToF, gestisce la portanza verticale dei motori principali. La separazione di questi due percorsi assicura che un eventuale ritardo di un sensore non comprometta la reattività dell'intero sistema.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/03_firmware/flow_complessivo.png}
+    \caption{Diagramma di flusso complessivo del firmware}
+    \label{fig:flow_firmware}
+\end{figure}
+
+%--------------------------------------------------------------
+\section{Protocollo di comunicazione seriale con MATLAB}
+La comunicazione tra MATLAB e il firmware avviene tramite un protocollo testuale bidirezionale sulla porta seriale USART3, configurata a 230\,400 [baud]. Questo canale costituisce il collegamento principale tra l'ambiente di acquisizione off-board e il prototipo fisico: MATLAB invia i comandi da applicare agli attuatori, mentre il firmware li riceve, li interpreta, li valida e restituisce in telemetria lo stato effettivamente raggiunto dal sistema.
+
+La UART è configurata in modalità \textit{full-duplex} asincrona, con 8 bit di dato, 1 bit di stop e nessuna parità, così da sostenere sia l'invio dei comandi da MATLAB sia la trasmissione periodica della telemetria. La ricezione dei comandi è gestita direttamente nel firmware tramite la callback UART: i byte ricevuti vengono accumulati in un buffer fino al carattere di terminazione, \texttt{\textbackslash n} oppure \texttt{\textbackslash r}; una volta completata la riga, il comando viene interpretato e validato.
+
+La descrizione dettagliata del formato di telemetria e delle modalità di acquisizione lato PC è rimandata al Capitolo~4; in questa sezione vengono invece illustrati i comandi che il firmware accetta in ricezione e le relative risposte di conferma.
+
+\subsection{Comandi ricevuti dal firmware}
+Il firmware riconosce quattro comandi distinti, terminati dal carattere di nuova riga (LF):
+\begin{itemize}
+    \item \textbf{CMD,top,bottom,roll,pitch} — comando di attuazione utilizzato durante le prove sperimentali. I quattro campi numerici rappresentano, nell'ordine: PWM del motore superiore, PWM del motore inferiore, PWM del servo di roll, PWM del servo di pitch. Tutti i valori sono espressi in unità CCR (\textit{Capture-Compare Register}) e vengono saturati in lettura entro i limiti hardware definiti in \texttt{config.h}. In particolare, \texttt{LOWER\_LIMIT\_MOTOR} e \texttt{UPPER\_LIMIT\_MOTOR} delimitano l'intervallo PWM ammesso per gli ESC dei motori, mentre \texttt{LOWER\_LIMIT\_SERVO}, \texttt{CENTER\_SERVO} e \texttt{UPPER\_LIMIT\_SERVO} definiscono rispettivamente il limite inferiore, la posizione neutra e il limite superiore dei servomotori associati ai flap. Le costanti \texttt{CCR\_PER\_DEGREE} e \texttt{MAX\_FLAP\_ANGLE\_DEG} permettono invece di collegare il comando PWM alla corrispondente escursione angolare dei flap, rendendo esplicito il vincolo meccanico imposto agli attuatori. I valori dei servomotori vengono aggiornati dopo la saturazione, mentre i valori dei motori vengono applicati solo se i motori risultano abilitati e non è presente una condizione di \textit{kill} latched.
+
+    \item \textbf{MOTOR\_ON} — richiede al firmware di passare dallo stato disarmato allo stato armato. In risposta, il firmware abilita la possibilità di applicare i successivi comandi PWM ai motori, mantenendo inizialmente i valori al limite inferiore, e risponde con \texttt{ACK\_ON}.
+
+    \item \textbf{MOTOR\_OFF} — richiede il ritorno allo stato disarmato. Il firmware forza i motori al PWM minimo, risponde con \texttt{ACK\_OFF} e disabilita l'esecuzione dei comandi CMD successivi fino al prossimo MOTOR\_ON.
+
+    \item \textbf{KILL} — comando di emergenza che ferma immediatamente i motori, indipendentemente dallo stato corrente, e attiva una condizione di arresto \textit{latched}. In tale stato i comandi motore non possono essere applicati fino a una nuova abilitazione esplicita del sistema. Il firmware risponde con \texttt{ACK\_KILL}.
+\end{itemize}
+
+Qualsiasi linea ricevuta che non corrisponda a uno di questi quattro formati genera una risposta \texttt{ACK\_ERR}, utile lato PC per individuare rapidamente errori di sintassi nel canale.
+
+La saturazione software rappresenta un elemento essenziale della robustezza del protocollo. MATLAB può generare profili di eccitazione anche molto variabili, ma il firmware non applica mai direttamente valori fuori dal range ammesso dall'hardware. In questo modo il protocollo seriale non viene interpretato come un accesso diretto agli attuatori, ma come una richiesta che il microcontrollore deve validare prima dell'applicazione.
+
+\subsection{ACK, watchdog e diagnostica UART}
+Il sistema di \textit{acknowledgement} consente a MATLAB di verificare che i comandi inviati siano stati ricevuti e interpretati correttamente dal firmware. A ogni comando di stato il firmware associa una risposta specifica: \texttt{ACK\_ON} per l'abilitazione dei motori, \texttt{ACK\_OFF} per lo spegnimento controllato, \texttt{ACK\_KILL} per l'arresto di emergenza e \texttt{ACK\_ERR} per righe non valide o condizioni di errore.
+
+Gli \textit{acknowledge} vengono gestiti tramite una variabile di stato dedicata e trasmessi nel ciclo principale solo quando la UART risulta libera. In questo modo la risposta al comando non viene inviata direttamente all'interno della callback di ricezione, mantenendo leggera la ISR e riducendo il rischio di interferenze con la trasmissione periodica della telemetria. Quando è presente un \textit{acknowledge} pendente, esso viene inviato con priorità rispetto alla telemetria, così da permettere a MATLAB di sincronizzarsi rapidamente con lo stato interno del firmware.
+
+A protezione della comunicazione è inoltre previsto un \textit{watchdog} sui comandi provenienti da MATLAB. Quando i motori sono abilitati, il firmware verifica che i comandi di attuazione continuino ad arrivare entro una finestra temporale prefissata. Se tale condizione non viene rispettata, la mancanza di aggiornamenti viene interpretata come possibile perdita di comunicazione o blocco lato MATLAB; di conseguenza, il firmware forza i motori al valore minimo e aggiorna la causa dell'arresto.
+
+La diagnostica UART permette inoltre di distinguere diverse condizioni anomale legate alla comunicazione seriale. Il contatore \texttt{uart\_bad\_lines} tiene traccia delle righe ricevute che non rispettano il formato previsto dal protocollo, \texttt{uart\_rx\_overflows} segnala eventuali saturazioni del buffer di ricezione, mentre \texttt{uart\_rx\_errors} registra errori hardware della periferica UART. Queste informazioni vengono incluse nella telemetria e consentono di riconoscere, durante l'analisi dei dati, se un comportamento anomalo del sistema sia dovuto alla dinamica fisica del DPDF oppure a un problema di comunicazione.
+
+Nel complesso, il protocollo seriale non si limita a trasferire comandi numerici da MATLAB al firmware, ma introduce un livello di controllo sullo stato della comunicazione. Gli \textit{acknowledge}, il \textit{watchdog} e i contatori diagnostici permettono di rendere osservabile e verificabile l'interazione tra PC e microcontrollore durante l'intera prova sperimentale.
+
+%--------------------------------------------------------------
+\section{Telemetria robusta a frequenza fissa}
+La telemetria rappresenta uno degli elementi centrali del firmware sviluppato, poiché consente di trasformare il DPDF in una piattaforma sperimentale osservabile. L'obiettivo non è soltanto trasmettere le grandezze misurate, ma generare un flusso dati periodico, coerente e diagnosticabile, utilizzabile nelle successive fasi di identificazione, modellazione e simulazione in MATLAB.
+
+Nel firmware, il periodo nominale della telemetria è definito dalla macro \texttt{TELEMETRY\_PERIOD\_MS}, posta pari a 20 [ms]. Tale valore corrisponde a una frequenza di 50 [Hz], scelta per acquisire campioni sufficientemente ravvicinati nel tempo senza saturare eccessivamente il canale seriale. La dimensione massima della stringa trasmessa è invece definita da \texttt{STANDARD\_MESSAGE\_LENGTH}, mentre \texttt{TELEMETRY\_MAX\_PENDING} limita il numero massimo di campioni che possono rimanere in attesa di trasmissione.
+
+La generazione del \textit{tick} telemetrico è affidata al timer TIM3. A ogni interrupt periodico, il firmware non costruisce né trasmette direttamente la stringa dati, ma aggiorna il tempo della telemetria e incrementa il numero di campioni pendenti. Questa scelta mantiene leggera la routine di interrupt, evitando di eseguire all'interno della ISR operazioni più onerose come la formattazione della stringa CSV o la trasmissione UART.
+
+La trasmissione effettiva viene gestita nel ciclo principale. Il firmware procede all'invio solo se sono presenti campioni pendenti, se la UART non è occupata e se non ci sono messaggi di \textit{acknowledge} da trasmettere con priorità. Se la UART rimane occupata o la trasmissione DMA precedente non è ancora conclusa, i campioni vengono accumulati fino al limite definito da \texttt{TELEMETRY\_MAX\_PENDING}. Al superamento di tale limite viene incrementato il contatore \texttt{telemetry\_overrun}, successivamente inserito nella telemetria stessa. In questo modo eventuali problemi di temporizzazione o saturazione del canale seriale diventano informazioni diagnostiche disponibili durante l'analisi dei dati.
+
+Prima di comporre la riga CSV, il firmware esegue uno \textit{snapshot} delle variabili da trasmettere. Tale operazione viene effettuata disabilitando temporaneamente gli interrupt, in modo da copiare in modo coerente le grandezze condivise tra callback e ciclo principale. La sezione critica viene mantenuta il più breve possibile: al suo interno vengono copiati soltanto i valori necessari, mentre la formattazione della stringa viene eseguita successivamente, a interrupt riabilitati.
+
+La riga telemetrica viene costruita in formato CSV tramite \texttt{snprintf()} e contiene sia le grandezze fisiche del sistema sia informazioni relative ai comandi applicati e allo stato diagnostico del firmware. Il formato utilizzato è il seguente:
+
+\begin{verbatim}
+time_ms,roll_cdeg,pitch_cdeg,yaw_cdeg,alt_mm,top_pwm,bottom_pwm,
+roll_pwm,pitch_pwm,motors_enabled,uart_rx_errors,uart_rx_overflows,
+uart_bad_lines,telemetry_overrun,stop_reason
+\end{verbatim}
+
+La presenza di campi diagnostici come \texttt{uart\_rx\_errors}, \texttt{uart\_rx\_overflows}, \texttt{uart\_bad\_lines}, \texttt{telemetry\_overrun} e \texttt{stop\_reason} permette di distinguere un comportamento fisico del drone da un eventuale problema di comunicazione o acquisizione. In questo modo ogni prova sperimentale può essere analizzata mettendo in relazione lo stato del DPDF, i comandi effettivamente applicati e la qualità del collegamento seriale.
+
+La trasmissione della riga avviene tramite DMA, utilizzando \texttt{HAL\_UART\_Transmit\_DMA()}. Questa scelta evita di bloccare il ciclo principale durante l'invio dei dati seriali: una volta avviata la trasmissione, il firmware imposta la variabile \texttt{uart\_tx\_busy} e continua la propria esecuzione. Al termine dell'invio, la callback di completamento riporta \texttt{uart\_tx\_busy} a \texttt{false}, rendendo nuovamente disponibile il canale UART.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/03_firmware/tim3_config.png}
+    \caption{Configurazione di TIM3 per la generazione del tick telemetrico}
+    \label{fig:tim3_config}
+\end{figure}
+
+Nel complesso, la telemetria implementata non si limita a inviare periodicamente misure sensoriali, ma costituisce un meccanismo di osservazione e diagnostica del test. La temporizzazione tramite TIM3, l'accumulo controllato dei campioni pendenti, lo \textit{snapshot} coerente delle variabili, la trasmissione DMA e l'inclusione di informazioni diagnostiche permettono di ottenere dataset più affidabili e interpretabili per le successive elaborazioni in MATLAB.
+
+%--------------------------------------------------------------
+\section{Safe startup e logiche di arresto}
+L'avvio del firmware è gestito tramite una sequenza di \textit{safe startup}, eseguita prima della fase operativa vera e propria. Lo scopo di questa procedura è portare il sistema in una condizione iniziale prevedibile, evitando che i motori ricevano comandi non desiderati durante il transitorio di accensione e inizializzazione.
+
+Durante questa fase vengono avviati i segnali PWM e i motori vengono mantenuti al valore minimo di comando, così da consentire agli ESC di riconoscere correttamente il segnale di armamento. La procedura è accompagnata da segnalazioni diagnostiche tramite LED, utili per fornire all'operatore un'indicazione visiva dello stato di avanzamento dell'avvio.
+
+Terminata la fase di avvio, il firmware mantiene comunque attivi diversi livelli di protezione. I valori PWM ricevuti da MATLAB vengono applicati ai motori solo se questi risultano abilitati e se non è presente una condizione di arresto \textit{latched}. In caso contrario, il firmware forza entrambi i motori al valore minimo, impedendo che un comando precedente o non valido possa mantenere attiva la propulsione.
+
+La procedura di spegnimento immediato dei motori è centralizzata nella funzione
+\begin{center}
+     \texttt{motor\_force\_off\_immediate()}, 
+\end{center}
+ richiamata nelle condizioni critiche. Tale funzione riporta i PWM dei motori al limite inferiore, disabilita lo stato logico di abilitazione e riallinea le variabili interne al comando effettivamente applicato agli ESC. In questo modo il comportamento di arresto rimane uniforme indipendentemente dalla causa che lo ha generato.
+
+Il firmware prevede diversi meccanismi di arresto. Il comando \texttt{MOTOR\_OFF} esegue uno spegnimento controllato, mentre il comando \texttt{KILL} rappresenta un arresto di emergenza e imposta una condizione \textit{latched} che impedisce la riattivazione dei motori senza una nuova abilitazione esplicita. A questi comandi software si aggiunge il pulsante fisico della scheda, che consente di interrompere la prova anche indipendentemente dal canale MATLAB-UART.
+
+Le principali cause di arresto o anomalia vengono codificate nella variabile \texttt{stop\_reason}, trasmessa successivamente in telemetria. Questo permette di distinguere, durante l'analisi dei dati, una prova terminata volontariamente da una prova interrotta per errore UART, overflow del buffer, timeout dei comandi o intervento di emergenza.
+
+Nel complesso, la \textit{safe startup} e le logiche di arresto completano il protocollo di comando e la telemetria, garantendo che il firmware possa riportare il DPDF in una condizione sicura sia all'avvio sia durante l'esecuzione dei test sperimentali.
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%                         CAPITOLO 4 - TELEMETRIA
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\chapter{Telemetria}
@@ -1227,6 +1264,13 @@ end
 	
 	Nell'istante esatto in cui viene premuta la barra spaziatrice, il \textit{callback} scavalca il ciclo principale, invia immediatamente la stringa \texttt{KILL} sulla seriale e alza le \textit{flag} globali \texttt{STOP\_FLAG} e \texttt{STOP\_IS\_KILL}. Il firmware, ricevendo questa parola chiave, bypassa qualsiasi logica di volo e forza istantaneamente i motori al PWM minimo, attivando il \textit{latch} di sicurezza descritto nel Capitolo~\ref{ch:firmware}. Il tempo che intercorre tra la pressione del tasto e l'arresto effettivo dei motori è dell'ordine di qualche millisecondo, dominato dal tempo di trasmissione seriale della stringa.
 	
+	\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figures/04_telemetria/kill_switch.png}
+    \caption{Interfaccia grafica del Kill Switch}
+    \label{fig:tim3_config}
+\end{figure}
+	
 	\subsection{Chiusura controllata con onCleanup}
 	Ogni prova si conclude con l'esecuzione dell'oggetto \texttt{cleanupObj}, costruito all'inizio dello \textit{script} mediante la primitiva \texttt{onCleanup} di MATLAB. Anche nel caso in cui lo \textit{script} terminasse a causa di un'eccezione non gestita, questo meccanismo garantisce l'esecuzione di una funzione di chiusura che invia almeno una sequenza di comandi al minimo e un \texttt{MOTOR\_OFF}, chiude correttamente il \textit{file handle} del CSV e rilascia la porta seriale.
 	
@@ -1248,6 +1292,12 @@ end
 	\end{itemize}
 	La selezione della prova imposta lo stato della funzione \texttt{generateSignal}, che a ogni iterazione del \textit{loop} principale produce la quadrupla \texttt{(top, bottom, roll, pitch)} da inviare al firmware. Nelle sottosezioni seguenti vengono descritte le caratteristiche principali di ciascuna famiglia di segnali.
 	
+	\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/04_telemetria/mod_controllo.png}
+    \caption{Menù di selezione del profilo di eccitazione}
+    \label{fig:tim3_config}
+\end{figure}
 	\subsection{Segnali a gradino}
 	Le prove a gradino (ad esempio 1.1, 3.1, 4.1) consistono nell'applicare una variazione istantanea e costante al segnale di comando per un intervallo di tempo prestabilito (tipicamente 5 [s]), prima di riportarlo al valore neutro. Questi test sono utili per una prima ispezione qualitativa della dinamica: permettono di stimare il guadagno statico del sistema misurando il rapporto tra l'ampiezza dell'ingresso e l'angolo di regime raggiunto, ed evidenziano parametri quali il ritardo puro, il tempo di salita e l'eventuale presenza di sovraelongazioni dovute all'elasticità delle funi.
 	
@@ -1436,11 +1486,11 @@ data_ident = iddata(y_centered, u_centered, Ts);
 			\toprule
 			\textbf{Coefficiente} & \textbf{$G_\text{roll}(s)$ (2p, 1z)} & \textbf{$G_\text{pitch}(s)$ (3p, 1z)} \\
 			\midrule
-			$b_1$ & --- (da inserire) & --- (da inserire) \\
-			$b_0$ & --- (da inserire) & --- (da inserire) \\
-			$a_2$ & --- (n/a)         & --- (da inserire) \\
-			$a_1$ & --- (da inserire) & --- (da inserire) \\
-			$a_0$ & --- (da inserire) & --- (da inserire) \\
+			$b_1$ & --- (-1.832) & --- (-2.033) \\
+			$b_0$ & --- (-9.160) & --- (-8.130) \\
+			$a_2$ & --- (n/a)         & --- (12.00) \\
+			$a_1$ & --- (20.00) & --- (70.00) \\
+			$a_0$ & --- (100.00) & --- (100.00) \\
 			\bottomrule
 		\end{tabular}
 		\caption{Coefficienti numerici delle funzioni di trasferimento identificate. I valori vanno inseriti a partire dall'output dello script \texttt{Identify\_and\_tune.m}}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.3)  16 JUN 2026 17:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.12.3)  16 JUN 2026 18:22
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -409,7 +409,14 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 File: lstlang1.sty 2024/02/21 1.10 listings language file
 ) (/usr/local/texlive/2024/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2024/02/21 1.10 (Carsten Heinz)
-) (/Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.aux)
+) (/Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.aux
+
+LaTeX Warning: Label `fig:tim3_config' multiply defined.
+
+
+LaTeX Warning: Label `fig:tim3_config' multiply defined.
+
+)
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 84.
@@ -516,7 +523,7 @@ Package hyperref Info: Link coloring OFF on input line 84.
 \@outlinefile=\write3
 \openout3 = `main.out'.
 
-<images/logoUnivpm.jpg, id=482, 111.2958pt x 115.632pt>
+<images/logoUnivpm.jpg, id=470, 111.2958pt x 115.632pt>
 File: images/logoUnivpm.jpg Graphic file (type jpg)
 <use images/logoUnivpm.jpg>
 Package pdftex.def Info: images/logoUnivpm.jpg  used on input line 99.
@@ -529,7 +536,7 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 102.
  (/usr/local/texlive/2024/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<images/dii_new.png, id=483, 192.72pt x 79.29625pt>
+<images/dii_new.png, id=471, 192.72pt x 79.29625pt>
 File: images/dii_new.png Graphic file (type png)
 <use images/dii_new.png>
 Package pdftex.def Info: images/dii_new.png  used on input line 121.
@@ -549,12 +556,12 @@ l.74 ...e dei collegamenti}{32}{subsection.2.12.1}
 
  [3] [4{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}] [5]
 Capitolo 1.
-<figures/01_sistema/struttura_ducted_fan_1.jpg, id=643, 1505.625pt x 2007.5pt>
+<figures/01_sistema/struttura_ducted_fan_1.jpg, id=628, 1505.625pt x 2007.5pt>
 File: figures/01_sistema/struttura_ducted_fan_1.jpg Graphic file (type jpg)
 <use figures/01_sistema/struttura_ducted_fan_1.jpg>
 Package pdftex.def Info: figures/01_sistema/struttura_ducted_fan_1.jpg  used on input line 170.
 (pdftex.def)             Requested size: 106.69106pt x 142.26378pt.
-<figures/01_sistema/struttura_ducted_fan_2.jpg, id=644, 1505.625pt x 2007.5pt>
+<figures/01_sistema/struttura_ducted_fan_2.jpg, id=629, 1505.625pt x 2007.5pt>
 File: figures/01_sistema/struttura_ducted_fan_2.jpg Graphic file (type jpg)
 <use figures/01_sistema/struttura_ducted_fan_2.jpg>
 Package pdftex.def Info: figures/01_sistema/struttura_ducted_fan_2.jpg  used on input line 176.
@@ -562,19 +569,19 @@ Package pdftex.def Info: figures/01_sistema/struttura_ducted_fan_2.jpg  used on 
 [6
 
  <./figures/01_sistema/struttura_ducted_fan_1.jpg (PNG copy)> <./figures/01_sistema/struttura_ducted_fan_2.jpg (PNG copy)>]
-<figures/01_sistema/render_dpdf_1.png, id=655, 1084.05pt x 1084.05pt>
+<figures/01_sistema/render_dpdf_1.png, id=640, 1084.05pt x 1084.05pt>
 File: figures/01_sistema/render_dpdf_1.png Graphic file (type png)
 <use figures/01_sistema/render_dpdf_1.png>
 Package pdftex.def Info: figures/01_sistema/render_dpdf_1.png  used on input line 193.
 (pdftex.def)             Requested size: 156.48022pt x 156.49014pt.
-<figures/01_sistema/render_dpdf_2.png, id=656, 1084.05pt x 1084.05pt>
+<figures/01_sistema/render_dpdf_2.png, id=641, 1084.05pt x 1084.05pt>
 File: figures/01_sistema/render_dpdf_2.png Graphic file (type png)
 <use figures/01_sistema/render_dpdf_2.png>
 Package pdftex.def Info: figures/01_sistema/render_dpdf_2.png  used on input line 198.
 (pdftex.def)             Requested size: 156.48022pt x 156.49014pt.
  [7 <./figures/01_sistema/render_dpdf_1.png (PNG copy)> <./figures/01_sistema/render_dpdf_2.png (PNG copy)>] [8]
 Capitolo 2.
-<figures/02_hardware/stm32h745zi_chip.png, id=669, 755.82375pt x 638.385pt>
+<figures/02_hardware/stm32h745zi_chip.png, id=654, 755.82375pt x 638.385pt>
 File: figures/02_hardware/stm32h745zi_chip.png Graphic file (type png)
 <use figures/02_hardware/stm32h745zi_chip.png>
 Package pdftex.def Info: figures/02_hardware/stm32h745zi_chip.png  used on input line 223.
@@ -586,36 +593,36 @@ Underfull \hbox (badness 10000) in paragraph at lines 248--249
 
  []
 
-<figures/02_hardware/nucleo_bridge_alimentazione.png, id=683, 681.54625pt x 574.145pt>
+<figures/02_hardware/nucleo_bridge_alimentazione.png, id=668, 681.54625pt x 574.145pt>
 File: figures/02_hardware/nucleo_bridge_alimentazione.png Graphic file (type png)
 <use figures/02_hardware/nucleo_bridge_alimentazione.png>
 Package pdftex.def Info: figures/02_hardware/nucleo_bridge_alimentazione.png  used on input line 272.
 (pdftex.def)             Requested size: 220.42372pt x 185.68379pt.
 [11]
-<figures/02_hardware/nucleo_h745zi_q_fronte.png, id=693, 362.35374pt x 707.64375pt>
+<figures/02_hardware/nucleo_h745zi_q_fronte.png, id=678, 362.35374pt x 707.64375pt>
 File: figures/02_hardware/nucleo_h745zi_q_fronte.png Graphic file (type png)
 <use figures/02_hardware/nucleo_h745zi_q_fronte.png>
 Package pdftex.def Info: figures/02_hardware/nucleo_h745zi_q_fronte.png  used on input line 284.
 (pdftex.def)             Requested size: 72.84543pt x 142.26378pt.
-<figures/02_hardware/nucleo_h745zi_q_retro.png, id=694, 348.30125pt x 674.52pt>
+<figures/02_hardware/nucleo_h745zi_q_retro.png, id=679, 348.30125pt x 674.52pt>
 File: figures/02_hardware/nucleo_h745zi_q_retro.png Graphic file (type png)
 <use figures/02_hardware/nucleo_h745zi_q_retro.png>
 Package pdftex.def Info: figures/02_hardware/nucleo_h745zi_q_retro.png  used on input line 290.
 (pdftex.def)             Requested size: 73.45898pt x 142.26378pt.
  [12 <./figures/02_hardware/nucleo_bridge_alimentazione.png (PNG copy)> <./figures/02_hardware/nucleo_h745zi_q_fronte.png (PNG copy)> <./figures/02_hardware/nucleo_h745zi_q_retro.png (PNG copy)>] [13]
-<figures/02_hardware/tattu_lipo.jpg, id=711, 357.335pt x 237.88875pt>
+<figures/02_hardware/tattu_lipo.jpg, id=696, 357.335pt x 237.88875pt>
 File: figures/02_hardware/tattu_lipo.jpg Graphic file (type jpg)
 <use figures/02_hardware/tattu_lipo.jpg>
 Package pdftex.def Info: figures/02_hardware/tattu_lipo.jpg  used on input line 332.
 (pdftex.def)             Requested size: 198.38pt x 132.06973pt.
  [14 <./figures/02_hardware/tattu_lipo.jpg (PNG copy)>]
-<figures/02_hardware/powersafe_twin.jpg, id=719, 398.48875pt x 148.555pt>
+<figures/02_hardware/powersafe_twin.jpg, id=704, 398.48875pt x 148.555pt>
 File: figures/02_hardware/powersafe_twin.jpg Graphic file (type jpg)
 <use figures/02_hardware/powersafe_twin.jpg>
 Package pdftex.def Info: figures/02_hardware/powersafe_twin.jpg  used on input line 351.
 (pdftex.def)             Requested size: 198.38pt x 73.95543pt.
  [15 <./figures/02_hardware/powersafe_twin.jpg (PNG copy)>]
-<figures/02_hardware/dfrobot_terminali.png, id=729, 809.0225pt x 542.025pt>
+<figures/02_hardware/dfrobot_terminali.png, id=714, 809.0225pt x 542.025pt>
 File: figures/02_hardware/dfrobot_terminali.png Graphic file (type png)
 <use figures/02_hardware/dfrobot_terminali.png>
 Package pdftex.def Info: figures/02_hardware/dfrobot_terminali.png  used on input line 379.
@@ -630,25 +637,25 @@ Underfull \hbox (badness 10000) in paragraph at lines 390--391
 
  []
 
-<figures/02_hardware/dfrobot_modulo.jpg, id=730, 783.92876pt x 523.9575pt>
+<figures/02_hardware/dfrobot_modulo.jpg, id=715, 783.92876pt x 523.9575pt>
 File: figures/02_hardware/dfrobot_modulo.jpg Graphic file (type jpg)
 <use figures/02_hardware/dfrobot_modulo.jpg>
 Package pdftex.def Info: figures/02_hardware/dfrobot_modulo.jpg  used on input line 400.
 (pdftex.def)             Requested size: 198.38pt x 132.58803pt.
 [16 <./figures/02_hardware/dfrobot_terminali.png (PNG copy)>]
-<figures/02_hardware/power_distribution_board.jpg, id=740, 727.71875pt x 400.49625pt>
+<figures/02_hardware/power_distribution_board.jpg, id=725, 727.71875pt x 400.49625pt>
 File: figures/02_hardware/power_distribution_board.jpg Graphic file (type jpg)
 <use figures/02_hardware/power_distribution_board.jpg>
 Package pdftex.def Info: figures/02_hardware/power_distribution_board.jpg  used on input line 411.
 (pdftex.def)             Requested size: 198.38pt x 109.1743pt.
  [17 <./figures/02_hardware/dfrobot_modulo.jpg (PNG copy)> <./figures/02_hardware/power_distribution_board.jpg (PNG copy)>]
-<figures/02_hardware/turnigy_motor.jpg, id=747, 658.46pt x 481.8pt>
+<figures/02_hardware/turnigy_motor.jpg, id=732, 658.46pt x 481.8pt>
 File: figures/02_hardware/turnigy_motor.jpg Graphic file (type jpg)
 <use figures/02_hardware/turnigy_motor.jpg>
 Package pdftex.def Info: figures/02_hardware/turnigy_motor.jpg  used on input line 443.
 (pdftex.def)             Requested size: 198.38pt x 145.15129pt.
  [18 <./figures/02_hardware/turnigy_motor.jpg (PNG copy)>]
-<figures/02_hardware/turnigy_plush_40a.jpg, id=757, 589.20125pt x 597.23125pt>
+<figures/02_hardware/turnigy_plush_40a.jpg, id=742, 589.20125pt x 597.23125pt>
 File: figures/02_hardware/turnigy_plush_40a.jpg Graphic file (type jpg)
 <use figures/02_hardware/turnigy_plush_40a.jpg>
 Package pdftex.def Info: figures/02_hardware/turnigy_plush_40a.jpg  used on input line 464.
@@ -658,65 +665,65 @@ Underfull \hbox (badness 10000) in paragraph at lines 479--481
 
  []
 
-<figures/02_hardware/apc_9x45.jpg, id=765, 581.17125pt x 334.24875pt>
+<figures/02_hardware/apc_9x45.jpg, id=750, 581.17125pt x 334.24875pt>
 File: figures/02_hardware/apc_9x45.jpg Graphic file (type jpg)
 <use figures/02_hardware/apc_9x45.jpg>
 Package pdftex.def Info: figures/02_hardware/apc_9x45.jpg  used on input line 498.
 (pdftex.def)             Requested size: 198.38pt x 114.09189pt.
 [20]
-<figures/02_hardware/hs82mg_misure.png, id=776, 591.20876pt x 563.10374pt>
+<figures/02_hardware/hs82mg_misure.png, id=761, 591.20876pt x 563.10374pt>
 File: figures/02_hardware/hs82mg_misure.png Graphic file (type png)
 <use figures/02_hardware/hs82mg_misure.png>
 Package pdftex.def Info: figures/02_hardware/hs82mg_misure.png  used on input line 516.
 (pdftex.def)             Requested size: 220.42372pt x 209.94328pt.
  [21 <./figures/02_hardware/apc_9x45.jpg (PNG copy)> <./figures/02_hardware/hs82mg_misure.png (PNG copy)>]
-<figures/02_hardware/hs82mg.jpg, id=785, 304.13625pt x 332.24126pt>
+<figures/02_hardware/hs82mg.jpg, id=769, 304.13625pt x 332.24126pt>
 File: figures/02_hardware/hs82mg.jpg Graphic file (type jpg)
 <use figures/02_hardware/hs82mg.jpg>
 Package pdftex.def Info: figures/02_hardware/hs82mg.jpg  used on input line 541.
 (pdftex.def)             Requested size: 176.33629pt x 192.63414pt.
  [22]
-<figures/02_hardware/hs82mg_terminali.png, id=799, 584.1825pt x 161.60374pt>
+<figures/02_hardware/hs82mg_terminali.png, id=784, 584.1825pt x 161.60374pt>
 File: figures/02_hardware/hs82mg_terminali.png Graphic file (type png)
 <use figures/02_hardware/hs82mg_terminali.png>
 Package pdftex.def Info: figures/02_hardware/hs82mg_terminali.png  used on input line 563.
 (pdftex.def)             Requested size: 220.42372pt x 60.97606pt.
  [23 <./figures/02_hardware/hs82mg.jpg (PNG copy)>] [24 <./figures/02_hardware/hs82mg_terminali.png (PNG copy)>]
-<figures/02_hardware/bno055_breakout.jpg, id=816, 562.1pt x 451.6875pt>
+<figures/02_hardware/bno055_breakout.jpg, id=801, 562.1pt x 451.6875pt>
 File: figures/02_hardware/bno055_breakout.jpg Graphic file (type jpg)
 <use figures/02_hardware/bno055_breakout.jpg>
 Package pdftex.def Info: figures/02_hardware/bno055_breakout.jpg  used on input line 593.
 (pdftex.def)             Requested size: 198.38pt x 159.4094pt.
  [25 <./figures/02_hardware/bno055_breakout.jpg (PNG copy)>]
-<figures/02_hardware/bno055_architettura.png, id=825, 633.36626pt x 610.28pt>
+<figures/02_hardware/bno055_architettura.png, id=810, 633.36626pt x 610.28pt>
 File: figures/02_hardware/bno055_architettura.png Graphic file (type png)
 <use figures/02_hardware/bno055_architettura.png>
 Package pdftex.def Info: figures/02_hardware/bno055_architettura.png  used on input line 616.
 (pdftex.def)             Requested size: 264.51115pt x 254.87247pt.
  [26] [27 <./figures/02_hardware/bno055_architettura.png (PNG copy)>] [28]
-<figures/02_hardware/vl53l1x_pinout.png, id=849, 1363.0925pt x 483.8075pt>
+<figures/02_hardware/vl53l1x_pinout.png, id=834, 1363.0925pt x 483.8075pt>
 File: figures/02_hardware/vl53l1x_pinout.png Graphic file (type png)
 <use figures/02_hardware/vl53l1x_pinout.png>
 Package pdftex.def Info: figures/02_hardware/vl53l1x_pinout.png  used on input line 672.
 (pdftex.def)             Requested size: 418.80373pt x 148.64996pt.
-<figures/02_hardware/vl53l1x_emettitore.jpg, id=850, 682.55pt x 421.575pt>
+<figures/02_hardware/vl53l1x_emettitore.jpg, id=835, 682.55pt x 421.575pt>
 File: figures/02_hardware/vl53l1x_emettitore.jpg Graphic file (type jpg)
 <use figures/02_hardware/vl53l1x_emettitore.jpg>
 Package pdftex.def Info: figures/02_hardware/vl53l1x_emettitore.jpg  used on input line 679.
 (pdftex.def)             Requested size: 198.38pt x 122.52379pt.
  [29 <./figures/02_hardware/vl53l1x_pinout.png (PNG copy)> <./figures/02_hardware/vl53l1x_emettitore.jpg (PNG copy)>]
-<figures/02_hardware/vl53l1x_fov.png, id=861, 654.445pt x 293.095pt>
+<figures/02_hardware/vl53l1x_fov.png, id=846, 654.445pt x 293.095pt>
 File: figures/02_hardware/vl53l1x_fov.png Graphic file (type png)
 <use figures/02_hardware/vl53l1x_fov.png>
 Package pdftex.def Info: figures/02_hardware/vl53l1x_fov.png  used on input line 689.
 (pdftex.def)             Requested size: 308.59187pt x 138.20189pt.
  [30 <./figures/02_hardware/vl53l1x_fov.png (PNG copy)>]
-<figures/02_hardware/vl53l1x_prestazioni.png, id=873, 838.13126pt x 605.26125pt>
+<figures/02_hardware/vl53l1x_prestazioni.png, id=858, 838.13126pt x 605.26125pt>
 File: figures/02_hardware/vl53l1x_prestazioni.png Graphic file (type png)
 <use figures/02_hardware/vl53l1x_prestazioni.png>
 Package pdftex.def Info: figures/02_hardware/vl53l1x_prestazioni.png  used on input line 719.
 (pdftex.def)             Requested size: 330.63559pt x 238.76617pt.
-<figures/02_hardware/schema_collegamenti.png, id=875, 979.66pt x 1082.0425pt>
+<figures/02_hardware/schema_collegamenti.png, id=860, 979.66pt x 1082.0425pt>
 File: figures/02_hardware/schema_collegamenti.png Graphic file (type png)
 <use figures/02_hardware/schema_collegamenti.png>
 Package pdftex.def Info: figures/02_hardware/schema_collegamenti.png  used on input line 730.
@@ -725,131 +732,170 @@ Package pdftex.def Info: figures/02_hardware/schema_collegamenti.png  used on in
 Capitolo 3.
 [35
 
-]
-LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 886.
- [36]
-Overfull \hbox (4.17674pt too wide) in paragraph at lines 888--889
-[]\OT1/cmtt/m/n/10.95 pwm.c \OT1/cmr/m/n/10.95 --- in-cap-su-la la ge-stio-ne dei se-gna-li PWM de-sti-na-ti a mo-to-ri (\OT1/cmtt/m/n/10.95 TIM4-CH2\OT1/cmr/m/n/10.95 , \OT1/cmtt/m/n/10.95 TIM4-CH3\OT1/cmr/m/n/10.95 )
+] [36] [37]
+Overfull \hbox (55.51607pt too wide) in paragraph at lines 920--921
+\OT1/cmr/m/n/10.95 l'ag-gior-na-men-to del ra-mo IMU{attuatori. La sua sca-den-za im-po-sta la flag \OT1/cmtt/m/n/10.95 actuate[]servo[]control\OT1/cmr/m/n/10.95 ,
  []
 
-[37] [38] [39]
-<figures/03_firmware/flow_vl53l1x.png, id=942, 559.08875pt x 1606.0pt>
+[38]
+Overfull \hbox (31.67557pt too wide) in paragraph at lines 948--949
+\OT1/cmr/m/n/10.95 con il suc-ces-si-vo riav-vio del-l'ac-qui-si-zio-ne tra-mi-te \OT1/cmtt/m/n/10.95 VL53L1[]ClearInterruptAndStartMeasurement()\OT1/cmr/m/n/10.95 . 
+ []
+
+[39]
+<figures/03_firmware/flow_vl53l1x.png, id=928, 559.08875pt x 1606.0pt>
 File: figures/03_firmware/flow_vl53l1x.png Graphic file (type png)
 <use figures/03_firmware/flow_vl53l1x.png>
-Package pdftex.def Info: figures/03_firmware/flow_vl53l1x.png  used on input line 952.
-(pdftex.def)             Requested size: 176.33629pt x 506.52983pt.
+Package pdftex.def Info: figures/03_firmware/flow_vl53l1x.png  used on input line 970.
+(pdftex.def)             Requested size: 220.42372pt x 633.17455pt.
+ [40]
+Overfull \vbox (33.6521pt too high) has occurred while \output is active []
 
-Overfull \hbox (61.1271pt too wide) in paragraph at lines 958--959
+ [41 <./figures/03_firmware/flow_vl53l1x.png>]
+Overfull \hbox (61.1271pt too wide) in paragraph at lines 976--977
 \OT1/cmr/m/n/10.95 men-te ri-le-van-te ^^Re il bloc-co de-di-ca-to al-l'ac-qui-si-zio-ne del-la po-sa ini-zia-le (\OT1/cmtt/m/n/10.95 DPDF[]BNO055[]firmware[]read[]init\OT1/cmr/m/n/10.95 ),
  []
 
-[40 <./figures/03_firmware/flow_vl53l1x.png>]
-<figures/03_firmware/flow_bno055.png, id=949, 509.905pt x 1606.0pt>
+<figures/03_firmware/flow_bno055.png, id=939, 509.905pt x 1606.0pt>
 File: figures/03_firmware/flow_bno055.png Graphic file (type png)
 <use figures/03_firmware/flow_bno055.png>
-Package pdftex.def Info: figures/03_firmware/flow_bno055.png  used on input line 962.
+Package pdftex.def Info: figures/03_firmware/flow_bno055.png  used on input line 980.
 (pdftex.def)             Requested size: 154.29929pt x 485.99417pt.
-<figures/03_firmware/flow_complessivo.png, id=950, 970.62625pt x 1606.0pt>
+[42 <./figures/03_firmware/flow_bno055.png>]
+<figures/03_firmware/flow_complessivo.png, id=947, 4223.78pt x 8221.71625pt>
 File: figures/03_firmware/flow_complessivo.png Graphic file (type png)
 <use figures/03_firmware/flow_complessivo.png>
-Package pdftex.def Info: figures/03_firmware/flow_complessivo.png  used on input line 971.
-(pdftex.def)             Requested size: 330.63559pt x 547.08653pt.
- [41 <./figures/03_firmware/flow_bno055.png>] [42 <./figures/03_firmware/flow_complessivo.png>] [43] [44]
-Overfull \hbox (4.05597pt too wide) in paragraph at lines 1028--1029
-[]\OT1/cmtt/m/n/10.95 CMD,top,bottom,roll,pitch \OT1/cmr/m/n/10.95 --- co-man-do di at-tua-zio-ne, ac-cet-ta-to esclu-si-va-men-te quan-
- []
+Package pdftex.def Info: figures/03_firmware/flow_complessivo.png  used on input line 994.
+(pdftex.def)             Requested size: 308.59187pt x 600.66957pt.
+ [43]
+Overfull \vbox (1.14713pt too high) has occurred while \output is active []
 
-[45] [46]
-Capitolo 4.
-[47
-
-] (/usr/local/texlive/2024/texmf-dist/tex/latex/listings/lstlang1.sty
-File: lstlang1.sty 2024/02/21 1.10 listings language file
-)
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 1087.
- [48]
-LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 1118.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 1118.
+ [44 <./figures/03_firmware/flow_complessivo.png>]
+LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 1003.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 1003.
 
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbackslash' on input line 1118.
+(Font)              for symbol `textbackslash' on input line 1003.
 
-[49] [50] [51] [52] [53] [54]
-<figures/04_telemetria/test_gradino_motori.png, id=1098, 1204.5pt x 803.0pt>
+[45] [46]
+Overfull \hbox (21.7pt too wide) in paragraph at lines 1038--1039
+[]\OT1/cmr/m/n/10.95 Nel firm-ware, il pe-rio-do no-mi-na-le del-la te-le-me-tria ^^Re de-fi-ni-to dal-la ma-cro \OT1/cmtt/m/n/10.95 TELEMETRY[]PERIOD[]MS\OT1/cmr/m/n/10.95 ,
+ []
+
+
+Overfull \hbox (20.2325pt too wide) in paragraph at lines 1038--1039
+\OT1/cmr/m/n/10.95 le. La di-men-sio-ne mas-si-ma del-la strin-ga tra-smes-sa ^^Re in-ve-ce de-fi-ni-ta da \OT1/cmtt/m/n/10.95 STANDARD[]MESSAGE[]LENGTH\OT1/cmr/m/n/10.95 ,
+ []
+
+
+Overfull \hbox (20.64342pt too wide) in paragraph at lines 1054--1055
+[]\OT1/cmr/m/n/10.95 La pre-sen-za di cam-pi dia-gno-sti-ci co-me \OT1/cmtt/m/n/10.95 uart[]rx[]errors\OT1/cmr/m/n/10.95 , \OT1/cmtt/m/n/10.95 uart[]rx[]overflows\OT1/cmr/m/n/10.95 , \OT1/cmtt/m/n/10.95 uart[]bad[]lines\OT1/cmr/m/n/10.95 ,
+ []
+
+<figures/03_firmware/tim3_config.png, id=968, 409.53pt x 743.77875pt>
+File: figures/03_firmware/tim3_config.png Graphic file (type png)
+<use figures/03_firmware/tim3_config.png>
+Package pdftex.def Info: figures/03_firmware/tim3_config.png  used on input line 1060.
+(pdftex.def)             Requested size: 220.42372pt x 400.34074pt.
+[47] [48 <./figures/03_firmware/tim3_config.png>] [49]
+Capitolo 4.
+[50
+
+] (/usr/local/texlive/2024/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2024/02/21 1.10 listings language file
+)
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 1124.
+ [51]
+
+LaTeX Warning: Reference `sec:architettura_controllo' on page 52 undefined on input line 1143.
+
+[52] [53] [54] [55] [56]
+<figures/04_telemetria/kill_switch.png, id=1089, 698.61pt x 389.455pt>
+File: figures/04_telemetria/kill_switch.png Graphic file (type png)
+<use figures/04_telemetria/kill_switch.png>
+Package pdftex.def Info: figures/04_telemetria/kill_switch.png  used on input line 1269.
+(pdftex.def)             Requested size: 330.63559pt x 184.32152pt.
+ [57 <./figures/04_telemetria/kill_switch.png>]
+<figures/04_telemetria/mod_controllo.png, id=1095, 491.8375pt x 602.25pt>
+File: figures/04_telemetria/mod_controllo.png Graphic file (type png)
+<use figures/04_telemetria/mod_controllo.png>
+Package pdftex.def Info: figures/04_telemetria/mod_controllo.png  used on input line 1297.
+(pdftex.def)             Requested size: 264.51115pt x 323.90523pt.
+ [58 <./figures/04_telemetria/mod_controllo.png>]
+<figures/04_telemetria/test_gradino_motori.png, id=1102, 1204.5pt x 803.0pt>
 File: figures/04_telemetria/test_gradino_motori.png Graphic file (type png)
 <use figures/04_telemetria/test_gradino_motori.png>
-Package pdftex.def Info: figures/04_telemetria/test_gradino_motori.png  used on input line 1258.
+Package pdftex.def Info: figures/04_telemetria/test_gradino_motori.png  used on input line 1308.
 (pdftex.def)             Requested size: 387.9479pt x 258.63162pt.
- [55 <./figures/04_telemetria/test_gradino_motori.png>] [56] [57] [58]
+ [59 <./figures/04_telemetria/test_gradino_motori.png>] [60] [61] [62]
 Capitolo 5.
 
-Overfull \hbox (5.45389pt too wide) in paragraph at lines 1343--1344
+Overfull \hbox (5.45389pt too wide) in paragraph at lines 1393--1394
 []\OT1/cmr/m/n/10.95 La mo-del-li-sti-ca ana-li-ti-ca clas-si-ca, ba-sa-ta sul-le equa-zio-ni car-di-na-li del-la di-na-mi-ca di Newton-
  []
 
-<figures/05_modello/dataset_prbs1.png.jpeg, id=1142, 1606.0pt x 765.86125pt>
+<figures/05_modello/dataset_prbs1.png.jpeg, id=1147, 1606.0pt x 765.86125pt>
 File: figures/05_modello/dataset_prbs1.png.jpeg Graphic file (type jpg)
 <use figures/05_modello/dataset_prbs1.png.jpeg>
-Package pdftex.def Info: figures/05_modello/dataset_prbs1.png.jpeg  used on input line 1359.
+Package pdftex.def Info: figures/05_modello/dataset_prbs1.png.jpeg  used on input line 1409.
 (pdftex.def)             Requested size: 330.63559pt x 157.66867pt.
-[59
+[63
 
 ]
-<figures/05_modello/dataset_prbs2.png.jpeg, id=1147, 1606.0pt x 766.865pt>
+<figures/05_modello/dataset_prbs2.png.jpeg, id=1152, 1606.0pt x 766.865pt>
 File: figures/05_modello/dataset_prbs2.png.jpeg Graphic file (type jpg)
 <use figures/05_modello/dataset_prbs2.png.jpeg>
-Package pdftex.def Info: figures/05_modello/dataset_prbs2.png.jpeg  used on input line 1364.
+Package pdftex.def Info: figures/05_modello/dataset_prbs2.png.jpeg  used on input line 1414.
 (pdftex.def)             Requested size: 330.63559pt x 157.87532pt.
- [60 <./figures/05_modello/dataset_prbs1.png.jpeg> <./figures/05_modello/dataset_prbs2.png.jpeg>] [61]
-Overfull \hbox (24.776pt too wide) in paragraph at lines 1454--1455
+ [64 <./figures/05_modello/dataset_prbs1.png.jpeg> <./figures/05_modello/dataset_prbs2.png.jpeg>] [65]
+Overfull \hbox (24.776pt too wide) in paragraph at lines 1504--1505
 \OT1/cmr/m/it/10.95 tion Tool-box\OT1/cmr/m/n/10.95 , con-fi-gu-ra-ta per im-por-re la sta-bi-lit^^Ra del mo-del-lo sti-ma-to (op-zio-ne \OT1/cmtt/m/n/10.95 EnforceStability\OT1/cmr/m/n/10.95 ).
  []
 
-[62]
-<figures/05_modello/cross_validation1.png, id=1207, 1477.52pt x 724.7075pt>
+[66]
+<figures/05_modello/cross_validation1.png, id=1212, 1477.52pt x 724.7075pt>
 File: figures/05_modello/cross_validation1.png Graphic file (type png)
 <use figures/05_modello/cross_validation1.png>
-Package pdftex.def Info: figures/05_modello/cross_validation1.png  used on input line 1491.
+Package pdftex.def Info: figures/05_modello/cross_validation1.png  used on input line 1541.
 (pdftex.def)             Requested size: 418.80373pt x 205.41585pt.
-<figures/05_modello/cross_validation2.png, id=1208, 1606.0pt x 667.49374pt>
+<figures/05_modello/cross_validation2.png, id=1213, 1606.0pt x 667.49374pt>
 File: figures/05_modello/cross_validation2.png Graphic file (type png)
 <use figures/05_modello/cross_validation2.png>
-Package pdftex.def Info: figures/05_modello/cross_validation2.png  used on input line 1496.
+Package pdftex.def Info: figures/05_modello/cross_validation2.png  used on input line 1546.
 (pdftex.def)             Requested size: 418.80373pt x 174.06372pt.
- [63 <./figures/05_modello/cross_validation1.png>] [64 <./figures/05_modello/cross_validation2.png>]
-<figures/05_modello/step_response1.png, id=1221, 1318.9275pt x 692.5875pt>
+ [67 <./figures/05_modello/cross_validation1.png>] [68 <./figures/05_modello/cross_validation2.png>]
+<figures/05_modello/step_response1.png, id=1227, 1318.9275pt x 692.5875pt>
 File: figures/05_modello/step_response1.png Graphic file (type png)
 <use figures/05_modello/step_response1.png>
-Package pdftex.def Info: figures/05_modello/step_response1.png  used on input line 1544.
+Package pdftex.def Info: figures/05_modello/step_response1.png  used on input line 1594.
 (pdftex.def)             Requested size: 418.80373pt x 219.9205pt.
-<figures/05_modello/step_response2.png, id=1222, 1313.90875pt x 692.5875pt>
+<figures/05_modello/step_response2.png, id=1228, 1313.90875pt x 692.5875pt>
 File: figures/05_modello/step_response2.png Graphic file (type png)
 <use figures/05_modello/step_response2.png>
-Package pdftex.def Info: figures/05_modello/step_response2.png  used on input line 1549.
+Package pdftex.def Info: figures/05_modello/step_response2.png  used on input line 1599.
 (pdftex.def)             Requested size: 418.80373pt x 220.75537pt.
- [65 <./figures/05_modello/step_response1.png>] [66 <./figures/05_modello/step_response2.png>] [67] [68]
+ [69 <./figures/05_modello/step_response1.png>] [70 <./figures/05_modello/step_response2.png>] [71] [72]
 Capitolo 6.
 
-Overfull \hbox (49.39787pt too wide) in paragraph at lines 1632--1633
+Overfull \hbox (49.39787pt too wide) in paragraph at lines 1682--1683
 []\OT1/cmr/m/n/10.95 Il si-mu-la-to-re im-ple-men-ta l'in-te-gra-zio-ne nu-me-ri-ca del-le equa-zio-ni del mo-to me-dian-te un'\OT1/cmr/bx/n/10.95 architettura
  []
 
-[69
+[73
 
-] [70] [71] [72] [73]
-<figures/06_simulazione/screenshot_simulatore.png, id=1345, 1927.2pt x 1084.05pt>
+] [74] [75] [76] [77]
+<figures/06_simulazione/screenshot_simulatore.png, id=1350, 1927.2pt x 1084.05pt>
 File: figures/06_simulazione/screenshot_simulatore.png Graphic file (type png)
 <use figures/06_simulazione/screenshot_simulatore.png>
-Package pdftex.def Info: figures/06_simulazione/screenshot_simulatore.png  used on input line 1789.
+Package pdftex.def Info: figures/06_simulazione/screenshot_simulatore.png  used on input line 1839.
 (pdftex.def)             Requested size: 418.80373pt x 235.56393pt.
- [74] [75 <./figures/06_simulazione/screenshot_simulatore.png>] [76] [77]
+ [78] [79 <./figures/06_simulazione/screenshot_simulatore.png>] [80] [81]
 Capitolo 7.
-[78
+[82
 
-] [79] [80] [81] [82] [83] (/Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.bbl [84]) [85
+] [83] [84] [85] [86] [87] (/Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.bbl [88]) [89
 
 ] (/Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.aux)
  ***********
@@ -860,22 +906,28 @@ L3 programming layer <2024-02-20>
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: There were multiply-defined labels.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 2EED10792DCDBBA034D2C69C2BE7F6AF;29286.
+(rerunfilecheck)             Checksum: 4405FCC3CCB30D7FB3BD3152927B5060;28616.
  ) 
 Here is how much of TeX's memory you used:
- 17733 strings out of 474116
- 287687 string characters out of 5743682
+ 17745 strings out of 474116
+ 288414 string characters out of 5743682
  2278187 words of memory out of 5000000
- 39344 multiletter control sequences out of 15000+600000
- 577052 words of font info for 104 fonts, out of 8000000 for 9000
+ 39353 multiletter control sequences out of 15000+600000
+ 575992 words of font info for 101 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,15n,93p,1388b,2045s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfbx1095.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on /Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.pdf (86 pages, 14882641 bytes).
+Output written on /Users/albertonalli/Downloads/Ducted_Fan/Relazione/.texpadtmp/main.pdf (90 pages, 16060745 bytes).
 PDF statistics:
- 1644 PDF objects out of 1728 (max. 8388607)
- 1454 compressed objects within 15 object streams
- 503 named destinations out of 1000 (max. 500000)
- 1148 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1651 PDF objects out of 1728 (max. 8388607)
+ 1453 compressed objects within 15 object streams
+ 508 named destinations out of 1000 (max. 500000)
+ 1139 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -920,6 +920,29 @@ I timer impiegati svolgono ruoli funzionalmente distinti:
     \item \textbf{TIM7}: utilizzato come \textit{timebase} per la generazione periodica dell'interrupt che abilita l'aggiornamento del ramo IMU–attuatori. La sua scadenza imposta la flag \texttt{actuate\_servo\_control}, che il main loop intercetta per eseguire la lettura del BNO055, aggiornare i valori operativi dei servomotori e applicare i PWM agli attuatori. Nella configurazione di test open-loop i PWM sono ricevuti da MATLAB; la stessa struttura temporale rimane tuttavia compatibile con la successiva integrazione dei PID di assetto, tarati a partire dal modello identificato.
 \end{itemize}
 
+\begin{lstlisting}[caption={Callback periodica dei timer utilizzati per safe startup, ramo IMU–attuatori e telemetria.}, label={lst:nome}]
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM6) {
+        HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+        current_number_of_toggles++;
+    }
+    else if (htim->Instance == TIM7) {
+        actuate_servo_control = true;
+    }
+    else if (htim->Instance == TIM3) {
+        telemetry_time_ms += TELEMETRY_PERIOD_MS;
+if (telemetry_pending < TELEMETRY_MAX_PENDING) {
+            telemetry_pending++;
+        } else {
+            telemetry_overrun++;
+        }
+    }
+}
+
+}
+\end{lstlisting}
+
 I valori di Prescaler e Auto-Reload Register (ARR) di ciascun timer sono stati calcolati a partire dalla frequenza di clock del bus APB1, configurata a 75 [MHz], secondo la relazione standard:
 \begin{equation}
     f_{PWM} = \frac{f_{clk}}{(Prescaler + 1) \cdot (ARR + 1)}
@@ -956,7 +979,7 @@ La sequenza di inizializzazione del sensore comprende: la verifica del corretto 
 
 Subito dopo l'inizializzazione, e prima dell'avvio del ciclo di controllo, il firmware acquisisce un campione di posa iniziale tramite le funzioni del modulo IMU, che memorizzano gli angoli di Eulero correnti come riferimento. Tutte le letture successive vengono espresse come scostamento rispetto a questa posa iniziale: in questo modo i PID di assetto lavorano su angoli relativi alla configurazione di equilibrio meccanico in cui il drone si trova all'accensione, evitando la dipendenza dall'orientamento magnetico assoluto e semplificando il confronto con la simulazione.
 
-Le letture periodiche degli angoli avvengono nel ramo IMU–servo a 100 [Hz], frequenza coerente con la massima banda passante della \textit{sensor fusion} interna al BNO055 in modalità NDOF. I valori di roll, pitch e yaw vengono mantenuti internamente come grandezze angolari e, al momento della composizione della telemetria, vengono convertiti in centesimi di grado. Questa rappresentazione consente di trasmettere informazione angolare con precisione di 0.01° utilizzando soli interi nella stringa di telemetria.
+Le letture periodiche degli angoli avvengono nel ramo IMU–servo a 50 [Hz], frequenza coerente con la massima banda passante della \textit{sensor fusion} interna al BNO055 in modalità NDOF. I valori di roll, pitch e yaw vengono mantenuti internamente come grandezze angolari e, al momento della composizione della telemetria, vengono convertiti in centesimi di grado. Questa rappresentazione consente di trasmettere informazione angolare con precisione di 0.01° utilizzando soli interi nella stringa di telemetria.
 
 %--------------------------------------------------------------
 \section{Diagrammi di flusso}
@@ -1009,6 +1032,32 @@ Il firmware riconosce quattro comandi distinti, terminati dal carattere di nuova
 \begin{itemize}
     \item \textbf{CMD,top,bottom,roll,pitch} — comando di attuazione utilizzato durante le prove sperimentali. I quattro campi numerici rappresentano, nell'ordine: PWM del motore superiore, PWM del motore inferiore, PWM del servo di roll, PWM del servo di pitch. Tutti i valori sono espressi in unità CCR (\textit{Capture-Compare Register}) e vengono saturati in lettura entro i limiti hardware definiti in \texttt{config.h}. In particolare, \texttt{LOWER\_LIMIT\_MOTOR} e \texttt{UPPER\_LIMIT\_MOTOR} delimitano l'intervallo PWM ammesso per gli ESC dei motori, mentre \texttt{LOWER\_LIMIT\_SERVO}, \texttt{CENTER\_SERVO} e \texttt{UPPER\_LIMIT\_SERVO} definiscono rispettivamente il limite inferiore, la posizione neutra e il limite superiore dei servomotori associati ai flap. Le costanti \texttt{CCR\_PER\_DEGREE} e \texttt{MAX\_FLAP\_ANGLE\_DEG} permettono invece di collegare il comando PWM alla corrispondente escursione angolare dei flap, rendendo esplicito il vincolo meccanico imposto agli attuatori. I valori dei servomotori vengono aggiornati dopo la saturazione, mentre i valori dei motori vengono applicati solo se i motori risultano abilitati e non è presente una condizione di \textit{kill} latched.
 
+\begin{lstlisting}[caption={Parsing del comando CMD e saturazione dei valori PWM ricevuti da MATLAB.}, label={lst:nome}]
+else if (strncmp(rx_buffer, "CMD,", 4) == 0) {
+
+    int top, bottom, roll, pitch;
+
+    if (sscanf(rx_buffer, "CMD,%d,%d,%d,%d",
+               &top, &bottom, &roll, &pitch) == 4) {
+
+        if (top    < LOWER_LIMIT_MOTOR) top    = LOWER_LIMIT_MOTOR;
+        if (top    > UPPER_LIMIT_MOTOR) top    = UPPER_LIMIT_MOTOR;
+        if (bottom < LOWER_LIMIT_MOTOR) bottom = LOWER_LIMIT_MOTOR;
+        if (bottom > UPPER_LIMIT_MOTOR) bottom = UPPER_LIMIT_MOTOR;
+
+        if (roll   < LOWER_LIMIT_SERVO) roll   = LOWER_LIMIT_SERVO;
+        if (roll   > UPPER_LIMIT_SERVO) roll   = UPPER_LIMIT_SERVO;
+        if (pitch  < LOWER_LIMIT_SERVO) pitch  = LOWER_LIMIT_SERVO;
+        if (pitch  > UPPER_LIMIT_SERVO) pitch  = UPPER_LIMIT_SERVO;
+
+        ext_roll_pwm  = (uint16_t) roll;
+        ext_pitch_pwm = (uint16_t) pitch;
+    }
+}
+
+}
+\end{lstlisting}
+
     \item \textbf{MOTOR\_ON} — richiede al firmware di passare dallo stato disarmato allo stato armato. In risposta, il firmware abilita la possibilità di applicare i successivi comandi PWM ai motori, mantenendo inizialmente i valori al limite inferiore, e risponde con \texttt{ACK\_ON}.
 
     \item \textbf{MOTOR\_OFF} — richiede il ritorno allo stato disarmato. Il firmware forza i motori al PWM minimo, risponde con \texttt{ACK\_OFF} e disabilita l'esecuzione dei comandi CMD successivi fino al prossimo MOTOR\_ON.
@@ -1022,6 +1071,31 @@ La saturazione software rappresenta un elemento essenziale della robustezza del 
 
 \subsection{ACK, watchdog e diagnostica UART}
 Il sistema di \textit{acknowledgement} consente a MATLAB di verificare che i comandi inviati siano stati ricevuti e interpretati correttamente dal firmware. A ogni comando di stato il firmware associa una risposta specifica: \texttt{ACK\_ON} per l'abilitazione dei motori, \texttt{ACK\_OFF} per lo spegnimento controllato, \texttt{ACK\_KILL} per l'arresto di emergenza e \texttt{ACK\_ERR} per righe non valide o condizioni di errore.
+
+\begin{lstlisting}[caption={Enumerazioni utilizzate per gli acknowledge e per la codifica delle cause di arresto.}, label={lst:nome}]
+typedef enum {
+    ACK_NONE = 0,
+    ACK_ON,
+    ACK_OFF,
+    ACK_KILL,
+    ACK_ERR
+} ack_t;
+
+typedef enum {
+    STOP_NONE = 0,
+    STOP_CMD_TIMEOUT,
+    STOP_UART_ERROR,
+    STOP_RX_OVERFLOW,
+    STOP_MOTOR_OFF,
+    STOP_KILL_CMD,
+    STOP_BUTTON
+} stop_reason_t;
+
+volatile ack_t ack_pending = ACK_NONE;
+volatile stop_reason_t stop_reason = STOP_NONE;
+
+}
+\end{lstlisting}
 
 Gli \textit{acknowledge} vengono gestiti tramite una variabile di stato dedicata e trasmessi nel ciclo principale solo quando la UART risulta libera. In questo modo la risposta al comando non viene inviata direttamente all'interno della callback di ricezione, mantenendo leggera la ISR e riducendo il rischio di interferenze con la trasmissione periodica della telemetria. Quando è presente un \textit{acknowledge} pendente, esso viene inviato con priorità rispetto alla telemetria, così da permettere a MATLAB di sincronizzarsi rapidamente con lo stato interno del firmware.
 
@@ -1041,15 +1115,44 @@ La generazione del \textit{tick} telemetrico è affidata al timer TIM3. A ogni i
 
 La trasmissione effettiva viene gestita nel ciclo principale. Il firmware procede all'invio solo se sono presenti campioni pendenti, se la UART non è occupata e se non ci sono messaggi di \textit{acknowledge} da trasmettere con priorità. Se la UART rimane occupata o la trasmissione DMA precedente non è ancora conclusa, i campioni vengono accumulati fino al limite definito da \texttt{TELEMETRY\_MAX\_PENDING}. Al superamento di tale limite viene incrementato il contatore \texttt{telemetry\_overrun}, successivamente inserito nella telemetria stessa. In questo modo eventuali problemi di temporizzazione o saturazione del canale seriale diventano informazioni diagnostiche disponibili durante l'analisi dei dati.
 
-Prima di comporre la riga CSV, il firmware esegue uno \textit{snapshot} delle variabili da trasmettere. Tale operazione viene effettuata disabilitando temporaneamente gli interrupt, in modo da copiare in modo coerente le grandezze condivise tra callback e ciclo principale. La sezione critica viene mantenuta il più breve possibile: al suo interno vengono copiati soltanto i valori necessari, mentre la formattazione della stringa viene eseguita successivamente, a interrupt riabilitati.
-
 La riga telemetrica viene costruita in formato CSV tramite \texttt{snprintf()} e contiene sia le grandezze fisiche del sistema sia informazioni relative ai comandi applicati e allo stato diagnostico del firmware. Il formato utilizzato è il seguente:
 
-\begin{verbatim}
-time_ms,roll_cdeg,pitch_cdeg,yaw_cdeg,alt_mm,top_pwm,bottom_pwm,
-roll_pwm,pitch_pwm,motors_enabled,uart_rx_errors,uart_rx_overflows,
-uart_bad_lines,telemetry_overrun,stop_reason
-\end{verbatim}
+\begin{lstlisting}[caption={Composizione della riga telemetrica e trasmissione non bloccante tramite DMA. }, label={lst:nome}]
+if (telemetry_pending > 0 &&
+    !uart_tx_busy &&
+    ack_pending == ACK_NONE) {
+
+    telemetry_pending--;
+
+    int len = snprintf(telemetry_tx_buffer,
+                       sizeof(telemetry_tx_buffer),
+                       "%lu,%d,%d,%d,%d,%d,%d,%u,%u,%d,%lu,%lu,%lu,%lu,%lu\n",
+                       sample_time,
+                       roll_cdeg_snapshot,
+                       pitch_cdeg_snapshot,
+                       yaw_cdeg_snapshot,
+                       alt_mm_snapshot,
+                       top_pwm_snapshot,
+                       bottom_pwm_snapshot,
+                       roll_pwm_snapshot,
+                       pitch_pwm_snapshot,
+                       motors_enabled_snapshot,
+                       uart_rx_errors,
+                       uart_rx_overflows,
+                       uart_bad_lines,
+                       telemetry_overrun,
+                       stop_reason);
+
+    if (len > 0 && len < (int)sizeof(telemetry_tx_buffer)) {
+        uart_tx_busy = true;
+        HAL_UART_Transmit_DMA(&huart3,
+                              (uint8_t*)telemetry_tx_buffer,
+                              (uint16_t)len);
+    }
+}
+
+}
+\end{lstlisting}
 
 La presenza di campi diagnostici come \texttt{uart\_rx\_errors}, \texttt{uart\_rx\_overflows}, \texttt{uart\_bad\_lines}, \texttt{telemetry\_overrun} e \texttt{stop\_reason} permette di distinguere un comportamento fisico del drone da un eventuale problema di comunicazione o acquisizione. In questo modo ogni prova sperimentale può essere analizzata mettendo in relazione lo stato del DPDF, i comandi effettivamente applicati e la qualità del collegamento seriale.
 
@@ -1057,7 +1160,7 @@ La trasmissione della riga avviene tramite DMA, utilizzando \texttt{HAL\_UART\_T
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{figures/03_firmware/tim3_config.png}
+    \includegraphics[width=0.4\textwidth]{figures/03_firmware/tim3_config.png}
     \caption{Configurazione di TIM3 per la generazione del tick telemetrico}
     \label{fig:tim3_config}
 \end{figure}
@@ -1412,7 +1515,7 @@ fprintf("===================================\n");
 		\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs2.png}
-		\caption{\textit{Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit{flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sinistra l'asse di \textit{roll}, a destra l'asse di \textit{pitch}}
+		\caption{\textit{Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit{flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sopra l'asse di \textit{roll}, a sotto l'asse di \textit{pitch}}
 		\label{fig:dataset_prbs}
 	\end{figure}
 	La centratura del segnale d'ingresso rispetto alla posizione neutra del \textit{flap} ($CCR_\text{neutro} = 1125$) è governata dalla relazione:
@@ -1486,14 +1589,14 @@ data_ident = iddata(y_centered, u_centered, Ts);
 			\toprule
 			\textbf{Coefficiente} & \textbf{$G_\text{roll}(s)$ (2p, 1z)} & \textbf{$G_\text{pitch}(s)$ (3p, 1z)} \\
 			\midrule
-			$b_1$ & --- (-1.832) & --- (-2.033) \\
-			$b_0$ & --- (-9.160) & --- (-8.130) \\
-			$a_2$ & --- (n/a)         & --- (12.00) \\
-			$a_1$ & --- (20.00) & --- (70.00) \\
-			$a_0$ & --- (100.00) & --- (100.00) \\
+			$b_1$ & (-1.832) & (-2.033) \\
+			$b_0$ &  (-9.160) & (-8.130) \\
+			$a_2$ &  (n/a)   & (12.00) \\
+			$a_1$ & (20.00) &  (70.00) \\
+			$a_0$ & (100.00) & (100.00) \\
 			\bottomrule
 		\end{tabular}
-		\caption{Coefficienti numerici delle funzioni di trasferimento identificate. I valori vanno inseriti a partire dall'output dello script \texttt{Identify\_and\_tune.m}}
+		\caption{Coefficienti numerici delle funzioni di trasferimento identificate.}
 		\label{tab:coefficienti_tf}
 	\end{table}
 	
@@ -1534,17 +1637,17 @@ fitC = goodnessOfFit(sim(sysC, data_ident).y, y_centered, 'NRMSE') * 100;
 		\item Asse di \textit{pitch}: $\text{Fit} = 77.67\%$
 	\end{itemize}
 	
-	Si tratta di valori soddisfacenti per un'identificazione \textit{black-box} su un sistema dotato di non-linearità importanti e condizioni di prova vincolate. La quota residua di varianza non spiegata dal modello è imputabile a effetti che il modello LTI non può catturare: in particolare l'attrito non lineare sui perni dei \textit{flap}, l'azione non perfettamente simmetrica delle funi di vincolo e i piccoli accoppiamenti tra gli assi non separabili dal modello SISO.
+Si tratta di valori soddisfacenti per un’identificazione black-box su un sistema dotato di non linearità importanti e testato in condizioni vincolate. La quota residua di varianza non spiegata dal modello è imputabile a effetti che un modello lineare SISO non può catturare integralmente: in particolare l’attrito non lineare sui perni dei flap, l’azione non perfettamente simmetrica delle funi di vincolo e i piccoli accoppiamenti tra gli assi. I modelli identificati devono quindi essere interpretati come approssimazioni locali della dinamica dominante del DPDF nella configurazione sperimentale adottata, sufficienti per la sintesi preliminare dei regolatori PIDF e per la successiva verifica in simulazione.
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation1.png}
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation2.png}
 	\end{figure}
 	
 		\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation2.png}
-		\caption{Analisi di \textit{cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata). A sinistra l'asse di \textit{roll} (Fit $77.85\%$), a destra l'asse di \textit{pitch} (Fit $77.67\%$)}
+		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation1.png}
+		\caption{Analisi di \textit{cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata).Sopra l'asse di \textit{roll} (Fit $77.85\%$), sotto l'asse di \textit{pitch} (Fit $77.67\%$)}
 		\label{fig:cross_validation}
 	\end{figure}
 	
@@ -1555,6 +1658,65 @@ fitC = goodnessOfFit(sim(sysC, data_ident).y, y_centered, 'NRMSE') * 100;
 		\label{eq:guadagno_statico}
 	\end{equation}
 	I test condotti hanno restituito, per entrambi gli assi, un guadagno statico di \textbf{segno negativo} ($\mu < 0$). Questo risultato fornisce una conferma fisica del modello stimato: un incremento del PWM del servomotore --- corrispondente a un'inclinazione positiva del \textit{flap} secondo la convenzione del firmware --- genera una coppia aerodinamica che ruota il drone nel verso opposto rispetto al sistema di riferimento destrorso solidale all'IMU. Tale inversione di segno, conseguenza della geometria meccanica del prototipo, vincolerà la successiva sintesi del controllore e la sua integrazione nel \textit{mixer} di controllo del firmware.
+	
+	%--------------------------------------------------------------
+	\section{Il regolatore PID: principi di funzionamento}
+	\label{sec:principi_pid}
+	
+	Prima di descrivere la procedura di sintesi automatica, è opportuno richiamare il principio di funzionamento del regolatore impiegato. Il \textit{DPDF} è un sistema intrinsecamente instabile attorno alla condizione di assetto orizzontale: in assenza di azione correttiva, il momento ribaltante indotto dall'eccentricità del baricentro (Sezione~\ref{sec:eccentricita_cg}) fa divergere gli angoli di \textit{roll} e \textit{pitch}. Il compito del controllore è chiudere un anello di retroazione che, confrontando istante per istante l'assetto misurato dall'IMU con il riferimento desiderato, generi un comando ai \textit{flap} tale da riportare il velivolo verso l'equilibrio.
+	
+	Si definisce a tal fine il segnale di \textbf{errore} come differenza tra l'angolo di riferimento $\theta_\text{rif}$ e l'angolo misurato $\theta(t)$:
+	\begin{equation}
+		e(t) = \theta_\text{rif} - \theta(t)
+		\label{eq:errore_pid}
+	\end{equation}
+	Nelle prove di stabilizzazione il riferimento è nullo ($\theta_\text{rif} = 0\degree$), poiché l'obiettivo è mantenere il drone in assetto orizzontale; l'errore coincide dunque, a meno del segno, con l'inclinazione istantanea del velivolo. A partire da questo errore, il regolatore PID elabora il comando di controllo combinando tre azioni distinte, ciascuna con un significato fisico preciso.
+	
+	\subsection{Le tre azioni di controllo}
+	\label{sec:tre_azioni}
+	Nella sua forma ideale a tempo continuo, l'uscita di un regolatore PID è la somma di un termine proporzionale, uno integrale e uno derivativo dell'errore:
+	\begin{equation}
+		u(t) = \underbrace{K_p \, e(t)}_{\text{proporzionale}}
+		\; + \; \underbrace{K_i \int_{0}^{t} e(\tau)\, d\tau}_{\text{integrale}}
+		\; + \; \underbrace{K_d \, \frac{d e(t)}{d t}}_{\text{derivativo}}
+		\label{eq:pid_ideale}
+	\end{equation}
+	I tre guadagni $K_p$, $K_i$, $K_d$ pesano il contributo di ciascuna azione e costituiscono i parametri da determinare in fase di taratura.
+	
+	\paragraph{Azione proporzionale.} Il termine $K_p \, e(t)$ produce una correzione istantanea proporzionale all'entità dell'errore: quanto più il drone è inclinato, tanto più ampia è la deflessione richiesta ai \textit{flap}. È l'azione di richiamo principale, ma da sola non è sufficiente. In presenza di un disturbo costante --- come il momento ribaltante gravitazionale del baricentro eccentrico --- l'azione proporzionale lascia infatti un \textbf{errore residuo a regime} (\textit{steady-state error}): per generare un momento correttivo permanente che bilanci il disturbo costante, è necessario un errore non nullo che alimenti il termine proporzionale.
+	
+	\paragraph{Azione integrale.} Il termine $K_i \int e\, d\tau$ accumula nel tempo l'errore e ne integra la storia passata. La sua funzione è proprio quella di \textbf{annullare l'errore a regime}: finché permane un errore, anche piccolo, l'integrale continua a crescere aumentando la correzione, fino a quando il momento correttivo eguaglia esattamente il disturbo costante e l'errore si azzera. Nel caso del \textit{DPDF} questa azione è essenziale per compensare lo sbilanciamento statico del baricentro. Il prezzo da pagare è il rischio di \textit{windup}: se l'attuatore satura (i \textit{flap} raggiungono il limite di $\pm 30\degree$) e l'errore persiste, l'integrale può accumulare valori molto elevati, generando sovraelongazioni e ritardi di recupero. Per questo motivo l'azione integrale è dotata di un meccanismo \textbf{anti-windup} a saturazione, descritto nel seguito.
+	
+	\paragraph{Azione derivativa.} Il termine $K_d \, \dot e(t)$ reagisce alla \textit{velocità} di variazione dell'errore, anticipando la dinamica del sistema. Esso introduce uno \textbf{smorzamento} che frena le oscillazioni e riduce la sovraelongazione, opponendosi alle variazioni rapide di assetto. La derivazione pura è però estremamente sensibile al rumore di misura: la derivata del rumore del BNO-055 produrrebbe comandi ad alta frequenza e ampiezza ai servomotori, con conseguente \textit{chattering}. Per questa ragione, nell'implementazione effettiva (Sezione~\ref{sec:sintesi_pidf}) l'azione derivativa è asservita a un filtro passa-basso del primo ordine, dando luogo alla forma PIDF di equazione~\eqref{eq:pidf}.
+	
+	\subsection{Implementazione discreta in forma posizionale}
+	\label{sec:pid_posizionale}
+	Il regolatore non opera nel continuo ma viene eseguito nel firmware come algoritmo a tempo discreto, all'interno dell'\textit{interrupt} deterministico del \textit{Timer 7} alla frequenza di 50~[Hz] ($T_s = 0.02$~[s]). L'implementazione adottata è in \textbf{forma posizionale} (\textit{positional form}): a ogni passo di campionamento $k$ l'azione di controllo viene \textit{ricalcolata per intero} a partire dall'errore corrente, dall'accumulatore integrale e dalla derivata filtrata. Questa scelta si distingue dalla forma \textit{incrementale} (\textit{velocity form}), nella quale si calcola invece l'incremento $\Delta u[k]$ rispetto al comando precedente; la forma posizionale è stata preferita per la maggiore trasparenza nella gestione esplicita della saturazione dell'attuatore e del termine anti-windup.
+	
+	Le tre azioni sono discretizzate come segue. Il termine proporzionale è immediato:
+	\begin{equation}
+		P[k] = K_p \, e[k]
+		\label{eq:pid_p}
+	\end{equation}
+	L'azione integrale è realizzata mediante un accumulatore aggiornato a ogni passo e limitato (\textit{clamping}) entro l'escursione fisica del flap, così da impedire il \textit{windup}:
+	\begin{equation}
+		I[k] = \mathrm{sat}\!\Bigl( I[k-1] + K_i \, T_s \, e[k] \Bigr), 
+		\qquad |I[k]| \leq 30\degree
+		\label{eq:pid_i}
+	\end{equation}
+	L'azione derivativa filtrata è discretizzata con la trasformazione di Eulero all'indietro introdotta in equazione~\eqref{eq:euler_backward}, da cui discende il coefficiente $\alpha = T_s/(T_s + T_f)$:
+	\begin{equation}
+		D[k] = (1-\alpha)\, D[k-1] + \alpha \, \frac{K_d}{T_s} \bigl( e[k] - e[k-1] \bigr)
+		\label{eq:pid_d}
+	\end{equation}
+	Il comando complessivo applicato al servomotore è infine la somma delle tre azioni, a sua volta saturata al limite meccanico dei \textit{flap}:
+	\begin{equation}
+		u[k] = \mathrm{sat}\!\Bigl( P[k] + I[k] + D[k] \Bigr),
+		\qquad |u[k]| \leq 30\degree
+		\label{eq:pid_posizionale}
+	\end{equation}
+	
+	Il comando $u[k]$, espresso in gradi di deflessione del \textit{flap}, viene poi convertito nel corrispondente valore CCR tramite la costante di conversione $K_\text{CCR} = 10.0$~[CCR/deg] (Sezione~\ref{sec:pre_elaborazione}) prima di essere inviato al timer di generazione del segnale PWM. Poiché i guadagni sono stati identificati lavorando in unità fisiche di gradi (Sezione~\ref{sec:architettura_modello}), i valori $K_p$, $K_i$, $K_d$ sintetizzati in MATLAB sono direttamente trasferibili nei campi del file \texttt{config.c} senza ulteriori riscalature.
 	
 	%--------------------------------------------------------------
 	\section{Sintesi del controllore PIDF}
@@ -1597,7 +1759,7 @@ sys_ctrl = feedback(C_pid, sys_asse);        % sforzo di controllo
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response2.png}
-		\caption{Analisi della risposta al gradino ad anello chiuso (sinistra) e del corrispondente sforzo di controllo dei servomotori (destra). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree$}
+		\caption{Analisi della risposta al gradino ad anello chiuso (sopra) e del corrispondente sforzo di controllo dei servomotori (sotto). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree$}
 		\label{fig:step_response}
 	\end{figure}
 	
@@ -1714,7 +1876,7 @@ sys_ctrl = feedback(C_pid, sys_asse);        % sforzo di controllo
 		I_{yy} \cdot \dot q = M_{fp} + M_{gp} + M_{y,\text{rope}} - C_{d,\text{ang}} \cdot q \cdot I_{yy}
 		\label{eq:dinamica_pitch}
 	\end{equation}
-	dove $p$ e $q$ rappresentano le velocità angolari attorno agli assi $x$ e $y$, $C_{d,\text{ang}} = 1.50$ è il coefficiente di smorzamento angolare equivalente, calibrato come descritto nella Sezione~\ref{sec:calibrazione_param}. I termini $M_{x,\text{rope}}$ e $M_{y,\text{rope}}$ sono i momenti generati dalle quattro funi di vincolo (descritti nella Sezione~\ref{sec:modello_funi}), $M_{fr}$ e $M_{fp}$ sono i momenti aerodinamici dei \textit{flap} (Sezione~\ref{sec:modello_spinta_flap}), mentre $M_{gr}$ e $M_{gp}$ modellano il momento ribaltante dovuto alla forza di gravità agente sul baricentro eccentrico.
+	dove $p$ e $q$ rappresentano le velocità angolari attorno agli assi $x$ e $y$, $C_{d,\text{ang}} = 0.40$ è il coefficiente di smorzamento angolare equivalente, calibrato come descritto nella Sezione~\ref{sec:calibrazione_param}. I termini $M_{x,\text{rope}}$ e $M_{y,\text{rope}}$ sono i momenti generati dalle quattro funi di vincolo (descritti nella Sezione~\ref{sec:modello_funi}), $M_{fr}$ e $M_{fp}$ sono i momenti aerodinamici dei \textit{flap} (Sezione~\ref{sec:modello_spinta_flap}), mentre $M_{gr}$ e $M_{gp}$ modellano il momento ribaltante dovuto alla forza di gravità agente sul baricentro eccentrico.
 	
 	\subsection{Momento ribaltante per eccentricità del baricentro}
 	Il momento ribaltante gravitazionale è uno degli elementi che, in assenza di una corretta azione di controllo, porterebbe il velivolo a inclinarsi spontaneamente nella direzione del baricentro eccentrico. Esso è modellato come:
@@ -1837,13 +1999,13 @@ end
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{figures/06_simulazione/screenshot_simulatore.png}
-		\caption{Risposta temporale del DPDF nel simulatore (sessione di 60 [s], $CCR = 1050$, PID attivo) con parametri PID in configurazione di sicurezza. In alto: quota del bordo inferiore del cilindro, che si assesta in tensione sulle funi a circa 275 mm dal pavimento della gabbia. Al centro: angoli di \textit{roll} (linea rossa) e \textit{pitch} (linea tratteggiata verde), che vengono mantenuti prossimi allo zero dall'azione dei due PID. In basso: angolo di \textit{yaw}}
+		\caption{Risposta temporale del DPDF nel simulatore (sessione di 60 [s], PID attivo) con parametri PID in configurazione di sicurezza. A t = 30 [s] viene applicato un gradino sul CCR da 1050 a 1200. In alto: quota del bordo inferiore del cilindro, che rimane stabile a circa 300 mm indipendentemente dalla variazione di throttle, a causa del vincolo delle funi. Al centro: angoli di roll (linea rossa) e pitch (linea tratteggiata verde), che mostrano un incremento delle oscillazioni in seguito al gradino, evidenziando come l'aumento di spinta amplifichi il momento dovuto all'offset del centro di massa. In basso: angolo di yaw.}
 		\label{fig:simulazione_hover}
 	\end{figure}
 	
 	I risultati osservati possono essere riassunti nei tre punti seguenti.
 	\begin{itemize}
-		\item \textbf{Il drone permane nella configurazione vincolata}, sostenuto dalle quattro funi che restano in tensione per l'intera durata della prova. La quota del bordo inferiore si stabilizza intorno a $275$ [mm] dal pavimento della gabbia, valore corrispondente alla configurazione di equilibrio meccanico in cui la componente verticale della tensione delle funi compensa la differenza tra peso del velivolo e spinta dei motori. Coerentemente con quanto anticipato nella Sezione~\ref{sec:modello_spinta_flap}, la spinta complessiva è insufficiente per produrre il decollo libero.
+		\item \textbf{Il drone permane nella configurazione vincolata}, sostenuto dalle quattro funi che restano in tensione per l'intera durata della prova. La quota del bordo inferiore si stabilizza intorno a $300$ [mm] dal pavimento della gabbia, valore corrispondente alla configurazione di equilibrio meccanico in cui la componente verticale della tensione delle funi compensa la differenza tra peso del velivolo e spinta dei motori. Coerentemente con quanto anticipato nella Sezione~\ref{sec:modello_spinta_flap}, la spinta complessiva è insufficiente per produrre il decollo libero.
 		\item \textbf{L'azione dei regolatori PID converge correttamente}. Gli angoli di \textit{roll} e \textit{pitch}, dopo un breve transitorio iniziale dovuto al momento ribaltante generato dall'eccentricità del baricentro, vengono riportati e mantenuti in un intorno dello zero per l'intera durata della prova. Le oscillazioni residue sono di ampiezza contenuta (dell'ordine di pochi gradi picco-picco) e non mostrano alcuna tendenza alla divergenza né segni di \textit{chattering} sugli attuatori.
 		\item \textbf{L'\textit{yaw} resta sostanzialmente fermo}, coerentemente con il fatto che il simulatore non include una sollecitazione differenziale tra i due motori. Eventuali piccoli scostamenti sono dovuti alla componente non perfettamente compensata dei momenti torcenti delle due eliche, che il modello include in forma semplificata.
 	\end{itemize}

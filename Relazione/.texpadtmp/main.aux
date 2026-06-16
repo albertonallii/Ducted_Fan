@@ -167,199 +167,222 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3.3}Organizzazione modulare del codice}{36}{section.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3.4}Configurazione delle periferiche}{38}{section.3.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Timer}{38}{subsection.3.4.1}\protected@file@percent }
-\newlabel{eq:timer_freq}{{3.1}{38}{Timer}{equation.3.4.1}{}}
+\newlabel{lst:nome}{{3.1}{38}{Callback periodica dei timer utilizzati per safe startup, ramo IMU–attuatori e telemetria}{lstlisting.3.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.1}{\ignorespaces Callback periodica dei timer utilizzati per safe startup, ramo IMU–attuatori e telemetria.}}{38}{lstlisting.3.1}\protected@file@percent }
+\newlabel{eq:timer_freq}{{3.1}{39}{Timer}{equation.3.4.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Periferiche di comunicazione}{39}{subsection.3.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3.5}Gestione dei sensori}{39}{section.3.5}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}VL53L1X — Acquisizione di quota}{39}{subsection.3.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}BNO055 — Acquisizione dell'assetto}{39}{subsection.3.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}BNO055 — Acquisizione dell'assetto}{40}{subsection.3.5.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3.6}Diagrammi di flusso}{40}{section.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Diagramma di flusso del VL53L1X}{40}{subsection.3.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Diagramma di flusso del sensore VL53L1X}}{41}{figure.caption.69}\protected@file@percent }
-\newlabel{fig:flow_vl53l1x}{{3.1}{41}{Diagramma di flusso del sensore VL53L1X}{figure.caption.69}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}Diagramma di flusso del BNO055}{42}{subsection.3.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Diagramma di flusso del sensore BNO055}}{42}{figure.caption.70}\protected@file@percent }
-\newlabel{fig:flow_bno055}{{3.2}{42}{Diagramma di flusso del sensore BNO055}{figure.caption.70}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.3}Diagramma di flusso del firmware complessivo}{43}{subsection.3.6.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Diagramma di flusso complessivo del firmware}}{44}{figure.caption.71}\protected@file@percent }
-\newlabel{fig:flow_firmware}{{3.3}{44}{Diagramma di flusso complessivo del firmware}{figure.caption.71}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.7}Protocollo di comunicazione seriale con MATLAB}{45}{section.3.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.1}Comandi ricevuti dal firmware}{45}{subsection.3.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.2}ACK, watchdog e diagnostica UART}{46}{subsection.3.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.8}Telemetria robusta a frequenza fissa}{46}{section.3.8}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Configurazione di TIM3 per la generazione del tick telemetrico}}{48}{figure.caption.72}\protected@file@percent }
-\newlabel{fig:tim3_config}{{3.4}{48}{Configurazione di TIM3 per la generazione del tick telemetrico}{figure.caption.72}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.9}Safe startup e logiche di arresto}{48}{section.3.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Telemetria}{50}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Diagramma di flusso del VL53L1X}{41}{subsection.3.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Diagramma di flusso del sensore VL53L1X}}{42}{figure.caption.69}\protected@file@percent }
+\newlabel{fig:flow_vl53l1x}{{3.1}{42}{Diagramma di flusso del sensore VL53L1X}{figure.caption.69}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}Diagramma di flusso del BNO055}{43}{subsection.3.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Diagramma di flusso del sensore BNO055}}{43}{figure.caption.70}\protected@file@percent }
+\newlabel{fig:flow_bno055}{{3.2}{43}{Diagramma di flusso del sensore BNO055}{figure.caption.70}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.3}Diagramma di flusso del firmware complessivo}{44}{subsection.3.6.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Diagramma di flusso complessivo del firmware}}{45}{figure.caption.71}\protected@file@percent }
+\newlabel{fig:flow_firmware}{{3.3}{45}{Diagramma di flusso complessivo del firmware}{figure.caption.71}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}Protocollo di comunicazione seriale con MATLAB}{46}{section.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.1}Comandi ricevuti dal firmware}{46}{subsection.3.7.1}\protected@file@percent }
+\newlabel{lst:nome}{{3.2}{46}{Parsing del comando CMD e saturazione dei valori PWM ricevuti da MATLAB}{lstlisting.3.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.2}{\ignorespaces Parsing del comando CMD e saturazione dei valori PWM ricevuti da MATLAB.}}{46}{lstlisting.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.2}ACK, watchdog e diagnostica UART}{47}{subsection.3.7.2}\protected@file@percent }
+\newlabel{lst:nome}{{3.3}{47}{Enumerazioni utilizzate per gli acknowledge e per la codifica delle cause di arresto}{lstlisting.3.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.3}{\ignorespaces Enumerazioni utilizzate per gli acknowledge e per la codifica delle cause di arresto.}}{47}{lstlisting.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}Telemetria robusta a frequenza fissa}{48}{section.3.8}\protected@file@percent }
+\newlabel{lst:nome}{{3.4}{49}{Composizione della riga telemetrica e trasmissione non bloccante tramite DMA}{lstlisting.3.4}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3.4}{\ignorespaces Composizione della riga telemetrica e trasmissione non bloccante tramite DMA.}}{49}{lstlisting.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Configurazione di TIM3 per la generazione del tick telemetrico}}{50}{figure.caption.72}\protected@file@percent }
+\newlabel{fig:tim3_config}{{3.4}{50}{Configurazione di TIM3 per la generazione del tick telemetrico}{figure.caption.72}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.9}Safe startup e logiche di arresto}{51}{section.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Telemetria}{52}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{ch:telemetria}{{4}{50}{Telemetria}{chapter.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{50}{section.4.1}\protected@file@percent }
-\newlabel{sec:ruolo_telemetria}{{4.1}{50}{Ruolo della telemetria nel progetto}{section.4.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{50}{section.4.2}\protected@file@percent }
-\newlabel{sec:architettura_canale}{{4.2}{50}{Architettura del canale di comunicazione}{section.4.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{51}{section.4.3}\protected@file@percent }
-\newlabel{sec:parametrizzazione}{{4.3}{51}{Parametrizzazione dello script di acquisizione}{section.4.3}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.1}{\ignorespaces Parametri globali dello script di acquisizione}}{51}{lstlisting.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{52}{section.4.4}\protected@file@percent }
-\newlabel{sec:protocollo_scambio}{{4.4}{52}{Protocollo di scambio dati}{section.4.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit  {uplink}: comandi}{52}{subsection.4.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit  {downlink}: telemetria}{53}{subsection.4.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{54}{section.4.5}\protected@file@percent }
-\newlabel{sec:watchdog_keepalive}{{4.5}{54}{Watchdog firmware e keep-alive lato MATLAB}{section.4.5}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.2}{\ignorespaces Meccanismo keep-alive durante l'attesa degli ACK critici}}{54}{lstlisting.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{54}{section.4.6}\protected@file@percent }
-\newlabel{sec:loop_acquisizione}{{4.6}{54}{Loop di acquisizione MATLAB}{section.4.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{55}{subsection.4.6.1}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.3}{\ignorespaces Scheduling anti-burst}}{55}{lstlisting.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{55}{subsection.4.6.2}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.4}{\ignorespaces Validazione delle righe di telemetria tramite conteggio dei separatori}}{55}{lstlisting.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{56}{subsection.4.6.3}\protected@file@percent }
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.5}{\ignorespaces Callback asincrono per la terminazione d'emergenza}}{56}{lstlisting.4.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Interfaccia grafica del Kill Switch}}{57}{figure.caption.73}\protected@file@percent }
-\newlabel{fig:tim3_config}{{4.1}{57}{Interfaccia grafica del Kill Switch}{figure.caption.73}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{57}{subsection.4.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.7}Profili di eccitazione}{57}{section.4.7}\protected@file@percent }
-\newlabel{sec:profili_eccitazione}{{4.7}{57}{Profili di eccitazione}{section.4.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Menù di selezione del profilo di eccitazione}}{58}{figure.caption.74}\protected@file@percent }
-\newlabel{fig:tim3_config}{{4.2}{58}{Menù di selezione del profilo di eccitazione}{figure.caption.74}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{59}{subsection.4.7.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces Esempio di test a gradino in anello aperto (prova 1.1, gradino motori piccolo $\pm 50$): comandi PWM ai motori e ai servo, e risposta angolare del drone}}{59}{figure.caption.75}\protected@file@percent }
-\newlabel{fig:test_gradino_motori}{{4.3}{59}{Esempio di test a gradino in anello aperto (prova 1.1, gradino motori piccolo $\pm 50$): comandi PWM ai motori e ai servo, e risposta angolare del drone}{figure.caption.75}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{59}{subsection.4.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.3}Sequenze pseudo-casuali multilivello}{60}{subsection.4.7.3}\protected@file@percent }
-\newlabel{subsec:aprbs}{{4.7.3}{60}{Sequenze pseudo-casuali multilivello}{subsection.4.7.3}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.6}{\ignorespaces Generazione della sequenza pseudo-casuale multilivello sul flap di roll (case 21)}}{60}{lstlisting.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{61}{subsection.4.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.8}Validazione del link telematico}{61}{section.4.8}\protected@file@percent }
-\newlabel{sec:validazione_link}{{4.8}{61}{Validazione del link telematico}{section.4.8}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.7}{\ignorespaces Esempio di report di fine prova}}{61}{lstlisting.4.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Identificazione del modello}{63}{chapter.5}\protected@file@percent }
+\newlabel{ch:telemetria}{{4}{52}{Telemetria}{chapter.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{52}{section.4.1}\protected@file@percent }
+\newlabel{sec:ruolo_telemetria}{{4.1}{52}{Ruolo della telemetria nel progetto}{section.4.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{52}{section.4.2}\protected@file@percent }
+\newlabel{sec:architettura_canale}{{4.2}{52}{Architettura del canale di comunicazione}{section.4.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{53}{section.4.3}\protected@file@percent }
+\newlabel{sec:parametrizzazione}{{4.3}{53}{Parametrizzazione dello script di acquisizione}{section.4.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.1}{\ignorespaces Parametri globali dello script di acquisizione}}{53}{lstlisting.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{54}{section.4.4}\protected@file@percent }
+\newlabel{sec:protocollo_scambio}{{4.4}{54}{Protocollo di scambio dati}{section.4.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit  {uplink}: comandi}{54}{subsection.4.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit  {downlink}: telemetria}{55}{subsection.4.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{56}{section.4.5}\protected@file@percent }
+\newlabel{sec:watchdog_keepalive}{{4.5}{56}{Watchdog firmware e keep-alive lato MATLAB}{section.4.5}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.2}{\ignorespaces Meccanismo keep-alive durante l'attesa degli ACK critici}}{56}{lstlisting.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{56}{section.4.6}\protected@file@percent }
+\newlabel{sec:loop_acquisizione}{{4.6}{56}{Loop di acquisizione MATLAB}{section.4.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{57}{subsection.4.6.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.3}{\ignorespaces Scheduling anti-burst}}{57}{lstlisting.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{57}{subsection.4.6.2}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.4}{\ignorespaces Validazione delle righe di telemetria tramite conteggio dei separatori}}{57}{lstlisting.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{58}{subsection.4.6.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.5}{\ignorespaces Callback asincrono per la terminazione d'emergenza}}{58}{lstlisting.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Interfaccia grafica del Kill Switch}}{59}{figure.caption.73}\protected@file@percent }
+\newlabel{fig:tim3_config}{{4.1}{59}{Interfaccia grafica del Kill Switch}{figure.caption.73}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{59}{subsection.4.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}Profili di eccitazione}{59}{section.4.7}\protected@file@percent }
+\newlabel{sec:profili_eccitazione}{{4.7}{59}{Profili di eccitazione}{section.4.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Menù di selezione del profilo di eccitazione}}{60}{figure.caption.74}\protected@file@percent }
+\newlabel{fig:tim3_config}{{4.2}{60}{Menù di selezione del profilo di eccitazione}{figure.caption.74}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{61}{subsection.4.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces Esempio di test a gradino in anello aperto (prova 1.1, gradino motori piccolo $\pm 50$): comandi PWM ai motori e ai servo, e risposta angolare del drone}}{61}{figure.caption.75}\protected@file@percent }
+\newlabel{fig:test_gradino_motori}{{4.3}{61}{Esempio di test a gradino in anello aperto (prova 1.1, gradino motori piccolo $\pm 50$): comandi PWM ai motori e ai servo, e risposta angolare del drone}{figure.caption.75}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{61}{subsection.4.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.3}Sequenze pseudo-casuali multilivello}{62}{subsection.4.7.3}\protected@file@percent }
+\newlabel{subsec:aprbs}{{4.7.3}{62}{Sequenze pseudo-casuali multilivello}{subsection.4.7.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.6}{\ignorespaces Generazione della sequenza pseudo-casuale multilivello sul flap di roll (case 21)}}{62}{lstlisting.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{63}{subsection.4.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.8}Validazione del link telematico}{63}{section.4.8}\protected@file@percent }
+\newlabel{sec:validazione_link}{{4.8}{63}{Validazione del link telematico}{section.4.8}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4.7}{\ignorespaces Esempio di report di fine prova}}{63}{lstlisting.4.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Identificazione del modello}{65}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{ch:modello}{{5}{63}{Identificazione del modello}{chapter.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}Approccio data-driven}{63}{section.5.1}\protected@file@percent }
-\newlabel{sec:approccio_datadriven}{{5.1}{63}{Approccio data-driven}{section.5.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{63}{section.5.2}\protected@file@percent }
-\newlabel{sec:pre_elaborazione}{{5.2}{63}{Pre-elaborazione dei dati}{section.5.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces \textit  {Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit  {flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sinistra l'asse di \textit  {roll}, a destra l'asse di \textit  {pitch}}}{64}{figure.caption.77}\protected@file@percent }
-\newlabel{fig:dataset_prbs}{{5.1}{64}{\textit {Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit {flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sinistra l'asse di \textit {roll}, a destra l'asse di \textit {pitch}}{figure.caption.77}{}}
-\newlabel{eq:centratura_input}{{5.1}{64}{Pre-elaborazione dei dati}{equation.5.2.1}{}}
-\newlabel{eq:centratura_output}{{5.2}{64}{Pre-elaborazione dei dati}{equation.5.2.2}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.1}{\ignorespaces Pre-elaborazione dei segnali di ingresso e uscita}}{65}{lstlisting.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{65}{section.5.3}\protected@file@percent }
-\newlabel{sec:architettura_modello}{{5.3}{65}{Selezione dell'architettura del modello}{section.5.3}{}}
-\newlabel{eq:tf_generale}{{5.3}{65}{Selezione dell'architettura del modello}{equation.5.3.3}{}}
-\newlabel{eq:tf_assi}{{5.4}{66}{Selezione dell'architettura del modello}{equation.5.3.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Coefficienti numerici delle funzioni di trasferimento identificate. I valori vanno inseriti a partire dall'output dello script \texttt  {Identify\_and\_tune.m}}}{66}{table.caption.78}\protected@file@percent }
-\newlabel{tab:coefficienti_tf}{{5.1}{66}{Coefficienti numerici delle funzioni di trasferimento identificate. I valori vanno inseriti a partire dall'output dello script \texttt {Identify\_and\_tune.m}}{table.caption.78}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{66}{section.5.4}\protected@file@percent }
-\newlabel{sec:stima_validazione}{{5.4}{66}{Stima del modello e validazione}{section.5.4}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.2}{\ignorespaces Confronto automatico delle tre strutture candidate (estratto da \texttt  {Identify\_and\_tune.m})}}{66}{lstlisting.5.2}\protected@file@percent }
-\newlabel{eq:nrmse}{{5.5}{67}{Stima del modello e validazione}{equation.5.4.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Analisi di \textit  {cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata). A sinistra l'asse di \textit  {roll} (Fit $77.85\%$), a destra l'asse di \textit  {pitch} (Fit $77.67\%$)}}{68}{figure.caption.80}\protected@file@percent }
-\newlabel{fig:cross_validation}{{5.2}{68}{Analisi di \textit {cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata). A sinistra l'asse di \textit {roll} (Fit $77.85\%$), a destra l'asse di \textit {pitch} (Fit $77.67\%$)}{figure.caption.80}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{68}{subsection.5.4.1}\protected@file@percent }
-\newlabel{eq:guadagno_statico}{{5.6}{68}{Analisi del guadagno statico}{equation.5.4.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.5}Sintesi del controllore PIDF}{68}{section.5.5}\protected@file@percent }
-\newlabel{sec:sintesi_pidf}{{5.5}{68}{Sintesi del controllore PIDF}{section.5.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5.1}Architettura del controllore}{68}{subsection.5.5.1}\protected@file@percent }
-\newlabel{eq:pidf}{{5.7}{69}{Architettura del controllore}{equation.5.5.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5.2}Sintesi tramite pidtune}{69}{subsection.5.5.2}\protected@file@percent }
-\newlabel{eq:vincolo_saturazione}{{5.8}{69}{Sintesi tramite pidtune}{equation.5.5.8}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.3}{\ignorespaces Sintesi del controllore PIDF con pidtune}}{69}{lstlisting.5.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Analisi della risposta al gradino ad anello chiuso (sinistra) e del corrispondente sforzo di controllo dei servomotori (destra). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree  $}}{70}{figure.caption.82}\protected@file@percent }
-\newlabel{fig:step_response}{{5.3}{70}{Analisi della risposta al gradino ad anello chiuso (sinistra) e del corrispondente sforzo di controllo dei servomotori (destra). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree $}{figure.caption.82}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5.3}Discretizzazione per il firmware}{70}{subsection.5.5.3}\protected@file@percent }
-\newlabel{eq:euler_backward}{{5.9}{70}{Discretizzazione per il firmware}{equation.5.5.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.6}Guadagni finali e parametri PID}{71}{section.5.6}\protected@file@percent }
-\newlabel{sec:guadagni_finali}{{5.6}{71}{Guadagni finali e parametri PID}{section.5.6}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Guadagni PIDF identificati per i due assi di controllo}}{71}{table.caption.83}\protected@file@percent }
-\newlabel{tab:guadagni_pid}{{5.2}{71}{Guadagni PIDF identificati per i due assi di controllo}{table.caption.83}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.7}Considerazioni sull'approccio black-box}{71}{section.5.7}\protected@file@percent }
-\newlabel{sec:limiti_blackbox}{{5.7}{71}{Considerazioni sull'approccio black-box}{section.5.7}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Simulazione 3D}{73}{chapter.6}\protected@file@percent }
+\newlabel{ch:modello}{{5}{65}{Identificazione del modello}{chapter.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}Approccio data-driven}{65}{section.5.1}\protected@file@percent }
+\newlabel{sec:approccio_datadriven}{{5.1}{65}{Approccio data-driven}{section.5.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{65}{section.5.2}\protected@file@percent }
+\newlabel{sec:pre_elaborazione}{{5.2}{65}{Pre-elaborazione dei dati}{section.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces \textit  {Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit  {flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sopra l'asse di \textit  {roll}, a sotto l'asse di \textit  {pitch}}}{66}{figure.caption.77}\protected@file@percent }
+\newlabel{fig:dataset_prbs}{{5.1}{66}{\textit {Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit {flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sopra l'asse di \textit {roll}, a sotto l'asse di \textit {pitch}}{figure.caption.77}{}}
+\newlabel{eq:centratura_input}{{5.1}{66}{Pre-elaborazione dei dati}{equation.5.2.1}{}}
+\newlabel{eq:centratura_output}{{5.2}{66}{Pre-elaborazione dei dati}{equation.5.2.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.1}{\ignorespaces Pre-elaborazione dei segnali di ingresso e uscita}}{67}{lstlisting.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{67}{section.5.3}\protected@file@percent }
+\newlabel{sec:architettura_modello}{{5.3}{67}{Selezione dell'architettura del modello}{section.5.3}{}}
+\newlabel{eq:tf_generale}{{5.3}{67}{Selezione dell'architettura del modello}{equation.5.3.3}{}}
+\newlabel{eq:tf_assi}{{5.4}{68}{Selezione dell'architettura del modello}{equation.5.3.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Coefficienti numerici delle funzioni di trasferimento identificate.}}{68}{table.caption.78}\protected@file@percent }
+\newlabel{tab:coefficienti_tf}{{5.1}{68}{Coefficienti numerici delle funzioni di trasferimento identificate}{table.caption.78}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{68}{section.5.4}\protected@file@percent }
+\newlabel{sec:stima_validazione}{{5.4}{68}{Stima del modello e validazione}{section.5.4}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.2}{\ignorespaces Confronto automatico delle tre strutture candidate (estratto da \texttt  {Identify\_and\_tune.m})}}{68}{lstlisting.5.2}\protected@file@percent }
+\newlabel{eq:nrmse}{{5.5}{69}{Stima del modello e validazione}{equation.5.4.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces Analisi di \textit  {cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata).Sopra l'asse di \textit  {roll} (Fit $77.85\%$), sotto l'asse di \textit  {pitch} (Fit $77.67\%$)}}{70}{figure.caption.80}\protected@file@percent }
+\newlabel{fig:cross_validation}{{5.2}{70}{Analisi di \textit {cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata).Sopra l'asse di \textit {roll} (Fit $77.85\%$), sotto l'asse di \textit {pitch} (Fit $77.67\%$)}{figure.caption.80}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{70}{subsection.5.4.1}\protected@file@percent }
+\newlabel{eq:guadagno_statico}{{5.6}{70}{Analisi del guadagno statico}{equation.5.4.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.5}Il regolatore PID: principi di funzionamento}{70}{section.5.5}\protected@file@percent }
+\newlabel{sec:principi_pid}{{5.5}{70}{Il regolatore PID: principi di funzionamento}{section.5.5}{}}
+\newlabel{eq:errore_pid}{{5.7}{71}{Il regolatore PID: principi di funzionamento}{equation.5.5.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5.1}Le tre azioni di controllo}{71}{subsection.5.5.1}\protected@file@percent }
+\newlabel{sec:tre_azioni}{{5.5.1}{71}{Le tre azioni di controllo}{subsection.5.5.1}{}}
+\newlabel{eq:pid_ideale}{{5.8}{71}{Le tre azioni di controllo}{equation.5.5.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Azione proporzionale.}{71}{paragraph*.81}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Azione integrale.}{71}{paragraph*.82}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Azione derivativa.}{71}{paragraph*.83}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5.2}Implementazione discreta in forma posizionale}{72}{subsection.5.5.2}\protected@file@percent }
+\newlabel{sec:pid_posizionale}{{5.5.2}{72}{Implementazione discreta in forma posizionale}{subsection.5.5.2}{}}
+\newlabel{eq:pid_p}{{5.9}{72}{Implementazione discreta in forma posizionale}{equation.5.5.9}{}}
+\newlabel{eq:pid_i}{{5.10}{72}{Implementazione discreta in forma posizionale}{equation.5.5.10}{}}
+\newlabel{eq:pid_d}{{5.11}{72}{Implementazione discreta in forma posizionale}{equation.5.5.11}{}}
+\newlabel{eq:pid_posizionale}{{5.12}{72}{Implementazione discreta in forma posizionale}{equation.5.5.12}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.6}Sintesi del controllore PIDF}{72}{section.5.6}\protected@file@percent }
+\newlabel{sec:sintesi_pidf}{{5.6}{72}{Sintesi del controllore PIDF}{section.5.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6.1}Architettura del controllore}{72}{subsection.5.6.1}\protected@file@percent }
+\newlabel{eq:pidf}{{5.13}{73}{Architettura del controllore}{equation.5.6.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6.2}Sintesi tramite pidtune}{73}{subsection.5.6.2}\protected@file@percent }
+\newlabel{eq:vincolo_saturazione}{{5.14}{73}{Sintesi tramite pidtune}{equation.5.6.14}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {5.3}{\ignorespaces Sintesi del controllore PIDF con pidtune}}{73}{lstlisting.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Analisi della risposta al gradino ad anello chiuso (sopra) e del corrispondente sforzo di controllo dei servomotori (sotto). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree  $}}{74}{figure.caption.85}\protected@file@percent }
+\newlabel{fig:step_response}{{5.3}{74}{Analisi della risposta al gradino ad anello chiuso (sopra) e del corrispondente sforzo di controllo dei servomotori (sotto). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree $}{figure.caption.85}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6.3}Discretizzazione per il firmware}{75}{subsection.5.6.3}\protected@file@percent }
+\newlabel{eq:euler_backward}{{5.15}{75}{Discretizzazione per il firmware}{equation.5.6.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.7}Guadagni finali e parametri PID}{75}{section.5.7}\protected@file@percent }
+\newlabel{sec:guadagni_finali}{{5.7}{75}{Guadagni finali e parametri PID}{section.5.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Guadagni PIDF identificati per i due assi di controllo}}{75}{table.caption.86}\protected@file@percent }
+\newlabel{tab:guadagni_pid}{{5.2}{75}{Guadagni PIDF identificati per i due assi di controllo}{table.caption.86}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.8}Considerazioni sull'approccio black-box}{76}{section.5.8}\protected@file@percent }
+\newlabel{sec:limiti_blackbox}{{5.8}{76}{Considerazioni sull'approccio black-box}{section.5.8}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Simulazione 3D}{77}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{ch:simulazione}{{6}{73}{Simulazione 3D}{chapter.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{73}{section.6.1}\protected@file@percent }
-\newlabel{sec:architettura_sim}{{6.1}{73}{Obiettivi e architettura del simulatore}{section.6.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{73}{subsection.6.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{74}{subsection.6.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{74}{section.6.2}\protected@file@percent }
-\newlabel{sec:parametrizzazione_sim}{{6.2}{74}{Parametrizzazione fisica e geometrica}{section.6.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{75}{section.6.3}\protected@file@percent }
-\newlabel{sec:dinamica_sim}{{6.3}{75}{Modello dinamico del corpo rigido}{section.6.3}{}}
-\newlabel{eq:dinamica_roll}{{6.1}{75}{Modello dinamico del corpo rigido}{equation.6.3.1}{}}
-\newlabel{eq:dinamica_pitch}{{6.2}{75}{Modello dinamico del corpo rigido}{equation.6.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{75}{subsection.6.3.1}\protected@file@percent }
-\newlabel{eq:momento_ribaltante}{{6.3}{75}{Momento ribaltante per eccentricità del baricentro}{equation.6.3.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{75}{subsection.6.3.2}\protected@file@percent }
-\newlabel{sec:modello_spinta_flap}{{6.3.2}{75}{Momenti aerodinamici dei flap}{subsection.6.3.2}{}}
-\newlabel{eq:momento_flap}{{6.4}{75}{Momenti aerodinamici dei flap}{equation.6.3.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{76}{subsection.6.3.3}\protected@file@percent }
-\newlabel{eq:profilo_throttle}{{6.5}{76}{Modello di spinta calibrato sui dati reali}{equation.6.3.5}{}}
-\newlabel{eq:spinta_motore}{{6.6}{76}{Modello di spinta calibrato sui dati reali}{equation.6.3.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{76}{section.6.4}\protected@file@percent }
-\newlabel{sec:modello_funi}{{6.4}{76}{Modello visco-elastico delle funi}{section.6.4}{}}
-\newlabel{eq:forza_fune}{{6.7}{76}{Modello visco-elastico delle funi}{equation.6.4.7}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {6.1}{\ignorespaces Calcolo delle forze e dei momenti generati dalle quattro funi di vincolo}}{77}{lstlisting.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{78}{section.6.5}\protected@file@percent }
-\newlabel{sec:calibrazione_param}{{6.5}{78}{Calibrazione empirica dei parametri}{section.6.5}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.6}Risultati della simulazione}{78}{section.6.6}\protected@file@percent }
-\newlabel{sec:risultati_sim}{{6.6}{78}{Risultati della simulazione}{section.6.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Risposta temporale del DPDF nel simulatore (sessione di 60 [s], $CCR = 1050$, PID attivo) con parametri PID in configurazione di sicurezza. In alto: quota del bordo inferiore del cilindro, che si assesta in tensione sulle funi a circa 275 mm dal pavimento della gabbia. Al centro: angoli di \textit  {roll} (linea rossa) e \textit  {pitch} (linea tratteggiata verde), che vengono mantenuti prossimi allo zero dall'azione dei due PID. In basso: angolo di \textit  {yaw}}}{79}{figure.caption.84}\protected@file@percent }
-\newlabel{fig:simulazione_hover}{{6.1}{79}{Risposta temporale del DPDF nel simulatore (sessione di 60 [s], $CCR = 1050$, PID attivo) con parametri PID in configurazione di sicurezza. In alto: quota del bordo inferiore del cilindro, che si assesta in tensione sulle funi a circa 275 mm dal pavimento della gabbia. Al centro: angoli di \textit {roll} (linea rossa) e \textit {pitch} (linea tratteggiata verde), che vengono mantenuti prossimi allo zero dall'azione dei due PID. In basso: angolo di \textit {yaw}}{figure.caption.84}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{80}{section.6.7}\protected@file@percent }
-\newlabel{sec:derating}{{6.7}{80}{De-rating dei guadagni per il transfer al prototipo fisico}{section.6.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces Guadagni PIDF adottati per il primo collaudo sul prototipo fisico, distinti per i due assi di controllo}}{80}{table.caption.85}\protected@file@percent }
-\newlabel{tab:guadagni_derated}{{6.1}{80}{Guadagni PIDF adottati per il primo collaudo sul prototipo fisico, distinti per i due assi di controllo}{table.caption.85}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{81}{section.6.8}\protected@file@percent }
-\newlabel{sec:limiti_sim}{{6.8}{81}{Limiti del simulatore e relazione con i capitoli successivi}{section.6.8}{}}
-\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{82}{chapter.7}\protected@file@percent }
+\newlabel{ch:simulazione}{{6}{77}{Simulazione 3D}{chapter.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{77}{section.6.1}\protected@file@percent }
+\newlabel{sec:architettura_sim}{{6.1}{77}{Obiettivi e architettura del simulatore}{section.6.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{77}{subsection.6.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{78}{subsection.6.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{78}{section.6.2}\protected@file@percent }
+\newlabel{sec:parametrizzazione_sim}{{6.2}{78}{Parametrizzazione fisica e geometrica}{section.6.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{79}{section.6.3}\protected@file@percent }
+\newlabel{sec:dinamica_sim}{{6.3}{79}{Modello dinamico del corpo rigido}{section.6.3}{}}
+\newlabel{eq:dinamica_roll}{{6.1}{79}{Modello dinamico del corpo rigido}{equation.6.3.1}{}}
+\newlabel{eq:dinamica_pitch}{{6.2}{79}{Modello dinamico del corpo rigido}{equation.6.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{79}{subsection.6.3.1}\protected@file@percent }
+\newlabel{eq:momento_ribaltante}{{6.3}{79}{Momento ribaltante per eccentricità del baricentro}{equation.6.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{79}{subsection.6.3.2}\protected@file@percent }
+\newlabel{sec:modello_spinta_flap}{{6.3.2}{79}{Momenti aerodinamici dei flap}{subsection.6.3.2}{}}
+\newlabel{eq:momento_flap}{{6.4}{79}{Momenti aerodinamici dei flap}{equation.6.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{80}{subsection.6.3.3}\protected@file@percent }
+\newlabel{eq:profilo_throttle}{{6.5}{80}{Modello di spinta calibrato sui dati reali}{equation.6.3.5}{}}
+\newlabel{eq:spinta_motore}{{6.6}{80}{Modello di spinta calibrato sui dati reali}{equation.6.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{80}{section.6.4}\protected@file@percent }
+\newlabel{sec:modello_funi}{{6.4}{80}{Modello visco-elastico delle funi}{section.6.4}{}}
+\newlabel{eq:forza_fune}{{6.7}{80}{Modello visco-elastico delle funi}{equation.6.4.7}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {6.1}{\ignorespaces Calcolo delle forze e dei momenti generati dalle quattro funi di vincolo}}{81}{lstlisting.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{82}{section.6.5}\protected@file@percent }
+\newlabel{sec:calibrazione_param}{{6.5}{82}{Calibrazione empirica dei parametri}{section.6.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.6}Risultati della simulazione}{82}{section.6.6}\protected@file@percent }
+\newlabel{sec:risultati_sim}{{6.6}{82}{Risultati della simulazione}{section.6.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Risposta temporale del DPDF nel simulatore (sessione di 60 [s], PID attivo) con parametri PID in configurazione di sicurezza. A t = 30 [s] viene applicato un gradino sul CCR da 1050 a 1200. In alto: quota del bordo inferiore del cilindro, che rimane stabile a circa 300 mm indipendentemente dalla variazione di throttle, a causa del vincolo delle funi. Al centro: angoli di roll (linea rossa) e pitch (linea tratteggiata verde), che mostrano un incremento delle oscillazioni in seguito al gradino, evidenziando come l'aumento di spinta amplifichi il momento dovuto all'offset del centro di massa. In basso: angolo di yaw.}}{83}{figure.caption.87}\protected@file@percent }
+\newlabel{fig:simulazione_hover}{{6.1}{83}{Risposta temporale del DPDF nel simulatore (sessione di 60 [s], PID attivo) con parametri PID in configurazione di sicurezza. A t = 30 [s] viene applicato un gradino sul CCR da 1050 a 1200. In alto: quota del bordo inferiore del cilindro, che rimane stabile a circa 300 mm indipendentemente dalla variazione di throttle, a causa del vincolo delle funi. Al centro: angoli di roll (linea rossa) e pitch (linea tratteggiata verde), che mostrano un incremento delle oscillazioni in seguito al gradino, evidenziando come l'aumento di spinta amplifichi il momento dovuto all'offset del centro di massa. In basso: angolo di yaw}{figure.caption.87}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{84}{section.6.7}\protected@file@percent }
+\newlabel{sec:derating}{{6.7}{84}{De-rating dei guadagni per il transfer al prototipo fisico}{section.6.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces Guadagni PIDF adottati per il primo collaudo sul prototipo fisico, distinti per i due assi di controllo}}{84}{table.caption.88}\protected@file@percent }
+\newlabel{tab:guadagni_derated}{{6.1}{84}{Guadagni PIDF adottati per il primo collaudo sul prototipo fisico, distinti per i due assi di controllo}{table.caption.88}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{85}{section.6.8}\protected@file@percent }
+\newlabel{sec:limiti_sim}{{6.8}{85}{Limiti del simulatore e relazione con i capitoli successivi}{section.6.8}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{86}{chapter.7}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{ch:conclusioni}{{7}{82}{Conclusioni e Sviluppi Futuri}{chapter.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{82}{section.7.1}\protected@file@percent }
-\newlabel{sec:analisi_cause}{{7.1}{82}{Analisi critica delle cause di mancato volo libero}{section.7.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{82}{subsection.7.1.1}\protected@file@percent }
-\newlabel{sec:verifica_spinta}{{7.1.1}{82}{Verifica analitica del deficit di spinta}{subsection.7.1.1}{}}
-\newlabel{eq:condizione_hovering}{{7.1}{83}{}{equation.7.1.1}{}}
-\newlabel{eq:forza_peso}{{7.2}{83}{}{equation.7.1.2}{}}
-\newlabel{eq:disco_attuatore}{{7.3}{83}{}{equation.7.1.3}{}}
-\newlabel{eq:area_elica}{{7.4}{83}{}{equation.7.1.4}{}}
-\newlabel{eq:spinta_ideale}{{7.5}{83}{}{equation.7.1.5}{}}
-\newlabel{eq:spinta_teorica}{{7.6}{83}{}{equation.7.1.6}{}}
-\newlabel{eq:rpm_vuoto}{{7.7}{83}{}{equation.7.1.7}{}}
+\newlabel{ch:conclusioni}{{7}{86}{Conclusioni e Sviluppi Futuri}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{86}{section.7.1}\protected@file@percent }
+\newlabel{sec:analisi_cause}{{7.1}{86}{Analisi critica delle cause di mancato volo libero}{section.7.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{86}{subsection.7.1.1}\protected@file@percent }
+\newlabel{sec:verifica_spinta}{{7.1.1}{86}{Verifica analitica del deficit di spinta}{subsection.7.1.1}{}}
+\newlabel{eq:condizione_hovering}{{7.1}{87}{}{equation.7.1.1}{}}
+\newlabel{eq:forza_peso}{{7.2}{87}{}{equation.7.1.2}{}}
+\newlabel{eq:disco_attuatore}{{7.3}{87}{}{equation.7.1.3}{}}
+\newlabel{eq:area_elica}{{7.4}{87}{}{equation.7.1.4}{}}
+\newlabel{eq:spinta_ideale}{{7.5}{87}{}{equation.7.1.5}{}}
+\newlabel{eq:spinta_teorica}{{7.6}{87}{}{equation.7.1.6}{}}
+\newlabel{eq:rpm_vuoto}{{7.7}{87}{}{equation.7.1.7}{}}
 \citation{uiuc_propeller_db}
-\newlabel{eq:rpm_statico}{{7.8}{84}{}{equation.7.1.8}{}}
-\newlabel{eq:spinta_singolo}{{7.9}{84}{}{equation.7.1.9}{}}
-\newlabel{eq:spinta_reale}{{7.10}{84}{}{equation.7.1.10}{}}
-\newlabel{eq:deficit}{{7.11}{84}{}{equation.7.1.11}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{85}{subsection.7.1.2}\protected@file@percent }
-\newlabel{sec:distribuzione_masse}{{7.1.2}{85}{Distribuzione delle masse ed elevata inerzia perimetrale}{subsection.7.1.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{85}{subsection.7.1.3}\protected@file@percent }
-\newlabel{sec:eccentricita_cg}{{7.1.3}{85}{Eccentricità del baricentro e momento ribaltante gravitazionale}{subsection.7.1.3}{}}
-\newlabel{eq:momento_gravity}{{7.12}{85}{Eccentricità del baricentro e momento ribaltante gravitazionale}{equation.7.1.12}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{85}{subsection.7.1.4}\protected@file@percent }
-\newlabel{sec:autorita_controllo}{{7.1.4}{85}{Deficit di autorità di controllo dei flap}{subsection.7.1.4}{}}
-\newlabel{eq:autorita_flap}{{7.13}{85}{Deficit di autorità di controllo dei flap}{equation.7.1.13}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{86}{subsection.7.1.5}\protected@file@percent }
-\newlabel{sec:masking_effect}{{7.1.5}{86}{L'effetto mascheramento del vincolo}{subsection.7.1.5}{}}
-\newlabel{eq:forza_fune_cap7}{{7.14}{86}{L'effetto mascheramento del vincolo}{equation.7.1.14}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{86}{section.7.2}\protected@file@percent }
-\newlabel{sec:sviluppi_futuri}{{7.2}{86}{Sviluppi futuri e linee guida per la riprogettazione}{section.7.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{86}{subsection.7.2.1}\protected@file@percent }
-\newlabel{sec:riprogettazione_propulsiva}{{7.2.1}{86}{Riprogettazione del sistema propulsivo}{subsection.7.2.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{87}{subsection.7.2.2}\protected@file@percent }
-\newlabel{sec:centratura_masse}{{7.2.2}{87}{Centratura e accostamento delle masse}{subsection.7.2.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{87}{subsection.7.2.3}\protected@file@percent }
-\newlabel{sec:aumento_autorita}{{7.2.3}{87}{Aumento dell'autorità di controllo}{subsection.7.2.3}{}}
+\newlabel{eq:rpm_statico}{{7.8}{88}{}{equation.7.1.8}{}}
+\newlabel{eq:spinta_singolo}{{7.9}{88}{}{equation.7.1.9}{}}
+\newlabel{eq:spinta_reale}{{7.10}{88}{}{equation.7.1.10}{}}
+\newlabel{eq:deficit}{{7.11}{88}{}{equation.7.1.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{89}{subsection.7.1.2}\protected@file@percent }
+\newlabel{sec:distribuzione_masse}{{7.1.2}{89}{Distribuzione delle masse ed elevata inerzia perimetrale}{subsection.7.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{89}{subsection.7.1.3}\protected@file@percent }
+\newlabel{sec:eccentricita_cg}{{7.1.3}{89}{Eccentricità del baricentro e momento ribaltante gravitazionale}{subsection.7.1.3}{}}
+\newlabel{eq:momento_gravity}{{7.12}{89}{Eccentricità del baricentro e momento ribaltante gravitazionale}{equation.7.1.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{89}{subsection.7.1.4}\protected@file@percent }
+\newlabel{sec:autorita_controllo}{{7.1.4}{89}{Deficit di autorità di controllo dei flap}{subsection.7.1.4}{}}
+\newlabel{eq:autorita_flap}{{7.13}{89}{Deficit di autorità di controllo dei flap}{equation.7.1.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{90}{subsection.7.1.5}\protected@file@percent }
+\newlabel{sec:masking_effect}{{7.1.5}{90}{L'effetto mascheramento del vincolo}{subsection.7.1.5}{}}
+\newlabel{eq:forza_fune_cap7}{{7.14}{90}{L'effetto mascheramento del vincolo}{equation.7.1.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{90}{section.7.2}\protected@file@percent }
+\newlabel{sec:sviluppi_futuri}{{7.2}{90}{Sviluppi futuri e linee guida per la riprogettazione}{section.7.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{90}{subsection.7.2.1}\protected@file@percent }
+\newlabel{sec:riprogettazione_propulsiva}{{7.2.1}{90}{Riprogettazione del sistema propulsivo}{subsection.7.2.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{91}{subsection.7.2.2}\protected@file@percent }
+\newlabel{sec:centratura_masse}{{7.2.2}{91}{Centratura e accostamento delle masse}{subsection.7.2.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{91}{subsection.7.2.3}\protected@file@percent }
+\newlabel{sec:aumento_autorita}{{7.2.3}{91}{Aumento dell'autorità di controllo}{subsection.7.2.3}{}}
 \bibstyle{ieeetr}
 \bibdata{bibl}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{88}{subsection.7.2.4}\protected@file@percent }
-\newlabel{sec:riduzione_peso}{{7.2.4}{88}{Riduzione del peso strutturale}{subsection.7.2.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{88}{section.7.3}\protected@file@percent }
-\newlabel{sec:considerazioni_finali}{{7.3}{88}{Considerazioni conclusive}{section.7.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{92}{subsection.7.2.4}\protected@file@percent }
+\newlabel{sec:riduzione_peso}{{7.2.4}{92}{Riduzione del peso strutturale}{subsection.7.2.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{92}{section.7.3}\protected@file@percent }
+\newlabel{sec:considerazioni_finali}{{7.3}{92}{Considerazioni conclusive}{section.7.3}{}}
 \bibcite{stm32_nucleo_um}{1}
 \bibcite{dfrobot_pm}{2}
 \bibcite{turnigy_plush}{3}
@@ -367,4 +390,4 @@
 \bibcite{bno055_ds}{5}
 \bibcite{vl53l1x_ds}{6}
 \bibcite{uiuc_propeller_db}{7}
-\gdef \@abspage@last{90}
+\gdef \@abspage@last{94}

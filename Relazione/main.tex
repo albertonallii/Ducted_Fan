@@ -1173,6 +1173,17 @@ L'avvio del firmware è gestito tramite una sequenza di \textit{safe startup}, e
 
 Durante questa fase vengono avviati i segnali PWM e i motori vengono mantenuti al valore minimo di comando, così da consentire agli ESC di riconoscere correttamente il segnale di armamento. La procedura è accompagnata da segnalazioni diagnostiche tramite LED, utili per fornire all'operatore un'indicazione visiva dello stato di avanzamento dell'avvio.
 
+Operativamente, la sequenza di \textit{safe startup} può essere suddivisa nelle seguenti fasi:
+\begin{enumerate}
+    \item inizializzazione delle periferiche e delle variabili interne del firmware;
+    \item forzatura dei comandi motore al valore PWM minimo;
+    \item posizionamento dei servomotori dei flap nella configurazione neutra;
+    \item mantenimento temporizzato del segnale PWM minimo, necessario per consentire l'armamento corretto degli ESC;
+    \item segnalazione diagnostica tramite LED durante l'attesa di stabilizzazione;
+    \item passaggio alla modalità operativa solo al termine della procedura e in assenza di condizioni di errore o arresto \textit{latched}.
+\end{enumerate}
+
+
 Terminata la fase di avvio, il firmware mantiene comunque attivi diversi livelli di protezione. I valori PWM ricevuti da MATLAB vengono applicati ai motori solo se questi risultano abilitati e se non è presente una condizione di arresto \textit{latched}. In caso contrario, il firmware forza entrambi i motori al valore minimo, impedendo che un comando precedente o non valido possa mantenere attiva la propulsione.
 
 La procedura di spegnimento immediato dei motori è centralizzata nella funzione
@@ -1241,9 +1252,9 @@ duration     = 30;
 	\begin{itemize}
 		\item \texttt{MOTOR\_MIN = 700} e \texttt{MOTOR\_MAX = 1500} definiscono i limiti inferiore e superiore dei segnali di comando in unità CCR (\textit{Capture-Compare Register}) destinati agli ESC dei motori \textit{Turnigy SK3}. Costituiscono la saturazione dell'attuatore principale: senza questi limiti, un errore di calcolo lato MATLAB potrebbe inviare un valore troppo basso (con conseguente spegnimento dei motori) oppure troppo alto (con potenziale danneggiamento degli ESC o uscita dalla zona di linearità della curva di spinta).
 		\item \texttt{HOVER = 1050} rappresenta il valore CCR corrispondente alla spinta nominale di equilibrio statico nella configurazione vincolata. Tutti i segnali di eccitazione che agiscono sui motori sono espressi come variazioni rispetto a questo valore.
-		\item \texttt{STEP\_SMALL = 50}, \texttt{STEP\_MEDIUM = 100} e \texttt{SIN\_AMP = 100} sono le ampiezze nominali dei segnali di eccitazione (gradini e sinusoidi) generati dalla funzione \texttt{generateSignal}. Questi parametri determinano il rapporto segnale--rumore dell'identificazione: ampiezze troppo piccole non producono uno spostamento angolare distinguibile dal rumore del BNO-055, mentre ampiezze eccessive potrebbero forzare le funi di vincolo oltre il loro regime elastico o portare i servomotori in saturazione meccanica.
+		\item \texttt{STEP\_SMALL = 50}, \texttt{STEP\_MEDIUM = 100} e \texttt{SIN\_AMP = 100} sono le ampiezze nominali delle sollecitazioni (espresse in microsecondi di PWM per i motori e in punti di deflessione per i flap). Tali costanti vengono utilizzate all'interno della funzione locale MATLAB \texttt{generateSignal} per calcolare istante per istante il profilo del segnale scelto. I valori numerici così generati vengono poi impacchettati dalla Ground Station e trasmessi all'STM32 tramite il comando seriale \texttt{CMD, top, bottom, roll, pitch}. Questi parametri determinano il rapporto segnale--rumore dell'identificazione: ampiezze troppo piccole non producono uno spostamento angolare distinguibile dal rumore del BNO-055, mentre ampiezze eccessive potrebbero forzare le funi di vincolo oltre il loro regime elastico o portare i servomotori in saturazione meccanica.
 		\item \texttt{CENTER\_SERVO = 1125} è il valore CCR corrispondente alla posizione neutra dei servomotori \textit{Hitec HS-82MG}, ovvero all'inclinazione nulla dei \textit{flap}.
-		\item \texttt{DT\_TARGET = 0.02} sancisce il passo di campionamento temporale dell'intero sistema. Coordinare la telemetria alla stessa frequenza a cui opera il ramo IMU/servo del firmware (50 [Hz], come descritto nella Sezione~\ref{sec:architettura_controllo} del Capitolo~\ref{ch:firmware}) è una scelta metodologica essenziale per evitare effetti di \textit{aliasing} e sfasamenti nei modelli identificati.
+		\item \texttt{DT\_TARGET = 0.02} sancisce il passo di campionamento temporale dell'intero sistema. Coordinare la telemetria alla stessa frequenza a cui opera il ramo IMU/servo del firmware (50 [Hz]) è una scelta metodologica essenziale per evitare effetti di \textit{aliasing} e sfasamenti nei modelli identificati.
 	\end{itemize}
 	
 	%--------------------------------------------------------------
@@ -1269,7 +1280,7 @@ duration     = 30;
 		\item \texttt{time\_ms} --- riferimento temporale in millisecondi dall'avvio del firmware, utilizzato lato MATLAB per costruire il vettore tempo dell'identificazione;
 		\item \texttt{roll\_cdeg}, \texttt{pitch\_cdeg}, \texttt{yaw\_cdeg} --- angoli di Eulero espressi in \textbf{centesimi di grado}. Questa conversione da \textit{float} a \textit{int} evita il costo computazionale e i ritardi di formattazione delle virgole mobili all'interno dello \textit{stack} \textit{stdio} del microcontrollore, e mantiene una precisione angolare di $0.01\degree$;
 		\item \texttt{alt\_mm} --- quota stimata dal VL53L1X dopo la compensazione del \textit{tilt}, in millimetri;
-		\item \texttt{top\_pwm}, \texttt{bottom\_pwm}, \texttt{roll\_pwm}, \texttt{pitch\_pwm} --- valori CCR effettivamente scritti negli attuatori dopo la saturazione hardware. Vengono trasmessi (e non semplicemente \"ripetuti\" rispetto al comando inviato) per consentire al PC di osservare gli effetti delle saturazioni;
+		\item \texttt{top\_pwm}, \texttt{bottom\_pwm}, \texttt{roll\_pwm}, \texttt{pitch\_pwm} --- valori CCR effettivamente scritti negli attuatori dopo la saturazione hardware. Vengono trasmessi (e non semplicemente ``ripetuti'' rispetto al comando inviato) per consentire al PC di osservare gli effetti delle saturazioni;
 		\item \texttt{motors\_enabled} --- \textit{flag} binaria che indica se il firmware è nello stato \textit{armato} o \textit{disarmato};
 		\item \texttt{uart\_rx\_errors}, \texttt{uart\_rx\_overflows}, \texttt{uart\_bad\_lines} --- contatori cumulativi degli errori UART in ricezione lato firmware. Permettono di monitorare in tempo reale la qualità del collegamento;
 		\item \texttt{telemetry\_overrun} --- \textit{flag} che indica se il firmware ha rilevato un ritardo nella propria stessa trasmissione, fenomeno che si verificherebbe se il \textit{buffer} di uscita non riuscisse a smaltire i pacchetti alla frequenza imposta;
@@ -1284,7 +1295,7 @@ duration     = 30;
 	
 	Esiste tuttavia una fase critica in cui questo meccanismo, pensato per la sicurezza, rischia di intervenire in modo non desiderato: la \textit{start sequence}. Durante l'attesa di un \textit{acknowledgement} (in particolare l'\texttt{ACK\_ON} dopo l'invio di \texttt{MOTOR\_ON}), MATLAB non sta ancora inviando comandi \texttt{CMD}, e il \textit{watchdog} potrebbe scattare prima che l'operatore abbia il controllo effettivo del sistema.
 	
-	Per risolvere questa situazione, lo \textit{script} MATLAB implementa un meccanismo di \textit{keep-alive}: durante l'attesa degli ACK critici, vengono inviati periodicamente comandi neutri (motori al minimo, servomotori centrati) che mantengono attivo il \textit{watchdog} senza alterare lo stato fisico del drone. L'implementazione è inserita nella funzione \texttt{sendCommandWaitAck}:
+	Per risolvere questa situazione, lo script MATLAB implementa un meccanismo di \texttt{keep-alive} attivo esclusivamente durante le fasi di transizione, ovvero quando la Ground Station è in attesa bloccante degli ACK critici (come l'avvio o l'arresto della prova). In questi frangenti, per evitare che l'attesa interrompa il flusso dati verso il velivolo facendo scattare il watchdog di bordo, vengono inviati periodicamente comandi neutri a bassa frequenza. Viceversa, quando il drone si trova in stato disarmato fuori dalle finestre di test e non vi è alcuno scambio di messaggi in corso, lo script rimane in uno stato di \textit{idle} completo senza inviare alcuna stringa sulla seriale, azzerando il rischio di attuazioni spurie. L'implementazione è inserita nella funzione \texttt{sendCommandWaitAck}:
 	
 	\begin{lstlisting}[language=Matlab, caption={Meccanismo keep-alive durante l'attesa degli ACK critici}]
 % Keep-alive durante l'attesa ACK.
@@ -1340,11 +1351,11 @@ end
 	Questo controllo è un filtro di primo livello, di natura puramente strutturale: garantisce che la riga abbia il numero corretto di campi, ma non verifica che ciascun campo contenga un valore numerico nel range atteso. Una corruzione che lasciasse intatto il numero di virgole ma alterasse il contenuto di un singolo campo (ad esempio un valore di angolo di Eulero fuori dall'intervallo $[-180, +180]\degree$) non verrebbe intercettata in questa fase. Un controllo più robusto richiederebbe l'inserimento di un \textit{checksum} (ad esempio CRC-8) come ultimo campo del pacchetto, soluzione comune nei protocolli telemetrici embedded ma non implementata in questa iterazione del progetto per non appesantire eccessivamente il \textit{payload} a livello applicativo. Nella pratica, il controllo geometrico si è dimostrato sufficiente per le campagne sperimentali svolte: se un disturbo elettromagnetico sui cavi del laboratorio corrompe un pacchetto UART troncandolo a metà, il conteggio delle virgole fallisce, la riga viene classificata come \texttt{badLines} e il file \texttt{.csv} resta libero da valori anomali (\texttt{NaN}) che farebbero fallire le successive procedure di identificazione in \texttt{tfest}. Eventuali corruzioni più sottili emergerebbero comunque in fase di analisi attraverso il controllo dei limiti fisici dei segnali.
 	
 	\subsection{Terminazione asincrona di emergenza}
-	Data la massa del prototipo ($\approx 2.2$ [kg]), l'energia cinetica delle eliche e il vincolo elastico delle funi, esiste la possibilità che oscillazioni divergenti si sviluppino più velocemente di quanto un operatore possa reagire premendo un pulsante tradizionale. Per questo motivo la telemetria include una gestione prioritaria degli arresti di emergenza, distinta a due livelli:
-	\begin{enumerate}
-		\item \textbf{Arresto controllato (\textit{Safe Stop})}: innescato al naturale scadere della durata della prova (ad esempio 30 [s]). Lo \textit{script} invia il comando \texttt{MOTOR\_OFF}; il firmware porta gradualmente i motori al PWM minimo e i servomotori in posizione neutra, garantendo un'uscita controllata dallo stato \textit{armato}.
-		\item \textbf{Terminazione d'emergenza (\textit{Kill})}: innescata manualmente dall'operatore tramite la pressione della barra spaziatrice o dell'apposito pulsante sulla GUI di MATLAB.
-	\end{enumerate}
+Durante le sessioni sperimentali abbiamo riscontrato che il velivolo, vincolato alle corde di sicurezza, tendeva a innescare oscillazioni divergenti improvvise e pericolose. Si è deciso quindi di implementare una gestione coordinata degli arresti di sicurezza, strutturata su due livelli a priorità differenziata per garantire l’integrità strutturale del prototipo e la sicurezza dell'operatore:
+\begin{enumerate}
+    \item \textbf{Arresto controllato (Safe Stop):} viene innescato al naturale scadere della durata della prova (ad esempio dopo 30~[s]) oppure automaticamente dal firmware (Watchdog) in caso di perdita del segnale di \textit{keep-alive}. Lo script invia il comando \texttt{MOTOR\_OFF}, portando gradualmente i motori al PWM minimo e i servomotori in posizione neutra per un'uscita controllata dallo stato armato.
+    \item \textbf{Terminazione d'emergenza (Kill):} viene attivata manualmente da remoto dall'operatore tramite la pressione asincrona della barra spaziatrice o dell'apposito pulsante sulla GUI di MATLAB\@. Questo comando interrompe istantaneamente qualsiasi routine in corso e azzera immediatamente i segnali di attuazione.
+\end{enumerate}
 	La pressione del tasto non viene valutata all'interno del ciclo principale, ma è gestita tramite il meccanismo dei \textit{callback} di MATLAB, che esegue la funzione associata in modo asincrono rispetto al \textit{loop} a 50 [Hz]:
 	
 	\begin{lstlisting}[language=Matlab, caption={Callback asincrono per la terminazione d'emergenza}]
@@ -1480,60 +1491,71 @@ fprintf("===================================\n");
 	Nelle campagne sperimentali svolte, i \textit{dataset} effettivamente utilizzati per la successiva fase di identificazione sono stati prevalentemente quelli generati dalle prove PRBS sui due assi di assetto. In particolare, il \textit{dataset} \texttt{5.3\_PRBS\_pitch\_*.csv} contiene oltre 1500 campioni utili con motori accesi, mentre il \textit{dataset} \texttt{5.2\_PRBS\_roll\_*.csv} contiene circa 840 campioni utili --- in entrambi i casi sufficienti, per durata e ricchezza spettrale, ad alimentare in modo efficace gli algoritmi di \texttt{tfest} descritti nel Capitolo~\ref{ch:modello}.
 	
 	Con la produzione di questi file \texttt{.csv} il sistema è pronto per la fase successiva, in cui i dati registrati vengono elaborati in MATLAB per l'identificazione delle funzioni di trasferimento del velivolo e per la sintesi dei regolatori PID.
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%             CAPITOLO 5 - IDENTIFICAZIONE DEL MODELLO
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\chapter{Identificazione del modello}
-	\label{ch:modello}
-	
-	Il presente capitolo descrive la fase di costruzione del modello matematico del \textit{Double Propeller Ducted-Fan (DPDF)} e la successiva sintesi dei regolatori PID. La procedura adottata è di tipo \textit{data-driven}: il modello dinamico del velivolo non viene derivato analiticamente dalle equazioni della meccanica, bensì \textit{stimato} a partire dai \textit{dataset} di telemetria acquisiti nel Capitolo~\ref{ch:telemetria}. I modelli identificati vengono poi impiegati per la sintesi automatica dei controllori tramite \texttt{pidtune}, con verifica della risposta in anello chiuso in simulazione prima della validazione sul prototipo fisico.
-	
-	%--------------------------------------------------------------
-	\section{Approccio data-driven}
-	\label{sec:approccio_datadriven}
-	
-	La modellistica analitica classica, basata sulle equazioni cardinali della dinamica di Newton-Eulero, descrive accuratamente il comportamento cinematico di un corpo rigido nello spazio. Nel caso di un velivolo con architettura \textit{DPDF}, tuttavia, tale approccio risulta parziale. Le complesse interazioni fluidodinamiche che si generano all'interno del condotto --- lo strato limite lungo le pareti interne, l'effetto di scia indotto dalle due eliche controrotanti, le mutue interferenze aerodinamiche tra i flussi e i \textit{flap} di controllo --- introducono non-linearità e incertezze parametriche difficilmente quantificabili \textit{a priori}.
-	
-	Per superare tali limitazioni si è scelto un approccio orientato ai dati, implementando una procedura di identificazione del sistema a \textbf{scatola nera} (\textit{Black-Box Identification}). Questa metodologia permette di ricavare un modello matematico lineare e tempo-invariante (LTI) nell'intorno del punto di lavoro statico, partendo esclusivamente dall'analisi delle risposte temporali del prototipo stimolato in anello aperto.
-	
-	Vale la pena anticipare che il modello LTI così ottenuto è valido localmente, in un intorno limitato della condizione di equilibrio. Le dinamiche globali del velivolo --- inclusi gli accoppiamenti tra gli assi, gli effetti delle saturazioni meccaniche e l'interazione con il vincolo elastico delle funi --- saranno invece esplorate tramite il simulatore fisico tridimensionale descritto nel Capitolo~\ref{ch:simulazione}, che adotta un modello a parametri concentrati di tipo \textit{grey-box} e complementa le funzioni di trasferimento qui identificate.
-	
-	%--------------------------------------------------------------
-	\section{Pre-elaborazione dei dati}
-	\label{sec:pre_elaborazione}
-	
-	I dati acquisiti dal firmware durante le prove vengono salvati nei file \texttt{.csv} descritti nel Capitolo~\ref{ch:telemetria}. In questi file i comandi impartiti ai servomotori sono espressi in unità CCR (\textit{Capture-Compare Register}), mentre le letture di assetto dell'IMU sono registrate in centesimi di grado.
-	
-	Prima di procedere alla stima delle funzioni di trasferimento è necessario un processo di conversione e condizionamento dei segnali. L'obiettivo è duplice: convertire le variabili in unità ingegneristiche coerenti (gradi fisici sia per l'ingresso che per l'uscita) e traslare l'origine dei segnali, in modo che rappresentino le pure variazioni dinamiche $\Delta$ rispetto alla condizione di equilibrio statico.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs1.png}
-	\end{figure}
-	
-		\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs2.png}
-		\caption{\textit{Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit{flap}; in basso: risposta angolare del velivolo misurata dall'IMU. A sopra l'asse di \textit{roll}, a sotto l'asse di \textit{pitch}}
-		\label{fig:dataset_prbs}
-	\end{figure}
-	La centratura del segnale d'ingresso rispetto alla posizione neutra del \textit{flap} ($CCR_\text{neutro} = 1125$) è governata dalla relazione:
-	\begin{equation}
-		\Delta u(t) = \frac{CCR_\text{flap}(t) - CCR_\text{neutro}}{K_\text{CCR}}
-		\label{eq:centratura_input}
-	\end{equation}
-	dove $K_\text{CCR} = 10.0$ [CCR/deg] rappresenta la costante di conversione statica del servomotore \textit{Hitec HS-82MG} adottato.
-	
-	Analogamente, la misura dell'angolo di assetto $\theta(t)$ (\textit{roll} o \textit{pitch}) viene convertita in gradi e depurata dal valore medio di \textit{offset} $\bar\theta$ registrato durante la fase di equilibrio:
-	\begin{equation}
-		\Delta y(t) = \frac{\theta_\text{cdeg}(t)}{100} - \bar\theta
-		\label{eq:centratura_output}
-	\end{equation}
-	
-	L'implementazione di questa fase di pre-elaborazione è riportata nel codice MATLAB seguente:
-	
-	\begin{lstlisting}[language=Matlab, caption={Pre-elaborazione dei segnali di ingresso e uscita}]
+\chapter{Identificazione del modello}
+\label{ch:modello}
+
+Il presente capitolo descrive la fase di costruzione del modello matematico del \textit{Double Propeller Ducted-Fan (DPDF)} e la successiva sintesi dei regolatori PID. La procedura adottata è di tipo \textit{data-driven}: il modello dinamico del velivolo non viene derivato analiticamente dalle equazioni della meccanica, bensì \textit{stimato} a partire dai \textit{dataset} di telemetria acquisiti nel Capitolo~\ref{ch:telemetria}. I modelli identificati vengono poi impiegati per la sintesi automatica dei controllori tramite \texttt{pidtune}, con verifica della risposta in anello chiuso in simulazione prima della validazione sul prototipo fisico.
+
+%--------------------------------------------------------------
+\section{Approccio data-driven}
+\label{sec:approccio_datadriven}
+
+La modellistica analitica classica, basata sulle equazioni cardinali della dinamica di Newton-Eulero, descrive accuratamente il comportamento cinematico di un corpo rigido nello spazio. Nel caso di un velivolo con architettura \textit{DPDF}, tuttavia, tale approccio risulta parziale. Le complesse interazioni fluidodinamiche che si generano all'interno del condotto --- lo strato limite lungo le pareti interne, l'effetto di scia indotto dalle due eliche controrotanti, le mutue interferenze aerodinamiche tra i flussi e i \textit{flap} di controllo --- introducono non-linearità e incertezze parametriche difficilmente quantificabili \textit{a priori}.
+
+Per superare tali limitazioni si è scelto un approccio orientato ai dati, implementando una procedura di identificazione del sistema a \textbf{scatola nera} (\textit{Black-Box Identification}). Questa metodologia permette di ricavare un modello matematico lineare e tempo-invariante (LTI) nell'intorno del punto di lavoro statico, partendo esclusivamente dall'analisi delle risposte temporali del prototipo stimolato in anello aperto.
+
+Vale la pena anticipare che il modello LTI così ottenuto è valido localmente,
+nell'intorno operativo effettivamente esplorato durante le prove di identificazione.
+In particolare, i dataset PRBS sono stati acquisiti mantenendo i motori attorno alla
+condizione nominale di prova e imponendo ai \textit{flap} variazioni limitate rispetto
+alla posizione neutra. Poiché la conversione adottata è pari a
+\(K_\text{CCR}=10~\mathrm{CCR/deg}\), una variazione di 50--100 CCR corrisponde
+a circa 5--10 gradi di deflessione del \textit{flap}. I modelli identificati descrivono
+quindi la dinamica del DPDF nel range di piccole e medie perturbazioni utilizzato
+per l'identificazione, e non devono essere estesi a condizioni di grande angolo,
+saturazione dei \textit{flap} o funzionamento lontano dal punto di equilibrio. Le dinamiche globali del velivolo --- inclusi gli accoppiamenti tra gli assi, gli effetti delle saturazioni meccaniche e l'interazione con il vincolo elastico delle funi --- saranno invece esplorate tramite il simulatore fisico tridimensionale descritto nel Capitolo~\ref{ch:simulazione}, che adotta un modello a parametri concentrati di tipo \textit{grey-box} e complementa le funzioni di trasferimento qui identificate.
+
+%--------------------------------------------------------------
+\section{Pre-elaborazione dei dati}
+\label{sec:pre_elaborazione}
+
+I dati acquisiti dal firmware durante le prove vengono salvati nei file \texttt{.csv} descritti nel Capitolo~\ref{ch:telemetria}. In questi file i comandi impartiti ai servomotori sono espressi in unità CCR (\textit{Capture-Compare Register}), mentre le letture di assetto dell'IMU sono registrate in centesimi di grado.
+
+Prima di procedere alla stima delle funzioni di trasferimento è necessario un processo di conversione e condizionamento dei segnali. L'obiettivo è duplice: convertire le variabili in unità ingegneristiche coerenti (gradi fisici sia per l'ingresso che per l'uscita) e traslare l'origine dei segnali, in modo che rappresentino le pure variazioni dinamiche $\Delta$ rispetto alla condizione di equilibrio statico.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs1.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{figures/05_modello/dataset_prbs2.png}
+	\caption{\textit{Dataset} sperimentale ad anello aperto ottenuto tramite stimolazione PRBS. In alto: comandi PWM ai motori; al centro: comandi PWM ai \textit{flap}; in basso: risposta angolare del velivolo misurata dall'IMU. La figura superiore si riferisce all'asse di \textit{roll}, quella inferiore all'asse di \textit{pitch}.}
+	\label{fig:dataset_prbs}
+\end{figure}
+
+La centratura del segnale d'ingresso rispetto alla posizione neutra del \textit{flap} ($CCR_\text{neutro} = 1125$) è governata dalla relazione:
+\begin{equation}
+	\Delta u(t) = \frac{CCR_\text{flap}(t) - CCR_\text{neutro}}{K_\text{CCR}}
+	\label{eq:centratura_input}
+\end{equation}
+dove $K_\text{CCR} = 10.0$ [CCR/deg] rappresenta la costante di conversione statica del servomotore \textit{Hitec HS-82MG} adottato.
+
+In questo modo l'ingresso del modello non è più espresso in unità di registro, ma in gradi di deflessione del \textit{flap} rispetto alla posizione neutra. Pertanto, nei modelli identificati, $\Delta u(t)$ rappresenta la variazione angolare del \textit{flap} comandata al servomotore.
+
+Analogamente, la misura dell'angolo di assetto $\theta(t)$ (\textit{roll} o \textit{pitch}) viene convertita in gradi e depurata dal valore medio di \textit{offset} $\bar\theta$ registrato durante la fase di equilibrio:
+\begin{equation}
+	\Delta y(t) = \frac{\theta_\text{cdeg}(t)}{100} - \bar\theta
+	\label{eq:centratura_output}
+\end{equation}
+
+L'implementazione di questa fase di pre-elaborazione è riportata nel codice MATLAB seguente:
+
+\begin{lstlisting}[language=Matlab, caption={Pre-elaborazione dei segnali di ingresso e uscita}]
 CCR_PER_DEGREE = 10.0;   % Costante di conversione servo
 CENTER_SERVO   = 1125;   % Zero meccanico flap
 
@@ -1549,64 +1571,74 @@ y_centered = y_raw - y_mean;
 % Creazione dell'oggetto iddata per il System Identification Toolbox
 Ts         = 0.02;       % Periodo di campionamento (50 Hz)
 data_ident = iddata(y_centered, u_centered, Ts);
-	\end{lstlisting}
-	
-	Il periodo di campionamento $T_s = 0.02$ [s] coincide con la frequenza di trasmissione della telemetria (50 [Hz]) ed è coerente con la frequenza alla quale il PID, una volta validato, opererà nel firmware. Questa scelta evita disallineamenti tra il modello identificato e l'ambiente in cui i regolatori saranno effettivamente eseguiti.
-	
-	%--------------------------------------------------------------
-	\section{Selezione dell'architettura del modello}
-	\label{sec:architettura_modello}
-	
-	Per identificare la dinamica del sistema SISO (\textit{Single-Input Single-Output}) che lega lo spostamento angolare dei \textit{flap} alla rotazione del velivolo attorno ai rispettivi assi principali, si è utilizzato il \textit{System Identification Toolbox} di MATLAB, in particolare la funzione \texttt{tfest}. La stima è stata condotta nel dominio del tempo continuo, configurando l'algoritmo iterativo di ottimizzazione su una struttura a tempo continuo che viene poi convertita a tempo discreto per il confronto con i dati.
-	
-	Per evitare fenomeni di sovra-parametrizzazione del rumore di misura ad alta frequenza (causato principalmente dalle vibrazioni dei motori \textit{brushless}), la complessità strutturale della funzione di trasferimento è stata limitata sulla base di considerazioni fisiche. La dinamica complessiva del drone può essere approssimata, in prima istanza, a un sistema del secondo ordine --- caratterizzato da un comportamento inerziale e da uno smorzamento aerodinamico --- a cui si aggiungono il ritardo di attuazione dei servomotori e l'effetto di un eventuale zero al numeratore.
-	
-	La struttura generale del modello LTI a tempo continuo che si cerca di identificare è:
-	\begin{equation}
-		G(s) = \frac{\Delta Y(s)}{\Delta U(s)} = \frac{b_m s^m + \dots + b_1 s + b_0}{s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}
-		\label{eq:tf_generale}
-	\end{equation}
-	
-	Sono state confrontate tre strutture candidate per ciascun asse: \textbf{2 poli e 1 zero}, \textbf{2 poli e 0 zeri}, \textbf{3 poli e 1 zero}. L'analisi iterativa condotta sui \textit{dataset} PRBS ha evidenziato due architetture ottimali per i rispettivi assi:
-	\begin{itemize}
-		\item \textbf{Asse di \textit{roll}}: modello a 2 poli e 1 zero ($n=2$, $m=1$), che cattura adeguatamente la dinamica inerziale del velivolo nella sezione trasversale.
-		\item \textbf{Asse di \textit{pitch}}: modello a 3 poli e 1 zero ($n=3$, $m=1$). Il polo aggiuntivo rispetto all'asse di \textit{roll} è imputabile alla maggiore complessità del flusso aerodinamico in direzione longitudinale, dovuta alla configurazione asimmetrica dei due rotori in cascata.
-	\end{itemize}
-	
-	Le rispettive funzioni di trasferimento hanno dunque forma:
-	\begin{equation}
-		G_\text{roll}(s) = \frac{b_1 s + b_0}{s^2 + a_1 s + a_0},
-		\qquad
-		G_\text{pitch}(s) = \frac{b_1 s + b_0}{s^3 + a_2 s^2 + a_1 s + a_0}
-		\label{eq:tf_assi}
-	\end{equation}
-	
-	I valori numerici dei coefficienti $a_i$ e $b_j$ ottenuti dall'identificazione su \textit{dataset} PRBS sono riportati nella Tabella~\ref{tab:coefficienti_tf}.
-	
-	\begin{table}[H]
-		\centering
-		\begin{tabular}{l c c}
-			\toprule
-			\textbf{Coefficiente} & \textbf{$G_\text{roll}(s)$ (2p, 1z)} & \textbf{$G_\text{pitch}(s)$ (3p, 1z)} \\
-			\midrule
-			$b_1$ & (-1.832) & (-2.033) \\
-			$b_0$ &  (-9.160) & (-8.130) \\
-			$a_2$ &  (n/a)   & (12.00) \\
-			$a_1$ & (20.00) &  (70.00) \\
-			$a_0$ & (100.00) & (100.00) \\
-			\bottomrule
-		\end{tabular}
-		\caption{Coefficienti numerici delle funzioni di trasferimento identificate.}
-		\label{tab:coefficienti_tf}
-	\end{table}
-	
-	%--------------------------------------------------------------
-	\section{Stima del modello e validazione}
-	\label{sec:stima_validazione}
-	
-	La stima dei coefficienti è stata effettuata tramite la funzione \texttt{tfest} del \textit{System Identification Toolbox}, configurata per imporre la stabilità del modello stimato (opzione \texttt{EnforceStability}). Lo \textit{script} di identificazione \texttt{Identify\_and\_tune.m} confronta automaticamente le tre strutture candidate e seleziona quella con il \textit{fit} più elevato:
-	
-	\begin{lstlisting}[language=Matlab, caption={Confronto automatico delle tre strutture candidate (estratto da \texttt{Identify\_and\_tune.m})}]
+\end{lstlisting}
+
+Il periodo di campionamento $T_s = 0.02$ [s] coincide con la frequenza di trasmissione della telemetria (50 [Hz]) ed è coerente con la frequenza alla quale il PID, una volta validato, opererà nel firmware. Questa scelta evita disallineamenti tra il modello identificato e l'ambiente in cui i regolatori saranno effettivamente eseguiti.
+
+I dataset utilizzati per l'identificazione sono costituiti dai campioni telemetrici effettivamente salvati a 50~[Hz]. Di conseguenza, anche qualora alcune grandezze interne al firmware vengano aggiornate a frequenze differenti, il modello identificato rappresenta la dinamica osservata alla cadenza temporale dei dati disponibili, pari a $T_s = 0.02$~[s].
+
+%--------------------------------------------------------------
+\section{Selezione dell'architettura del modello}
+\label{sec:architettura_modello}
+
+Il \textit{DPDF}, considerato nella sua interezza, è un sistema multi-ingresso multi-uscita (MIMO), poiché dispone di più attuatori --- motori e \textit{flap} --- e produce più grandezze misurabili, quali \textit{roll}, \textit{pitch}, \textit{yaw} e quota. Ai fini della sintesi preliminare dei regolatori di assetto, il problema è stato tuttavia ricondotto all'identificazione di due canali SISO equivalenti, uno per l'asse di \textit{roll} e uno per l'asse di \textit{pitch}.
+
+In ciascuna prova di identificazione è stato eccitato prevalentemente un solo \textit{flap} alla volta, mantenendo gli altri ingressi in condizioni nominali o costanti. Per l'asse di \textit{roll} l'ingresso del modello è quindi la variazione angolare del \textit{flap} di \textit{roll} rispetto alla posizione neutra, mentre l'uscita è la variazione dell'angolo di \textit{roll} misurato dalla IMU. In modo analogo, per l'asse di \textit{pitch} l'ingresso è la variazione angolare del \textit{flap} di \textit{pitch} e l'uscita è la variazione dell'angolo di \textit{pitch}.
+
+I modelli ottenuti devono quindi essere interpretati come approssimazioni locali dei canali principali di assetto, e non come una descrizione completa della dinamica MIMO del \textit{DPDF}.
+
+La stima è stata condotta nel dominio del tempo continuo tramite il \textit{System Identification Toolbox} di MATLAB, in particolare mediante la funzione \texttt{tfest}. Sebbene i dati sperimentali siano acquisiti a tempo discreto con periodo di campionamento $T_s = 0.02$~[s], le funzioni di trasferimento riportate in questa sezione sono espresse nel dominio continuo $s$. La discretizzazione rilevante ai fini dell'implementazione firmware viene discussa successivamente nella sezione dedicata al controllore.
+
+Per evitare fenomeni di sovra-parametrizzazione del rumore di misura ad alta frequenza (causato principalmente dalle vibrazioni dei motori \textit{brushless}), la complessità strutturale della funzione di trasferimento è stata limitata sulla base di considerazioni fisiche. La dinamica complessiva del drone può essere approssimata, in prima istanza, a un sistema del secondo ordine --- caratterizzato da un comportamento inerziale e da uno smorzamento aerodinamico --- a cui si aggiungono il ritardo di attuazione dei servomotori e l'effetto di un eventuale zero al numeratore.
+
+La struttura generale del modello LTI a tempo continuo che si cerca di identificare è:
+\begin{equation}
+	G(s) = \frac{\Delta Y(s)}{\Delta U(s)} = 
+	\frac{b_m s^m + \dots + b_1 s + b_0}
+	{s^n + a_{n-1} s^{n-1} + \dots + a_1 s + a_0}
+	\label{eq:tf_generale}
+\end{equation}
+
+Sono state confrontate tre strutture candidate per ciascun asse: \textbf{2 poli e 1 zero}, \textbf{2 poli e 0 zeri}, \textbf{3 poli e 1 zero}. L'analisi iterativa condotta sui \textit{dataset} PRBS ha evidenziato due architetture ottimali per i rispettivi assi:
+\begin{itemize}
+	\item \textbf{Asse di \textit{roll}}: modello a 2 poli e 1 zero ($n=2$, $m=1$), che cattura adeguatamente la dinamica inerziale del velivolo nella sezione trasversale, mantenendo una struttura sufficientemente semplice.
+	\item \textbf{Asse di \textit{pitch}}: modello a 3 poli e 1 zero ($n=3$, $m=1$). Il polo aggiuntivo rispetto all'asse di \textit{roll} è stato introdotto perché i modelli di ordine inferiore non riproducevano con sufficiente accuratezza il transitorio osservato lungo l'asse longitudinale. Tale maggiore complessità può essere attribuita alla distribuzione non ideale delle masse, all'interazione con le funi di vincolo e alla non perfetta uniformità del flusso aerodinamico all'interno del condotto.
+\end{itemize}
+
+Le rispettive funzioni di trasferimento hanno dunque forma:
+\begin{equation}
+	G_\text{roll}(s) = \frac{b_1 s + b_0}{s^2 + a_1 s + a_0},
+	\qquad
+	G_\text{pitch}(s) = \frac{b_1 s + b_0}{s^3 + a_2 s^2 + a_1 s + a_0}
+	\label{eq:tf_assi}
+\end{equation}
+
+I valori numerici dei coefficienti $a_i$ e $b_j$ ottenuti dall'identificazione su \textit{dataset} PRBS sono riportati nella Tabella~\ref{tab:coefficienti_tf}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l c c}
+		\toprule
+		\textbf{Coefficiente} & \textbf{$G_\text{roll}(s)$ (2p, 1z)} & \textbf{$G_\text{pitch}(s)$ (3p, 1z)} \\
+		\midrule
+		$b_1$ & $-1.832$ & $-2.033$ \\
+		$b_0$ & $-9.160$ & $-8.130$ \\
+		$a_2$ & n/a & $12.00$ \\
+		$a_1$ & $20.00$ & $70.00$ \\
+		$a_0$ & $100.00$ & $100.00$ \\
+		\bottomrule
+	\end{tabular}
+	\caption{Coefficienti numerici delle funzioni di trasferimento identificate.}
+	\label{tab:coefficienti_tf}
+\end{table}
+
+%--------------------------------------------------------------
+\section{Stima del modello e validazione}
+\label{sec:stima_validazione}
+
+La stima dei coefficienti è stata effettuata tramite la funzione \texttt{tfest} del \textit{System Identification Toolbox}, configurata per imporre la stabilità del modello stimato (opzione \texttt{EnforceStability}). Lo \textit{script} di identificazione \texttt{Identify\_and\_tune.m} confronta automaticamente le tre strutture candidate e seleziona quella con il \textit{fit} più elevato:
+
+\begin{lstlisting}[language=Matlab, caption={Confronto automatico delle tre strutture candidate (estratto da \texttt{Identify\_and\_tune.m})}]
 opt_tf = tfestOptions('EnforceStability', true, 'Display', 'off');
 
 % Modello A: 2 poli, 1 zero
@@ -1622,201 +1654,241 @@ sysC = tfest(data_ident, 3, 1, opt_tf);
 fitC = goodnessOfFit(sim(sysC, data_ident).y, y_centered, 'NRMSE') * 100;
 
 [best_fit, best_idx] = max([fitA, fitB, fitC]);
-	\end{lstlisting}
-	
-	La bontà del modello identificato è valutata mediante l'indice di \textit{fit} percentuale basato sulla NRMSE (\textit{Normalized Root Mean Square Error}):
-	\begin{equation}
-		\text{Fit} = 100 \cdot \left( 1 - \frac{\sqrt{\sum_{k=1}^{N} \bigl| y(k) - \hat y(k) \bigr|^{2}}}{\sqrt{\sum_{k=1}^{N} \bigl| y(k) - \bar y \bigr|^{2}}} \right) \quad [\%]
-		\label{eq:nrmse}
-	\end{equation}
-	dove $y(k)$ è la misura sperimentale dell'IMU, $\hat y(k)$ è la risposta temporale simulata dal modello identificato e $\bar y$ è il valore medio del segnale reale. Un valore del 100\% indica una corrispondenza perfetta; un valore prossimo a 0\% indica che il modello non spiega la varianza del dato meglio di una semplice media costante.
-	
-	I valori di \textit{fit} ottenuti sui \textit{dataset} PRBS sono:
-	\begin{itemize}
-		\item Asse di \textit{roll}: $\text{Fit} = 77.85\%$
-		\item Asse di \textit{pitch}: $\text{Fit} = 77.67\%$
-	\end{itemize}
-	
-Si tratta di valori soddisfacenti per un’identificazione black-box su un sistema dotato di non linearità importanti e testato in condizioni vincolate. La quota residua di varianza non spiegata dal modello è imputabile a effetti che un modello lineare SISO non può catturare integralmente: in particolare l’attrito non lineare sui perni dei flap, l’azione non perfettamente simmetrica delle funi di vincolo e i piccoli accoppiamenti tra gli assi. I modelli identificati devono quindi essere interpretati come approssimazioni locali della dinamica dominante del DPDF nella configurazione sperimentale adottata, sufficienti per la sintesi preliminare dei regolatori PIDF e per la successiva verifica in simulazione.
-	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation2.png}
-	\end{figure}
-	
-		\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation1.png}
-		\caption{Analisi di \textit{cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata).Sopra l'asse di \textit{roll} (Fit $77.85\%$), sotto l'asse di \textit{pitch} (Fit $77.67\%$)}
-		\label{fig:cross_validation}
-	\end{figure}
-	
-	\subsection{Analisi del guadagno statico}
-	Un'analisi che permette di validare fisicamente il modello identificato riguarda l'estrazione del guadagno statico del sistema, calcolato applicando il teorema del valore finale per $s \to 0$:
-	\begin{equation}
-		\mu = \lim_{s \to 0} G(s) = \frac{b_0}{a_0}
-		\label{eq:guadagno_statico}
-	\end{equation}
-	I test condotti hanno restituito, per entrambi gli assi, un guadagno statico di \textbf{segno negativo} ($\mu < 0$). Questo risultato fornisce una conferma fisica del modello stimato: un incremento del PWM del servomotore --- corrispondente a un'inclinazione positiva del \textit{flap} secondo la convenzione del firmware --- genera una coppia aerodinamica che ruota il drone nel verso opposto rispetto al sistema di riferimento destrorso solidale all'IMU. Tale inversione di segno, conseguenza della geometria meccanica del prototipo, vincolerà la successiva sintesi del controllore e la sua integrazione nel \textit{mixer} di controllo del firmware.
-	
-	%--------------------------------------------------------------
-	\section{Il regolatore PID: principi di funzionamento}
-	\label{sec:principi_pid}
-	
-	Prima di descrivere la procedura di sintesi automatica, è opportuno richiamare il principio di funzionamento del regolatore impiegato. Il \textit{DPDF} è un sistema intrinsecamente instabile attorno alla condizione di assetto orizzontale: in assenza di azione correttiva, il momento ribaltante indotto dall'eccentricità del baricentro (Sezione~\ref{sec:eccentricita_cg}) fa divergere gli angoli di \textit{roll} e \textit{pitch}. Il compito del controllore è chiudere un anello di retroazione che, confrontando istante per istante l'assetto misurato dall'IMU con il riferimento desiderato, generi un comando ai \textit{flap} tale da riportare il velivolo verso l'equilibrio.
-	
-	Si definisce a tal fine il segnale di \textbf{errore} come differenza tra l'angolo di riferimento $\theta_\text{rif}$ e l'angolo misurato $\theta(t)$:
-	\begin{equation}
-		e(t) = \theta_\text{rif} - \theta(t)
-		\label{eq:errore_pid}
-	\end{equation}
-	Nelle prove di stabilizzazione il riferimento è nullo ($\theta_\text{rif} = 0\degree$), poiché l'obiettivo è mantenere il drone in assetto orizzontale; l'errore coincide dunque, a meno del segno, con l'inclinazione istantanea del velivolo. A partire da questo errore, il regolatore PID elabora il comando di controllo combinando tre azioni distinte, ciascuna con un significato fisico preciso.
-	
-	\subsection{Le tre azioni di controllo}
-	\label{sec:tre_azioni}
-	Nella sua forma ideale a tempo continuo, l'uscita di un regolatore PID è la somma di un termine proporzionale, uno integrale e uno derivativo dell'errore:
-	\begin{equation}
-		u(t) = \underbrace{K_p \, e(t)}_{\text{proporzionale}}
-		\; + \; \underbrace{K_i \int_{0}^{t} e(\tau)\, d\tau}_{\text{integrale}}
-		\; + \; \underbrace{K_d \, \frac{d e(t)}{d t}}_{\text{derivativo}}
-		\label{eq:pid_ideale}
-	\end{equation}
-	I tre guadagni $K_p$, $K_i$, $K_d$ pesano il contributo di ciascuna azione e costituiscono i parametri da determinare in fase di taratura.
-	
-	\paragraph{Azione proporzionale.} Il termine $K_p \, e(t)$ produce una correzione istantanea proporzionale all'entità dell'errore: quanto più il drone è inclinato, tanto più ampia è la deflessione richiesta ai \textit{flap}. È l'azione di richiamo principale, ma da sola non è sufficiente. In presenza di un disturbo costante --- come il momento ribaltante gravitazionale del baricentro eccentrico --- l'azione proporzionale lascia infatti un \textbf{errore residuo a regime} (\textit{steady-state error}): per generare un momento correttivo permanente che bilanci il disturbo costante, è necessario un errore non nullo che alimenti il termine proporzionale.
-	
-	\paragraph{Azione integrale.} Il termine $K_i \int e\, d\tau$ accumula nel tempo l'errore e ne integra la storia passata. La sua funzione è proprio quella di \textbf{annullare l'errore a regime}: finché permane un errore, anche piccolo, l'integrale continua a crescere aumentando la correzione, fino a quando il momento correttivo eguaglia esattamente il disturbo costante e l'errore si azzera. Nel caso del \textit{DPDF} questa azione è essenziale per compensare lo sbilanciamento statico del baricentro. Il prezzo da pagare è il rischio di \textit{windup}: se l'attuatore satura (i \textit{flap} raggiungono il limite di $\pm 30\degree$) e l'errore persiste, l'integrale può accumulare valori molto elevati, generando sovraelongazioni e ritardi di recupero. Per questo motivo l'azione integrale è dotata di un meccanismo \textbf{anti-windup} a saturazione, descritto nel seguito.
-	
-	\paragraph{Azione derivativa.} Il termine $K_d \, \dot e(t)$ reagisce alla \textit{velocità} di variazione dell'errore, anticipando la dinamica del sistema. Esso introduce uno \textbf{smorzamento} che frena le oscillazioni e riduce la sovraelongazione, opponendosi alle variazioni rapide di assetto. La derivazione pura è però estremamente sensibile al rumore di misura: la derivata del rumore del BNO-055 produrrebbe comandi ad alta frequenza e ampiezza ai servomotori, con conseguente \textit{chattering}. Per questa ragione, nell'implementazione effettiva (Sezione~\ref{sec:sintesi_pidf}) l'azione derivativa è asservita a un filtro passa-basso del primo ordine, dando luogo alla forma PIDF di equazione~\eqref{eq:pidf}.
-	
-	\subsection{Implementazione discreta in forma posizionale}
-	\label{sec:pid_posizionale}
-	Il regolatore non opera nel continuo ma viene eseguito nel firmware come algoritmo a tempo discreto, all'interno dell'\textit{interrupt} deterministico del \textit{Timer 7} alla frequenza di 50~[Hz] ($T_s = 0.02$~[s]). L'implementazione adottata è in \textbf{forma posizionale} (\textit{positional form}): a ogni passo di campionamento $k$ l'azione di controllo viene \textit{ricalcolata per intero} a partire dall'errore corrente, dall'accumulatore integrale e dalla derivata filtrata. Questa scelta si distingue dalla forma \textit{incrementale} (\textit{velocity form}), nella quale si calcola invece l'incremento $\Delta u[k]$ rispetto al comando precedente; la forma posizionale è stata preferita per la maggiore trasparenza nella gestione esplicita della saturazione dell'attuatore e del termine anti-windup.
-	
-	Le tre azioni sono discretizzate come segue. Il termine proporzionale è immediato:
-	\begin{equation}
-		P[k] = K_p \, e[k]
-		\label{eq:pid_p}
-	\end{equation}
-	L'azione integrale è realizzata mediante un accumulatore aggiornato a ogni passo e limitato (\textit{clamping}) entro l'escursione fisica del flap, così da impedire il \textit{windup}:
-	\begin{equation}
-		I[k] = \mathrm{sat}\!\Bigl( I[k-1] + K_i \, T_s \, e[k] \Bigr), 
-		\qquad |I[k]| \leq 30\degree
-		\label{eq:pid_i}
-	\end{equation}
-	L'azione derivativa filtrata è discretizzata con la trasformazione di Eulero all'indietro introdotta in equazione~\eqref{eq:euler_backward}, da cui discende il coefficiente $\alpha = T_s/(T_s + T_f)$:
-	\begin{equation}
-		D[k] = (1-\alpha)\, D[k-1] + \alpha \, \frac{K_d}{T_s} \bigl( e[k] - e[k-1] \bigr)
-		\label{eq:pid_d}
-	\end{equation}
-	Il comando complessivo applicato al servomotore è infine la somma delle tre azioni, a sua volta saturata al limite meccanico dei \textit{flap}:
-	\begin{equation}
-		u[k] = \mathrm{sat}\!\Bigl( P[k] + I[k] + D[k] \Bigr),
-		\qquad |u[k]| \leq 30\degree
-		\label{eq:pid_posizionale}
-	\end{equation}
-	
-	Il comando $u[k]$, espresso in gradi di deflessione del \textit{flap}, viene poi convertito nel corrispondente valore CCR tramite la costante di conversione $K_\text{CCR} = 10.0$~[CCR/deg] (Sezione~\ref{sec:pre_elaborazione}) prima di essere inviato al timer di generazione del segnale PWM. Poiché i guadagni sono stati identificati lavorando in unità fisiche di gradi (Sezione~\ref{sec:architettura_modello}), i valori $K_p$, $K_i$, $K_d$ sintetizzati in MATLAB sono direttamente trasferibili nei campi del file \texttt{config.c} senza ulteriori riscalature.
-	
-	%--------------------------------------------------------------
-	\section{Sintesi del controllore PIDF}
-	\label{sec:sintesi_pidf}
-	
-	Identificato il modello matematico $G(s)$ del processo, si è proceduto alla sintesi dell'algoritmo di controllo ad anello chiuso. L'architettura scelta è un controllore PID in forma parallela con l'azione derivativa asservita a un filtro passa-basso del primo ordine, configurazione comunemente indicata come \textbf{PIDF}.
-	
-	\subsection{Architettura del controllore}
-	La presenza del filtro derivativo, caratterizzato dalla costante di tempo $T_f$, è indispensabile per limitare l'amplificazione del rumore di misura alle alte frequenze: senza filtraggio, la derivata pura del rumore del BNO-055 produrrebbe comandi ad alta ampiezza e alta frequenza ai servomotori, con conseguente fenomeno di \textit{chattering} (vibrazioni rapide e meccanicamente dannose). La funzione di trasferimento del controllore nel dominio di Laplace ha forma:
-	\begin{equation}
-		C(s) = K_p + \frac{K_i}{s} + \frac{K_d \, s}{T_f \, s + 1}
-		\label{eq:pidf}
-	\end{equation}
-	
-	\subsection{Sintesi tramite pidtune}
-	Il calcolo dei guadagni ottimali è stato effettuato tramite l'algoritmo di ottimizzazione \texttt{pidtune} di MATLAB. Per mitigare i rischi di danneggiamento meccanico durante le prime prove sul prototipo, i vincoli di progetto sono stati impostati in modo conservativo:
-	\begin{enumerate}
-		\item Il parametro \texttt{DesignFocus} è stato configurato su \texttt{'reference-tracking'} per privilegiare la dolcezza di inseguimento del riferimento ed eliminare sovraelongazioni pronunciate; tale impostazione produce guadagni più contenuti rispetto all'alternativa \texttt{'disturbance-rejection'}, più aggressiva ma anche più rischiosa per un primo collaudo.
-		\item L'azione di controllo $u_\text{ctrl}(t)$ è stata costantemente monitorata in simulazione per garantire il rispetto del vincolo di saturazione fisica dei \textit{flap}, fissato a $\pm 30\degree$:
-		\begin{equation}
-			\max \, \bigl| u_\text{ctrl}(t) \bigr| \leq 30\degree
-			\label{eq:vincolo_saturazione}
-		\end{equation}
-	\end{enumerate}
-	
-	\begin{lstlisting}[language=Matlab, caption={Sintesi del controllore PIDF con pidtune}]
-pid_opts        = pidtuneOptions('DesignFocus', 'reference-tracking');
-[C_pid, info]   = pidtune(sys_asse, 'PIDF', pid_opts);
+\end{lstlisting}
 
-% Verifica in anello chiuso e azione di controllo
-sys_cl   = feedback(C_pid * sys_asse, 1);    % risposta a gradino
-sys_ctrl = feedback(C_pid, sys_asse);        % sforzo di controllo
-	\end{lstlisting}
+La bontà del modello identificato è valutata mediante l'indice di \textit{fit} percentuale basato sulla NRMSE (\textit{Normalized Root Mean Square Error}):
+\begin{equation}
+	\text{Fit} = 100 \cdot \left( 1 -
+	\frac{\sqrt{\sum_{k=1}^{N} \bigl| y(k) - \hat y(k) \bigr|^{2}}}
+	{\sqrt{\sum_{k=1}^{N} \bigl| y(k) - \bar y \bigr|^{2}}}
+	\right) \quad [\%]
+	\label{eq:nrmse}
+\end{equation}
+dove $y(k)$ è la misura sperimentale dell'IMU, $\hat y(k)$ è la risposta temporale simulata dal modello identificato e $\bar y$ è il valore medio del segnale reale. Un valore del 100\% indica una corrispondenza perfetta; un valore prossimo a 0\% indica che il modello non spiega la varianza del dato meglio di una semplice media costante.
+
+I valori di \textit{fit} ottenuti sui \textit{dataset} PRBS si riferiscono ai modelli selezionati al termine del confronto tra le strutture candidate, ossia il modello a 2 poli e 1 zero per l'asse di \textit{roll} e il modello a 3 poli e 1 zero per l'asse di \textit{pitch}:
+\begin{itemize}
+	\item asse di \textit{roll}, modello a 2 poli e 1 zero: $\text{Fit} = 77.85\%$;
+	\item asse di \textit{pitch}, modello a 3 poli e 1 zero: $\text{Fit} = 77.67\%$.
+\end{itemize}
+
+Si tratta di valori soddisfacenti per un'identificazione \textit{black-box} su un sistema dotato di non linearità importanti e testato in condizioni vincolate. La quota residua di varianza non spiegata dal modello è imputabile a effetti che un modello lineare SISO equivalente non può catturare integralmente: in particolare l'attrito non lineare sui perni dei \textit{flap}, l'azione non perfettamente simmetrica delle funi di vincolo e i piccoli accoppiamenti tra gli assi. I modelli identificati devono quindi essere interpretati come approssimazioni locali della dinamica dominante del \textit{DPDF} nella configurazione sperimentale adottata, sufficienti per la sintesi preliminare dei regolatori PIDF e per la successiva verifica in simulazione.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation2.png}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{figures/05_modello/cross_validation1.png}
+	\caption{Analisi di \textit{cross-validazione} nel dominio del tempo per i due assi. Confronto tra risposta angolare reale del prototipo (linea nera) e uscita stimata dal modello LTI (linea colorata). In alto l'asse di \textit{roll} (Fit $77.85\%$), in basso l'asse di \textit{pitch} (Fit $77.67\%$).}
+	\label{fig:cross_validation}
+\end{figure}
+
+\subsection{Analisi del guadagno statico}
+
+Un'analisi che permette di validare fisicamente il modello identificato riguarda l'estrazione del guadagno statico del sistema, calcolato applicando il teorema del valore finale per $s \to 0$:
+\begin{equation}
+	\mu = \lim_{s \to 0} G(s) = \frac{b_0}{a_0}
+	\label{eq:guadagno_statico}
+\end{equation}
+
+I test condotti hanno restituito, per entrambi gli assi, un guadagno statico di \textbf{segno negativo} ($\mu < 0$). Questo risultato fornisce una conferma fisica del modello stimato: un incremento del PWM del servomotore --- corrispondente a un'inclinazione positiva del \textit{flap} secondo la convenzione del firmware --- genera una coppia aerodinamica che ruota il drone nel verso opposto rispetto al sistema di riferimento destrorso solidale all'IMU.
+
+Il segno negativo del guadagno statico non rappresenta quindi un'anomalia del processo di identificazione, ma riflette la convenzione geometrica adottata tra verso positivo del comando \textit{flap} e verso positivo dell'angolo misurato dalla IMU. Per questo motivo, nella successiva implementazione, i guadagni PID possono essere mantenuti positivi, demandando al \textit{mixer} firmware l'inversione del verso di attuazione.
+
+%--------------------------------------------------------------
+\section{Il regolatore PID: principi di funzionamento}
+\label{sec:principi_pid}
+
+Prima di descrivere la procedura di sintesi automatica, è opportuno richiamare il principio di funzionamento del regolatore impiegato. Il \textit{DPDF} è un sistema intrinsecamente instabile attorno alla condizione di assetto orizzontale: in assenza di azione correttiva, il momento ribaltante indotto dall'eccentricità del baricentro (Sezione~\ref{sec:eccentricita_cg}) fa divergere gli angoli di \textit{roll} e \textit{pitch}. Il compito del controllore è chiudere un anello di retroazione che, confrontando istante per istante l'assetto misurato dall'IMU con il riferimento desiderato, generi un comando ai \textit{flap} tale da riportare il velivolo verso l'equilibrio.
+
+Si definisce a tal fine il segnale di \textbf{errore} come differenza tra l'angolo di riferimento $\theta_\text{rif}$ e l'angolo misurato $\theta(t)$:
+\begin{equation}
+	e(t) = \theta_\text{rif} - \theta(t)
+	\label{eq:errore_pid}
+\end{equation}
+Nelle prove di stabilizzazione il riferimento è nullo ($\theta_\text{rif} = 0\degree$), poiché l'obiettivo è mantenere il drone in assetto orizzontale; l'errore coincide dunque, a meno del segno, con l'inclinazione istantanea del velivolo. A partire da questo errore, il regolatore PID elabora il comando di controllo combinando tre azioni distinte, ciascuna con un significato fisico preciso.
+
+\subsection{Le tre azioni di controllo}
+\label{sec:tre_azioni}
+
+Nella sua forma ideale a tempo continuo, l'uscita di un regolatore PID è la somma di un termine proporzionale, uno integrale e uno derivativo dell'errore:
+\begin{equation}
+	u(t) = \underbrace{K_p \, e(t)}_{\text{proporzionale}}
+	\; + \; \underbrace{K_i \int_{0}^{t} e(\tau)\, d\tau}_{\text{integrale}}
+	\; + \; \underbrace{K_d \, \frac{d e(t)}{d t}}_{\text{derivativo}}
+	\label{eq:pid_ideale}
+\end{equation}
+I tre guadagni $K_p$, $K_i$, $K_d$ pesano il contributo di ciascuna azione e costituiscono i parametri da determinare in fase di taratura.
+
+\paragraph{Azione proporzionale.}
+Il termine $K_p \, e(t)$ reagisce istantaneamente all'errore, generando un comando tanto maggiore quanto più elevato è lo scostamento tra riferimento e misura. Questa azione costituisce il contributo principale di richiamo del sistema, ma un controllo puramente proporzionale non garantisce in generale l'annullamento dell'errore a regime. Infatti, man mano che l'errore diminuisce, si riduce anche l'azione di controllo generata dal termine proporzionale; può quindi permanere uno scostamento tra il valore desiderato e il valore effettivamente raggiunto, necessario a produrre il comando richiesto all'attuatore.
+
+Questo effetto è ancora più evidente in presenza di disturbi costanti, come il momento ribaltante dovuto all'eccentricità del baricentro o eventuali squilibri aerodinamici. L'eliminazione dell'errore statico è affidata al termine integrale del PID.
+
+\paragraph{Azione integrale.}
+Il termine $K_i \int e\, d\tau$ accumula nel tempo l'errore e ne integra la storia passata. La sua funzione è proprio quella di \textbf{annullare l'errore a regime}: finché permane un errore, anche piccolo, l'integrale continua a crescere aumentando la correzione, fino a quando il contributo di controllo è sufficiente a compensare lo scostamento statico residuo. Nel caso del \textit{DPDF} questa azione è essenziale per compensare lo sbilanciamento statico del baricentro.
+
+Il prezzo da pagare è il rischio di \textit{windup}: se l'attuatore satura (i \textit{flap} raggiungono il limite di $\pm 30\degree$) e l'errore persiste, l'integrale può accumulare valori molto elevati, generando sovraelongazioni e ritardi di recupero. Per questo motivo l'azione integrale è dotata di un meccanismo \textbf{anti-windup} a saturazione, descritto nel seguito.
+
+\paragraph{Azione derivativa.}
+Il termine $K_d \, \dot e(t)$ reagisce alla \textit{velocità} di variazione dell'errore, anticipando la dinamica del sistema. Esso introduce uno \textbf{smorzamento} che frena le oscillazioni e riduce la sovraelongazione, opponendosi alle variazioni rapide di assetto. La derivazione pura è però estremamente sensibile al rumore di misura: la derivata del rumore del BNO-055 produrrebbe comandi ad alta frequenza e ampiezza ai servomotori, con conseguente \textit{chattering}. Per questa ragione, nell'implementazione effettiva (Sezione~\ref{sec:sintesi_pidf}) l'azione derivativa è asservita a un filtro passa-basso del primo ordine, dando luogo alla forma PIDF di equazione~\eqref{eq:pidf}.
+
+\subsection{Implementazione discreta in forma posizionale}
+\label{sec:pid_posizionale}
+
+Il regolatore non opera nel continuo ma viene eseguito come algoritmo a tempo discreto alla frequenza nominale di 50~[Hz] ($T_s = 0.02$~[s]). Coerentemente con l'architettura event-driven descritta nel Capitolo~\ref{ch:firmware}, la cadenza temporale del regolatore è determinata dal timer periodico, mentre il calcolo dell'azione di controllo può essere eseguito nel ciclo principale a seguito dell'attivazione della relativa flag. In questo modo la routine di interrupt rimane leggera e l'elaborazione numerica viene mantenuta nel contesto sequenziale del \textit{main loop}.
+
+L'implementazione adottata è in \textbf{forma posizionale} (\textit{positional form}): a ogni passo di campionamento $k$ l'azione di controllo viene \textit{ricalcolata per intero} a partire dall'errore corrente, dall'accumulatore integrale e dalla derivata filtrata. Questa scelta si distingue dalla forma \textit{incrementale} (\textit{velocity form}), nella quale si calcola invece l'incremento $\Delta u[k]$ rispetto al comando precedente; la forma posizionale è stata preferita per la maggiore trasparenza nella gestione esplicita della saturazione dell'attuatore e del termine anti-windup.
+
+Le tre azioni sono discretizzate come segue. Il termine proporzionale è immediato:
+\begin{equation}
+	P[k] = K_p \, e[k]
+	\label{eq:pid_p}
+\end{equation}
+
+L'azione integrale è realizzata mediante un accumulatore aggiornato a ogni passo e limitato (\textit{clamping}) entro l'escursione fisica del flap, così da impedire il \textit{windup}:
+\begin{equation}
+	I[k] = \mathrm{sat}\!\Bigl( I[k-1] + K_i \, T_s \, e[k] \Bigr), 
+	\qquad |I[k]| \leq 30\degree
+	\label{eq:pid_i}
+\end{equation}
+
+L'azione derivativa filtrata è discretizzata con la trasformazione di Eulero all'indietro introdotta in equazione~\eqref{eq:euler_backward}, da cui discende il coefficiente $\alpha = T_s/(T_s + T_f)$:
+\begin{equation}
+	D[k] = (1-\alpha)\, D[k-1] + \alpha \, \frac{K_d}{T_s} \bigl( e[k] - e[k-1] \bigr)
+	\label{eq:pid_d}
+\end{equation}
+
+Con questa convenzione, valori elevati di $\alpha$ aumentano il peso del termine derivativo istantaneo e rendono il filtro più reattivo; valori più bassi aumentano invece il peso della memoria del valore precedente, producendo un filtraggio più incisivo.
+
+Il comando complessivo applicato al servomotore è infine la somma delle tre azioni, a sua volta saturata al limite meccanico dei \textit{flap}:
+\begin{equation}
+	u[k] = \mathrm{sat}\!\Bigl( P[k] + I[k] + D[k] \Bigr),
+	\qquad |u[k]| \leq 30\degree
+	\label{eq:pid_posizionale}
+\end{equation}
+
+Il comando $u[k]$, espresso in gradi di deflessione del \textit{flap}, viene poi convertito nel corrispondente valore CCR tramite la costante di conversione $K_\text{CCR} = 10.0$~[CCR/deg] (Sezione~\ref{sec:pre_elaborazione}) prima di essere inviato al timer di generazione del segnale PWM:
+\begin{equation}
+	CCR = CCR_\text{neutro} + K_\text{CCR} \, u[k]
+	\label{eq:conversione_ccr_pid}
+\end{equation}
+
+Poiché i guadagni sono stati identificati lavorando in unità fisiche di gradi (Sezione~\ref{sec:architettura_modello}), i valori $K_p$, $K_i$, $K_d$ sintetizzati in MATLAB sono direttamente trasferibili nei campi del file \texttt{config.c} senza ulteriori riscalature, salvo l'eventuale gestione del segno demandata al \textit{mixer}.
+
+%--------------------------------------------------------------
+\section{Sintesi del controllore PIDF}
+\label{sec:sintesi_pidf}
+
+Identificato il modello matematico $G(s)$ del processo, si è proceduto alla sintesi dell'algoritmo di controllo ad anello chiuso. L'architettura scelta è un controllore PID in forma parallela con l'azione derivativa asservita a un filtro passa-basso del primo ordine, configurazione comunemente indicata come \textbf{PIDF}.
+
+È importante osservare che i regolatori PIDF descritti in questa sezione non sono stati utilizzati durante le prove di identificazione \textit{open-loop}. In quella fase i segnali PWM sono stati generati da MATLAB e applicati direttamente agli attuatori, entro i limiti di sicurezza imposti dal firmware. I regolatori vengono invece sintetizzati a partire dai modelli identificati e costituiscono il risultato della fase di identificazione, destinato alla verifica in simulazione e alla successiva integrazione nel firmware di controllo in anello chiuso.
+
+\subsection{Architettura del controllore}
+
+La presenza del filtro derivativo, caratterizzato dalla costante di tempo $T_f$, è indispensabile per limitare l'amplificazione del rumore di misura alle alte frequenze: senza filtraggio, la derivata pura del rumore del BNO-055 produrrebbe comandi ad alta ampiezza e alta frequenza ai servomotori, con conseguente fenomeno di \textit{chattering} (vibrazioni rapide e meccanicamente dannose). La funzione di trasferimento del controllore nel dominio di Laplace ha forma:
+\begin{equation}
+	C(s) = K_p + \frac{K_i}{s} + \frac{K_d \, s}{T_f \, s + 1}
+	\label{eq:pidf}
+\end{equation}
+
+\subsection{Sintesi tramite pidtune}
+
+Il calcolo dei guadagni ottimali è stato effettuato tramite l'algoritmo di ottimizzazione \texttt{pidtune} di MATLAB. Per mitigare i rischi di danneggiamento meccanico durante le prime prove sul prototipo, i vincoli di progetto sono stati impostati in modo conservativo:
+\begin{enumerate}
+	\item Il parametro \texttt{DesignFocus} è stato configurato su \texttt{'reference-tracking'} per privilegiare la dolcezza di inseguimento del riferimento ed evitare sovraelongazioni pronunciate; tale impostazione produce guadagni più contenuti rispetto all'alternativa \texttt{'disturbance-rejection'}, più aggressiva ma anche più rischiosa per un primo collaudo.
+	\item La verifica preliminare del regolatore è stata effettuata osservando la risposta al gradino del sistema in anello chiuso. Tale analisi consente di valutare rapidità del transitorio, sovraelongazione e assestamento a regime del modello controllato.
+\end{enumerate}
+
+\begin{lstlisting}[language=Matlab, caption={Sintesi del controllore PIDF con pidtune}]
+pid_opts      = pidtuneOptions('DesignFocus', 'reference-tracking');
+[C_pid, info] = pidtune(sys_asse, 'PIDF', pid_opts);
+
+% Verifica della risposta in anello chiuso
+sys_cl = feedback(C_pid * sys_asse, 1);
+\end{lstlisting}
+
+La verifica preliminare dei regolatori sintetizzati è stata condotta analizzando la risposta al gradino del sistema in anello chiuso. In questa prova il modello identificato viene chiuso in retroazione con il controllore PIDF ottenuto tramite \texttt{pidtune}, e viene valutata la capacità del sistema controllato di inseguire un riferimento unitario.
+
+Le risposte mostrate in Figura~\ref{fig:step_tracking_pidf} sono normalizzate rispetto al riferimento unitario utilizzato nella simulazione MATLAB. Esse non rappresentano direttamente un angolo fisico imposto al prototipo, ma forniscono una verifica della dinamica relativa del sistema controllato, evidenziando rapidità del transitorio, sovraelongazione e assestamento a regime.
+
+\begin{figure}[H]
+	\centering
 	
-		\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response1.png}
-	\end{figure}
+	\includegraphics[width=0.90\textwidth]{figures/05_modello/step_tracking_roll.png}
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.95\textwidth]{figures/05_modello/step_response2.png}
-		\caption{Analisi della risposta al gradino ad anello chiuso (sopra) e del corrispondente sforzo di controllo dei servomotori (sotto). Il picco iniziale dell'azione di controllo si attesta entro il vincolo fisico di $\pm 30\degree$}
-		\label{fig:step_response}
-	\end{figure}
+	\vspace{0.4cm}
 	
-	Una nota implementativa importante riguarda la \textbf{convenzione di segno} adottata. Il modello identificato presenta guadagno statico negativo ($\mu < 0$, come discusso nella Sezione~\ref{sec:stima_validazione}). Tuttavia, nel codice sorgente del firmware i guadagni $K_p$, $K_i$, $K_d$ vengono inseriti come valori \textbf{positivi}: l'inversione di segno necessaria per produrre un momento correttivo opposto al disturbo viene gestita a valle, all'interno della logica di \textit{mixer} che combina l'uscita del PID con il comando applicato al servomotore. Questa scelta separa la legge di controllo \textit{matematica} dalla \textit{convenzione di segno} dell'attuatore meccanico, semplificando la lettura del codice firmware.
+	\includegraphics[width=0.90\textwidth]{figures/05_modello/step_tracking_pitch.png}
 	
-	\subsection{Discretizzazione per il firmware}
-	Il firmware esegue il \textit{loop} di controllo all'interno di un \textit{interrupt} deterministico generato dal \textit{Timer 7} alla frequenza di 50 [Hz], corrispondente a un periodo di campionamento $T_s = 0.02$ [s]. Per mappare la costante di tempo continua del filtro $T_f$ nel coefficiente adimensionale discreto $\alpha$ utilizzato nell'equazione alle differenze del firmware, è stata applicata la trasformazione di Eulero all'indietro (\textit{Backward Euler approximation}):
-	\begin{equation}
-		s \approx \frac{1 - z^{-1}}{T_s}
-		\;\;\Longrightarrow\;\;
-		\alpha = \frac{T_s}{T_s + T_f}
-		\label{eq:euler_backward}
-	\end{equation}
-	Il coefficiente $\alpha$ è compreso nell'intervallo $[0,1]$ e determina il peso del filtraggio: un valore prossimo a 1 indica un filtraggio leggero (adatto a segnali poco rumorosi), mentre un valore basso indica un'azione di smorzamento più incisiva. Per il caso in esame i due assi richiedono filtraggi differenti, come risulterà dalla Tabella~\ref{tab:guadagni_pid} riportata nella sezione successiva.
-	
-	%--------------------------------------------------------------
-	\section{Guadagni finali e parametri PID}
-	\label{sec:guadagni_finali}
-	
-	I parametri finali, validati in simulazione e pronti per la compilazione nel file \texttt{config.c} del firmware, sono riassunti nella Tabella~\ref{tab:guadagni_pid}.
-	
-	\begin{table}[H]
-		\centering
-		\begin{tabular}{l c c}
-			\toprule
-			\textbf{Parametro} & \textbf{Asse di Roll} & \textbf{Asse di Pitch} \\
-			\midrule
-			Modello di partenza        & 2 poli, 1 zero & 3 poli, 1 zero \\
-			Guadagno proporzionale $K_p$ & 16.49 & 10.38 \\
-			Guadagno integrale $K_i$     & 43.16 & 11.45 \\
-			Guadagno derivativo $K_d$    & 1.24  & 2.32  \\
-			Coefficiente filtro discreto $\alpha$ & 0.27 & 0.94 \\
-			Saturazione del canale       & $\pm 30\degree$ & $\pm 30\degree$ \\
-			\bottomrule
-		\end{tabular}
-		\caption{Guadagni PIDF identificati per i due assi di controllo}
-		\label{tab:guadagni_pid}
-	\end{table}
-	
-	I valori riportati nella Tabella~\ref{tab:guadagni_pid} si interpretano nel modo seguente. I guadagni proporzionali e integrali dell'asse di \textit{roll} sono significativamente più elevati di quelli dell'asse di \textit{pitch}, conseguenza diretta dei rispettivi modelli identificati: l'asse di \textit{roll} presenta un guadagno statico più piccolo in modulo, dunque richiede un'azione di controllo proporzionalmente più \textit{forte} per riportare il velivolo nella condizione di riferimento. Per quanto riguarda i coefficienti del filtro derivativo, il valore $\alpha = 0.27$ per il \textit{roll} indica un filtraggio aggressivo, necessario per attenuare il rumore di assetto presente su quest'asse, mentre $\alpha = 0.94$ per il \textit{pitch} indica un filtraggio appena percettibile, segno di un canale di misura più pulito.
-	
-	%--------------------------------------------------------------
-	\section{Considerazioni sull'approccio black-box}
-	\label{sec:limiti_blackbox}
-	
-	I modelli identificati nel presente capitolo forniscono una descrizione lineare e tempo-invariante della risposta angolare del velivolo, valida \textit{localmente} attorno alla condizione di equilibrio. Questa rappresentazione è perfettamente adeguata allo scopo per cui è stata costruita --- la sintesi automatica dei regolatori PID tramite \texttt{pidtune} --- ed è coerente con l'ipotesi di funzionamento del PID stesso, che opera sulla linearizzazione del sistema attorno al riferimento.
-	
-	Esistono però aspetti della dinamica del \textit{DPDF} che, per loro natura, non possono essere catturati da un modello LTI SISO. Tra questi: l'accoppiamento tra gli assi di \textit{roll} e \textit{pitch}, particolarmente significativo a grandi inclinazioni; gli effetti delle saturazioni meccaniche dei \textit{flap} e degli ESC; l'interazione non lineare tra il velivolo e le quattro funi di vincolo che lo sostengono nella gabbia di sicurezza; e gli effetti geometrici di grande angolo, in cui le proiezioni della spinta sulle componenti orizzontali e verticali cessano di poter essere approssimate dai loro sviluppi al primo ordine.
-	
-	Per questa ragione, il modello \textit{black-box} qui presentato è stato affiancato da un \textbf{simulatore fisico tridimensionale} a parametri concentrati, descritto nel Capitolo~\ref{ch:simulazione}, che integra le equazioni di Newton-Eulero a 6 gradi di libertà del velivolo e include esplicitamente la geometria, l'accoppiamento tra assi, le saturazioni e il modello elastico delle funi. I due approcci sono complementari e operano su due piani distinti:
-	\begin{itemize}
-		\item l'\textbf{identificazione \textit{black-box}} (Capitolo~\ref{ch:modello}) produce un modello LTI dedicato alla \textit{sintesi del controllore} con strumenti consolidati come \texttt{pidtune}, e si concentra sul singolo grado di libertà alla volta;
-		\item la \textbf{simulazione fisica \textit{grey-box}} (Capitolo 6) fornisce un ambiente di \textit{verifica} in cui i regolatori sintetizzati possono essere testati in condizioni più realistiche, includendo gli effetti non catturati dal modello LTI.
-	\end{itemize}
-	I due strumenti si chiudono dunque su un percorso unitario: i parametri PID derivati dall'identificazione vengono inseriti nel simulatore per verifica visiva del comportamento complessivo, e solo dopo questa doppia validazione vengono trasferiti al firmware per il collaudo sul prototipo fisico.
-	
-	Si segnala infine, per completezza, una piccola discrepanza temporale tra i due ambienti: l'identificazione lavora con periodo di campionamento $T_s = 0.02$ [s] coerente con la frequenza del firmware, mentre il simulatore del Capitolo 6 adotta un passo di visualizzazione $\Delta t = 0.025$ [s] suddiviso in più \textit{substep} di integrazione fisica. La scelta è motivata da ragioni di compromesso tra fluidità della visualizzazione 3D e fedeltà numerica dell'integratore, e non altera la validità dei regolatori sintetizzati, che il simulatore continua a eseguire alla loro frequenza nominale.
+	\caption{Risposta al gradino in anello chiuso dei modelli identificati controllati tramite PIDF. In alto: asse di \textit{roll}; in basso: asse di \textit{pitch}. Le curve mostrano l'inseguimento di un riferimento unitario da parte del sistema controllato.}
+	\label{fig:step_tracking_pidf}
+\end{figure}
+
+Per l'asse di \textit{roll} si osserva una risposta più rapida, caratterizzata da una sovraelongazione iniziale più marcata e da un successivo rientro verso il riferimento. Per l'asse di \textit{pitch}, invece, la sovraelongazione risulta più contenuta, ma l'assestamento è più lento. Tale differenza è coerente con i modelli identificati: l'asse di \textit{pitch}, descritto da una funzione di trasferimento di ordine superiore, presenta una dinamica più lenta e articolata rispetto all'asse di \textit{roll}.
+
+Una nota implementativa importante riguarda la \textbf{convenzione di segno} adottata. Il modello identificato presenta guadagno statico negativo ($\mu < 0$, come discusso nella Sezione~\ref{sec:stima_validazione}). Tuttavia, nel codice sorgente del firmware i guadagni $K_p$, $K_i$, $K_d$ vengono inseriti come valori \textbf{positivi}: l'inversione di segno necessaria per produrre un momento correttivo opposto al disturbo viene gestita a valle, all'interno della logica di \textit{mixer} che combina l'uscita del PID con il comando applicato al servomotore. Questa scelta separa la legge di controllo \textit{matematica} dalla \textit{convenzione di segno} dell'attuatore meccanico, semplificando la lettura del codice firmware.
+
+\subsection{Discretizzazione per il firmware}
+
+Il firmware esegue il \textit{loop} di controllo alla frequenza nominale di 50~[Hz], corrispondente a un periodo di campionamento $T_s = 0.02$~[s]. Per mappare la costante di tempo continua del filtro $T_f$ nel coefficiente adimensionale discreto $\alpha$ utilizzato nell'equazione alle differenze del firmware, è stata applicata la trasformazione di Eulero all'indietro (\textit{Backward Euler approximation}):
+\begin{equation}
+	s \approx \frac{1 - z^{-1}}{T_s}
+	\;\;\Longrightarrow\;\;
+	\alpha = \frac{T_s}{T_s + T_f}
+	\label{eq:euler_backward}
+\end{equation}
+
+Il coefficiente $\alpha$ è compreso nell'intervallo $[0,1]$ e, nella forma discreta adottata in equazione~\eqref{eq:pid_d}, determina il peso relativo tra valore derivativo precedente e nuova stima della derivata. Un valore elevato di $\alpha$ assegna maggiore peso al termine derivativo istantaneo e quindi produce un filtraggio più leggero; un valore più basso assegna maggiore peso alla memoria del filtro e produce invece un'azione di smorzamento più marcata. Per il caso in esame i due assi richiedono filtraggi differenti, come risulterà dalla Tabella~\ref{tab:guadagni_pid} riportata nella sezione successiva.
+
+%--------------------------------------------------------------
+\section{Guadagni finali e parametri PID}
+\label{sec:guadagni_finali}
+
+I parametri finali, validati in simulazione e pronti per la compilazione nel file \texttt{config.c} del firmware, sono riassunti nella Tabella~\ref{tab:guadagni_pid}.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l c c}
+		\toprule
+		\textbf{Parametro} & \textbf{Asse di Roll} & \textbf{Asse di Pitch} \\
+		\midrule
+		Modello di partenza & 2 poli, 1 zero & 3 poli, 1 zero \\
+		Guadagno proporzionale $K_p$ & 16.49 & 10.38 \\
+		Guadagno integrale $K_i$ & 43.16 & 11.45 \\
+		Guadagno derivativo $K_d$ & 1.24 & 2.32 \\
+		Coefficiente filtro discreto $\alpha$ & 0.27 & 0.94 \\
+		Saturazione del canale & $\pm 30\degree$ & $\pm 30\degree$ \\
+		\bottomrule
+	\end{tabular}
+	\caption{Guadagni PIDF identificati per i due assi di controllo.}
+	\label{tab:guadagni_pid}
+\end{table}
+
+I valori riportati nella Tabella~\ref{tab:guadagni_pid} si interpretano nel modo seguente. I guadagni proporzionali e integrali dell'asse di \textit{roll} sono significativamente più elevati di quelli dell'asse di \textit{pitch}, conseguenza diretta dei rispettivi modelli identificati: l'asse di \textit{roll} presenta un guadagno statico più piccolo in modulo, dunque richiede un'azione di controllo proporzionalmente più \textit{forte} per riportare il velivolo nella condizione di riferimento.
+
+Per quanto riguarda i coefficienti del filtro derivativo, il valore $\alpha = 0.27$ per il \textit{roll} indica un filtraggio più incisivo, necessario per attenuare il rumore di assetto presente su quest'asse. Al contrario, il valore $\alpha = 0.94$ per il \textit{pitch} assegna maggiore peso alla derivata istantanea e corrisponde a un filtraggio più leggero, coerente con un canale di misura che, nelle prove analizzate, ha mostrato una dinamica meno rumorosa.
+
+%--------------------------------------------------------------
+\section{Considerazioni sull'approccio black-box}
+\label{sec:limiti_blackbox}
+
+I modelli identificati nel presente capitolo forniscono una descrizione lineare e tempo-invariante della risposta angolare del velivolo, valida \textit{localmente} attorno alla condizione di equilibrio. Questa rappresentazione è adeguata allo scopo per cui è stata costruita --- la sintesi automatica dei regolatori PID tramite \texttt{pidtune} --- ed è coerente con l'ipotesi di funzionamento del PID stesso, che opera sulla linearizzazione del sistema attorno al riferimento.
+
+Esistono però aspetti della dinamica del \textit{DPDF} che, per loro natura, non possono essere catturati da un modello LTI SISO equivalente. Tra questi: l'accoppiamento tra gli assi di \textit{roll} e \textit{pitch}, particolarmente significativo a grandi inclinazioni; gli effetti delle saturazioni meccaniche dei \textit{flap} e degli ESC; l'interazione non lineare tra il velivolo e le quattro funi di vincolo che lo sostengono nella gabbia di sicurezza; e gli effetti geometrici di grande angolo, in cui le proiezioni della spinta sulle componenti orizzontali e verticali cessano di poter essere approssimate dai loro sviluppi al primo ordine.
+
+Per questa ragione, il modello \textit{black-box} qui presentato è stato affiancato da un \textbf{simulatore fisico tridimensionale} a parametri concentrati, descritto nel Capitolo~\ref{ch:simulazione}, che integra le equazioni di Newton-Eulero a 6 gradi di libertà del velivolo e include esplicitamente la geometria, l'accoppiamento tra assi, le saturazioni e il modello elastico delle funi. I due approcci sono complementari e operano su due piani distinti:
+\begin{itemize}
+	\item l'\textbf{identificazione \textit{black-box}} (Capitolo~\ref{ch:modello}) produce un modello LTI dedicato alla \textit{sintesi del controllore} con strumenti consolidati come \texttt{pidtune}, e si concentra sul singolo canale di assetto alla volta;
+	\item la \textbf{simulazione fisica \textit{grey-box}} (Capitolo~\ref{ch:simulazione}) fornisce un ambiente di \textit{verifica} in cui i regolatori sintetizzati possono essere testati in condizioni più realistiche, includendo gli effetti non catturati dal modello LTI.
+\end{itemize}
+
+I due strumenti si chiudono dunque su un percorso unitario: i parametri PID derivati dall'identificazione vengono inseriti nel simulatore per verifica visiva del comportamento complessivo, e solo dopo questa doppia validazione vengono trasferiti al firmware per il collaudo sul prototipo fisico.
+
+Si segnala infine, per completezza, una piccola discrepanza temporale tra i due ambienti: l'identificazione lavora con periodo di campionamento $T_s = 0.02$ [s] coerente con la frequenza del firmware, mentre il simulatore del Capitolo~\ref{ch:simulazione} adotta un passo di visualizzazione $\Delta t = 0.025$ [s] suddiviso in più \textit{substep} di integrazione fisica. La scelta è motivata da ragioni di compromesso tra fluidità della visualizzazione 3D e fedeltà numerica dell'integratore, e non altera la validità dei regolatori sintetizzati, che il simulatore continua a eseguire alla loro frequenza nominale.
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%                CAPITOLO 6 - SIMULAZIONE 3D
@@ -1848,6 +1920,7 @@ sys_ctrl = feedback(C_pid, sys_asse);        % sforzo di controllo
 	\subsection{Interfaccia interattiva}
 	Lo \textit{script} \texttt{Sim.m} include una doppia interfaccia grafica. La finestra principale presenta la scena 3D del drone all'interno della gabbia, con visualizzazione in tempo reale di assetto, traiettoria, tensione delle funi e quota; tre grafici laterali mostrano l'evoluzione temporale di quota, angoli di \textit{roll}/\textit{pitch} e angolo di \textit{yaw}. Una seconda finestra dedicata espone gli \textit{slider} di controllo: due per il CCR dei motori superiore e inferiore (range $[750, 1500]$), sei per i guadagni dei PID di \textit{roll} e \textit{pitch} ($K_p$, $K_i$, $K_d$ per asse), oltre ai pulsanti di START, STOP e RESET. Questa configurazione permette di esplorare interattivamente lo spazio dei parametri, osservando immediatamente l'effetto di ogni modifica sul comportamento del sistema --- modalità di lavoro che si è dimostrata particolarmente efficace durante la fase di calibrazione dei parametri fisici.
 	
+		\includegraphics[width=0.95\textwidth]{figures/06_simulazione/interfaccia_grafica.png}
 	%--------------------------------------------------------------
 	\section{Parametrizzazione fisica e geometrica}
 	\label{sec:parametrizzazione_sim}
@@ -1994,8 +2067,7 @@ end
 	\section{Risultati della simulazione}
 	\label{sec:risultati_sim}
 	
-	Il comportamento del sistema ad anello chiuso è stato osservato conducendo sessioni di simulazione continuative della durata di 60 [s], a partire dalla configurazione di equilibrio statico del drone appeso alle funi, con i motori al \textit{throttle} di equilibrio ($CCR = 1050$) e i regolatori PID attivi sui due assi di assetto. I risultati di una sessione rappresentativa sono riportati in Figura~\ref{fig:simulazione_hover}.
-	
+	Il comportamento del sistema ad anello chiuso è stato osservato conducendo sessioni di simulazione continuative della durata di 60 [s], a partire dalla configurazione di equilibrio statico del drone appeso alle funi, con i motori al \textit{throttle} di equilibrio ($CCR = 1050$) e i regolatori PID attivi sui due assi di assetto.  Per sollecitare il sistema, durante la sessione rappresentativa riportata in Figura~\ref{fig:simulazione_hover}  è stato imposto un gradino sul comando dei motori da CCR = 1050 a CCR = 1200, applicato dopo un breve intervallo iniziale a regime di equilibrio.	
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.95\textwidth]{figures/06_simulazione/screenshot_simulatore.png}
@@ -2004,10 +2076,13 @@ end
 	\end{figure}
 	
 	I risultati osservati possono essere riassunti nei tre punti seguenti.
+
 	\begin{itemize}
-		\item \textbf{Il drone permane nella configurazione vincolata}, sostenuto dalle quattro funi che restano in tensione per l'intera durata della prova. La quota del bordo inferiore si stabilizza intorno a $300$ [mm] dal pavimento della gabbia, valore corrispondente alla configurazione di equilibrio meccanico in cui la componente verticale della tensione delle funi compensa la differenza tra peso del velivolo e spinta dei motori. Coerentemente con quanto anticipato nella Sezione~\ref{sec:modello_spinta_flap}, la spinta complessiva è insufficiente per produrre il decollo libero.
-		\item \textbf{L'azione dei regolatori PID converge correttamente}. Gli angoli di \textit{roll} e \textit{pitch}, dopo un breve transitorio iniziale dovuto al momento ribaltante generato dall'eccentricità del baricentro, vengono riportati e mantenuti in un intorno dello zero per l'intera durata della prova. Le oscillazioni residue sono di ampiezza contenuta (dell'ordine di pochi gradi picco-picco) e non mostrano alcuna tendenza alla divergenza né segni di \textit{chattering} sugli attuatori.
-		\item \textbf{L'\textit{yaw} resta sostanzialmente fermo}, coerentemente con il fatto che il simulatore non include una sollecitazione differenziale tra i due motori. Eventuali piccoli scostamenti sono dovuti alla componente non perfettamente compensata dei momenti torcenti delle due eliche, che il modello include in forma semplificata.
+		\item \textbf{Il drone permane nella configurazione vincolata}, sostenuto dalle quattro funi che restano in tensione per l'intera durata della prova. La quota del bordo inferiore si stabilizza intorno a 300 [mm] dal pavimento della gabbia, valore corrispondente alla configurazione di equilibrio meccanico in cui la componente verticale della tensione delle funi compensa la differenza tra peso del velivolo e spinta dei motori. Il gradino di throttle non altera sensibilmente questo equilibrio verticale, confermando che la spinta complessiva resta insufficiente per produrre il decollo libero anche al CCR più elevato.
+
+		\item \textbf{Il gradino di throttle destabilizza l'assetto su roll e pitch.} In seguito al gradino da CCR = 1050 a CCR = 1200, gli angoli di roll e pitch non convergono verso lo zero, ma divergono progressivamente con andamento irregolare, raggiungendo escursioni dell'ordine di alcuni gradi senza mostrare segni di ristabilizzazione entro la durata della prova. Tale comportamento evidenzia un'autorità di controllo insufficiente dei flap aerodinamici alle nuove condizioni di throttle, e/o un accoppiamento tra il momento ribaltante generato dall'eccentricità del baricentro e l'azione dei regolatori PID, che non riescono a riportare il sistema in condizione di equilibrio.
+
+		\item \textbf{Lo yaw mostra una deriva monotona crescente} successiva al gradino, in luogo della condizione di quiete attesa. Tale comportamento è coerente con la presenza, nel modello, di un termine di coppia di imbardata (\texttt{Myaw}) legato alla differenza di velocità angolare tra le due eliche controrotanti, che non viene compensato in assenza di un anello di controllo dedicato sull'asse di yaw: l'incremento di CCR si traduce quindi in una coppia di reazione netta non nulla che fa derivare l'angolo di yaw nel tempo.
 	\end{itemize}
 	
 	Il simulatore fornisce dunque due indicazioni complementari, entrambe di valore. Da un lato \textbf{conferma la validità della legge di controllo PID} sintetizzata nel Capitolo~\ref{ch:modello}, mostrando che i regolatori sono in grado di stabilizzare l'assetto del velivolo in presenza dei principali disturbi non lineari (eccentricità del baricentro, accoppiamento con il vincolo elastico). Dall'altro \textbf{conferma il deficit di spinta} che impedisce il volo libero: nessuna combinazione dei guadagni testati produce il decollo, e questo non è un limite dei regolatori ma una caratteristica intrinseca della catena propulsiva nella configurazione attuale. Le cause di tale deficit e le possibili strade per superarlo sono analizzate in dettaglio nel Capitolo~\ref{ch:conclusioni}.

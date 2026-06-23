@@ -95,67 +95,67 @@
 \contentsline {subsection}{\numberline {3.7.2}ACK, watchdog e diagnostica UART}{47}{subsection.3.7.2}%
 \contentsline {section}{\numberline {3.8}Telemetria robusta a frequenza fissa}{48}{section.3.8}%
 \contentsline {section}{\numberline {3.9}Safe startup e logiche di arresto}{51}{section.3.9}%
-\contentsline {chapter}{\numberline {4}Telemetria}{52}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{52}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{52}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{53}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{54}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit {uplink}: comandi}{54}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit {downlink}: telemetria}{55}{subsection.4.4.2}%
-\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{56}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{56}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{57}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{57}{subsection.4.6.2}%
-\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{58}{subsection.4.6.3}%
-\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{59}{subsection.4.6.4}%
-\contentsline {section}{\numberline {4.7}Profili di eccitazione}{59}{section.4.7}%
-\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{61}{subsection.4.7.1}%
-\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{61}{subsection.4.7.2}%
-\contentsline {subsection}{\numberline {4.7.3}Sequenze pseudo-casuali multilivello}{62}{subsection.4.7.3}%
-\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{63}{subsection.4.7.4}%
-\contentsline {section}{\numberline {4.8}Validazione del link telematico}{63}{section.4.8}%
-\contentsline {chapter}{\numberline {5}Identificazione del modello}{65}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Approccio data-driven}{65}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{65}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{67}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{68}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{70}{subsection.5.4.1}%
-\contentsline {section}{\numberline {5.5}Il regolatore PID: principi di funzionamento}{70}{section.5.5}%
-\contentsline {subsection}{\numberline {5.5.1}Le tre azioni di controllo}{71}{subsection.5.5.1}%
-\contentsline {paragraph}{Azione proporzionale.}{71}{paragraph*.81}%
-\contentsline {paragraph}{Azione integrale.}{71}{paragraph*.82}%
-\contentsline {paragraph}{Azione derivativa.}{71}{paragraph*.83}%
-\contentsline {subsection}{\numberline {5.5.2}Implementazione discreta in forma posizionale}{72}{subsection.5.5.2}%
-\contentsline {section}{\numberline {5.6}Sintesi del controllore PIDF}{72}{section.5.6}%
-\contentsline {subsection}{\numberline {5.6.1}Architettura del controllore}{72}{subsection.5.6.1}%
-\contentsline {subsection}{\numberline {5.6.2}Sintesi tramite pidtune}{73}{subsection.5.6.2}%
-\contentsline {subsection}{\numberline {5.6.3}Discretizzazione per il firmware}{75}{subsection.5.6.3}%
-\contentsline {section}{\numberline {5.7}Guadagni finali e parametri PID}{75}{section.5.7}%
-\contentsline {section}{\numberline {5.8}Considerazioni sull'approccio black-box}{76}{section.5.8}%
-\contentsline {chapter}{\numberline {6}Simulazione 3D}{77}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{77}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{77}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{78}{subsection.6.1.2}%
-\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{78}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{79}{section.6.3}%
-\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{79}{subsection.6.3.1}%
-\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{79}{subsection.6.3.2}%
-\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{80}{subsection.6.3.3}%
-\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{80}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{82}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Risultati della simulazione}{82}{section.6.6}%
-\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{84}{section.6.7}%
-\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{85}{section.6.8}%
-\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{86}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{86}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{86}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{89}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{89}{subsection.7.1.3}%
-\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{89}{subsection.7.1.4}%
-\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{90}{subsection.7.1.5}%
-\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{90}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{90}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{91}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{91}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{92}{subsection.7.2.4}%
-\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{92}{section.7.3}%
+\contentsline {chapter}{\numberline {4}Telemetria}{53}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Ruolo della telemetria nel progetto}{53}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Architettura del canale di comunicazione}{53}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Parametrizzazione dello script di acquisizione}{54}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Protocollo di scambio dati}{55}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Flusso di \textit {uplink}: comandi}{55}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Flusso di \textit {downlink}: telemetria}{56}{subsection.4.4.2}%
+\contentsline {section}{\numberline {4.5}Watchdog firmware e keep-alive lato MATLAB}{57}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Loop di acquisizione MATLAB}{57}{section.4.6}%
+\contentsline {subsection}{\numberline {4.6.1}Scheduling anti-burst}{58}{subsection.4.6.1}%
+\contentsline {subsection}{\numberline {4.6.2}Parsing CSV e validazione delle righe}{58}{subsection.4.6.2}%
+\contentsline {subsection}{\numberline {4.6.3}Terminazione asincrona di emergenza}{59}{subsection.4.6.3}%
+\contentsline {subsection}{\numberline {4.6.4}Chiusura controllata con onCleanup}{60}{subsection.4.6.4}%
+\contentsline {section}{\numberline {4.7}Profili di eccitazione}{61}{section.4.7}%
+\contentsline {subsection}{\numberline {4.7.1}Segnali a gradino}{62}{subsection.4.7.1}%
+\contentsline {subsection}{\numberline {4.7.2}Segnali armonici e chirp}{63}{subsection.4.7.2}%
+\contentsline {subsection}{\numberline {4.7.3}Sequenze pseudo-casuali multilivello}{63}{subsection.4.7.3}%
+\contentsline {subsection}{\numberline {4.7.4}Eccitazioni multi-asse}{65}{subsection.4.7.4}%
+\contentsline {section}{\numberline {4.8}Validazione del link telematico}{65}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Identificazione del modello}{67}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Approccio data-driven}{67}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Pre-elaborazione dei dati}{67}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Selezione dell'architettura del modello}{69}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Stima del modello e validazione}{71}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Analisi del guadagno statico}{73}{subsection.5.4.1}%
+\contentsline {section}{\numberline {5.5}Il regolatore PID: principi di funzionamento}{73}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Le tre azioni di controllo}{73}{subsection.5.5.1}%
+\contentsline {paragraph}{Azione proporzionale.}{74}{paragraph*.81}%
+\contentsline {paragraph}{Azione integrale.}{74}{paragraph*.82}%
+\contentsline {paragraph}{Azione derivativa.}{74}{paragraph*.83}%
+\contentsline {subsection}{\numberline {5.5.2}Implementazione discreta in forma posizionale}{74}{subsection.5.5.2}%
+\contentsline {section}{\numberline {5.6}Sintesi del controllore PIDF}{75}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Architettura del controllore}{76}{subsection.5.6.1}%
+\contentsline {subsection}{\numberline {5.6.2}Sintesi tramite pidtune}{76}{subsection.5.6.2}%
+\contentsline {subsection}{\numberline {5.6.3}Discretizzazione per il firmware}{78}{subsection.5.6.3}%
+\contentsline {section}{\numberline {5.7}Guadagni finali e parametri PID}{78}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Considerazioni sull'approccio black-box}{79}{section.5.8}%
+\contentsline {chapter}{\numberline {6}Simulazione 3D}{81}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Obiettivi e architettura del simulatore}{81}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Architettura a doppio loop temporale}{81}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Interfaccia interattiva}{82}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Parametrizzazione fisica e geometrica}{82}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Modello dinamico del corpo rigido}{83}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Momento ribaltante per eccentricità del baricentro}{83}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Momenti aerodinamici dei flap}{84}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}Modello di spinta calibrato sui dati reali}{84}{subsection.6.3.3}%
+\contentsline {section}{\numberline {6.4}Modello visco-elastico delle funi}{85}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Calibrazione empirica dei parametri}{86}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Risultati della simulazione}{87}{section.6.6}%
+\contentsline {section}{\numberline {6.7}De-rating dei guadagni per il transfer al prototipo fisico}{88}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Limiti del simulatore e relazione con i capitoli successivi}{89}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Conclusioni e Sviluppi Futuri}{91}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Analisi critica delle cause di mancato volo libero}{91}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}Verifica analitica del deficit di spinta}{91}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}Distribuzione delle masse ed elevata inerzia perimetrale}{94}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}Eccentricità del baricentro e momento ribaltante gravitazionale}{94}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.4}Deficit di autorità di controllo dei flap}{94}{subsection.7.1.4}%
+\contentsline {subsection}{\numberline {7.1.5}L'effetto mascheramento del vincolo}{95}{subsection.7.1.5}%
+\contentsline {section}{\numberline {7.2}Sviluppi futuri e linee guida per la riprogettazione}{95}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Riprogettazione del sistema propulsivo}{95}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Centratura e accostamento delle masse}{96}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}Aumento dell'autorità di controllo}{96}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}Riduzione del peso strutturale}{97}{subsection.7.2.4}%
+\contentsline {section}{\numberline {7.3}Considerazioni conclusive}{97}{section.7.3}%
